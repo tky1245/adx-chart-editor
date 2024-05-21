@@ -1,0 +1,7 @@
+[gd_resource type="Theme" format=3 uid="uid://cagtxxicx3p16"]
+
+[resource]
+default_font_size = 24
+Label/font_sizes/font_size = 24
+LineEdit/constants/minimum_character_width = 2
+LineEdit/font_sizes/font_size = 24

@@ -1,0 +1,133 @@
+[gd_scene format=3 uid="uid://cnfa6jwk4yk48"]
+
+[node name="Slider" type="VBoxContainer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SliderNum" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Text" type="Label" parent="SliderNum"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.364706, 0.564706, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "Slider 1"
+
+[node name="CheckButton" type="CheckButton" parent="SliderNum"]
+layout_mode = 2
+
+[node name="Space" type="Label" parent="SliderNum"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.364706, 0.564706, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "       "
+
+[node name="DeleteSlide" type="Button" parent="SliderNum"]
+layout_mode = 2
+text = "del slide"
+
+[node name="Properties" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SliderDuration" type="HBoxContainer" parent="Properties"]
+layout_mode = 2
+
+[node name="Duration" type="Label" parent="Properties/SliderDuration"]
+layout_mode = 2
+text = "Duration:"
+
+[node name="X" type="LineEdit" parent="Properties/SliderDuration"]
+layout_mode = 2
+placeholder_text = "1"
+
+[node name="Slash" type="Label" parent="Properties/SliderDuration"]
+layout_mode = 2
+text = "/"
+
+[node name="Y" type="LineEdit" parent="Properties/SliderDuration"]
+layout_mode = 2
+placeholder_text = "8"
+
+[node name="Bar" type="Label" parent="Properties/SliderDuration"]
+layout_mode = 2
+text = "Bar"
+
+[node name="SliderDelay" type="HBoxContainer" parent="Properties"]
+layout_mode = 2
+
+[node name="Delay" type="Label" parent="Properties/SliderDelay"]
+layout_mode = 2
+text = "Delay:"
+
+[node name="X" type="LineEdit" parent="Properties/SliderDelay"]
+layout_mode = 2
+placeholder_text = "1"
+
+[node name="Slash" type="Label" parent="Properties/SliderDelay"]
+layout_mode = 2
+text = "/"
+
+[node name="Y" type="LineEdit" parent="Properties/SliderDelay"]
+layout_mode = 2
+placeholder_text = "4"
+
+[node name="Bar" type="Label" parent="Properties/SliderDelay"]
+layout_mode = 2
+text = "Bar"
+
+[node name="SliderShapeSegments" type="VBoxContainer" parent="Properties"]
+layout_mode = 2
+
+[node name="Text" type="Label" parent="Properties/SliderShapeSegments"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.721569, 0.815686, 1, 1)
+theme_override_font_sizes/font_size = 24
+text = "Slider Shape"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Properties/SliderShapeSegments"]
+layout_mode = 2
+
+[node name="Label2" type="Label" parent="Properties/SliderShapeSegments/HBoxContainer"]
+layout_mode = 2
+text = "syntax:"
+
+[node name="ShapeSyntax" type="OptionButton" parent="Properties/SliderShapeSegments/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+item_count = 11
+selected = 0
+popup/item_0/text = "-"
+popup/item_0/id = 0
+popup/item_1/text = "<"
+popup/item_1/id = 1
+popup/item_2/text = ">"
+popup/item_2/id = 2
+popup/item_3/text = "v"
+popup/item_3/id = 3
+popup/item_4/text = "p"
+popup/item_4/id = 4
+popup/item_5/text = "q"
+popup/item_5/id = 5
+popup/item_6/text = "pp"
+popup/item_6/id = 6
+popup/item_7/text = "qq"
+popup/item_7/id = 7
+popup/item_8/text = "s"
+popup/item_8/id = 8
+popup/item_9/text = "z"
+popup/item_9/id = 9
+popup/item_10/text = "w"
+popup/item_10/id = 10
+
+[node name="Label" type="Label" parent="Properties/SliderShapeSegments/HBoxContainer"]
+layout_mode = 2
+text = "pos:"
+
+[node name="LineEdit" type="LineEdit" parent="Properties/SliderShapeSegments/HBoxContainer"]
+layout_mode = 2
+placeholder_text = "1-8"
+
+[node name="Delete" type="Button" parent="Properties/SliderShapeSegments/HBoxContainer"]
+visible = false
+layout_mode = 2
+text = "  -  "

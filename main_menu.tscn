@@ -1,0 +1,42 @@
+[gd_scene load_steps=2 format=3 uid="uid://cshhy4ff5xcv6"]
+
+[ext_resource type="Script" path="res://main_menu.gd" id="1_n2763"]
+
+[node name="MainMenu" type="Node2D"]
+script = ExtResource("1_n2763")
+
+[node name="Buttons" type="Node2D" parent="."]
+
+[node name="NewChart" type="Button" parent="Buttons"]
+offset_left = 49.0
+offset_top = 45.0
+offset_right = 313.0
+offset_bottom = 136.0
+text = "new chart"
+
+[node name="OpenChart" type="Button" parent="Buttons"]
+offset_left = 50.0
+offset_top = 155.0
+offset_right = 314.0
+offset_bottom = 246.0
+text = "open chart"
+
+[node name="ImportFromMaidata" type="Button" parent="Buttons"]
+offset_left = 51.0
+offset_top = 264.0
+offset_right = 315.0
+offset_bottom = 355.0
+text = "import from maidata
+"
+
+[node name="SelectSong" type="FileDialog" parent="."]
+title = "Open a File"
+position = Vector2i(50, 50)
+size = Vector2i(1050, 550)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("track.mp3", "track.ogg")
+
+[connection signal="pressed" from="Buttons/NewChart" to="." method="_on_new_chart_pressed"]
+[connection signal="file_selected" from="SelectSong" to="." method="_on_select_song_file_selected"]
