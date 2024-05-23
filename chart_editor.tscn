@@ -529,52 +529,68 @@ offset_bottom = 637.0
 text = "{Divisor}"
 
 [node name="BPMWindow" type="Node2D" parent="TimeLineControls"]
-visible = false
 
 [node name="ColorRect" type="ColorRect" parent="TimeLineControls/BPMWindow"]
 offset_left = 189.0
-offset_top = 408.0
+offset_top = 389.0
 offset_right = 297.0
 offset_bottom = 496.0
 color = Color(0.678431, 0.678431, 0.678431, 1)
 
 [node name="Label" type="Label" parent="TimeLineControls/BPMWindow"]
-offset_left = 198.0
-offset_top = 410.0
-offset_right = 318.0
-offset_bottom = 475.0
+offset_left = 199.0
+offset_top = 397.0
+offset_right = 319.0
+offset_bottom = 462.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "BPM:"
 
 [node name="BPMField" type="LineEdit" parent="TimeLineControls/BPMWindow"]
-offset_left = 198.0
-offset_top = 435.0
-offset_right = 285.0
-offset_bottom = 468.0
+offset_left = 199.0
+offset_top = 421.0
+offset_right = 286.0
+offset_bottom = 454.0
+
+[node name="DeleteBPMChange" type="Button" parent="TimeLineControls/BPMWindow"]
+offset_left = 192.0
+offset_top = 461.0
+offset_right = 292.0
+offset_bottom = 492.0
+text = "delete node"
 
 [node name="BeatDivisorWindow" type="Node2D" parent="TimeLineControls"]
-visible = false
 
 [node name="ColorRect" type="ColorRect" parent="TimeLineControls/BeatDivisorWindow"]
 offset_left = 189.0
-offset_top = 408.0
+offset_top = 389.0
 offset_right = 297.0
 offset_bottom = 496.0
 color = Color(0.678431, 0.678431, 0.678431, 1)
 
 [node name="Label" type="Label" parent="TimeLineControls/BeatDivisorWindow"]
 offset_left = 194.0
-offset_top = 409.0
+offset_top = 396.0
 offset_right = 314.0
-offset_bottom = 474.0
+offset_bottom = 461.0
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Beat Divisor:"
 
 [node name="BeatDivisorField" type="LineEdit" parent="TimeLineControls/BeatDivisorWindow"]
-offset_left = 198.0
-offset_top = 435.0
-offset_right = 285.0
-offset_bottom = 468.0
+offset_left = 199.0
+offset_top = 420.0
+offset_right = 286.0
+offset_bottom = 453.0
+
+[node name="DeleteBDChange" type="Button" parent="TimeLineControls/BeatDivisorWindow"]
+offset_left = 192.0
+offset_top = 461.0
+offset_right = 292.0
+offset_bottom = 492.0
+text = "delete node"
+
+[node name="Waveform" type="Node2D" parent="."]
+
+[node name="TimelineBeats" type="Node2D" parent="."]
 
 [node name="TimelineBars" type="Node2D" parent="."]
 
@@ -588,6 +604,12 @@ width = 2.0
 
 [node name="Polygon2D" type="Polygon2D" parent="TimelinePointer/Pointer"]
 polygon = PackedVector2Array(230, 513, 250, 513, 240, 530)
+
+[node name="Button" type="Button" parent="."]
+offset_left = 119.0
+offset_right = 271.0
+offset_bottom = 67.0
+text = "btn"
 
 [connection signal="gui_input" from="Timeline/NoteTimeline" to="." method="_on_note_timeline_gui_input"]
 [connection signal="timeout" from="Timeline/SongTimer" to="." method="_on_song_timer_timeout"]
@@ -605,4 +627,7 @@ polygon = PackedVector2Array(230, 513, 250, 513, 240, 530)
 [connection signal="pressed" from="TimeLineControls/AddBPMNode" to="." method="_on_add_bpm_node_pressed"]
 [connection signal="pressed" from="TimeLineControls/AddDivisorNode" to="." method="_on_add_divisor_node_pressed"]
 [connection signal="text_submitted" from="TimeLineControls/BPMWindow/BPMField" to="." method="_on_bpm_field_text_submitted"]
+[connection signal="pressed" from="TimeLineControls/BPMWindow/DeleteBPMChange" to="." method="_on_delete_bpm_change_pressed"]
 [connection signal="text_submitted" from="TimeLineControls/BeatDivisorWindow/BeatDivisorField" to="." method="_on_beat_divisor_field_text_submitted"]
+[connection signal="pressed" from="TimeLineControls/BeatDivisorWindow/DeleteBDChange" to="." method="_on_delete_bd_change_pressed"]
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]

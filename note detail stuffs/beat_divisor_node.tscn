@@ -6,22 +6,19 @@ var beat_divisor: int
 var beat: int
 signal bd_button_clicked
 
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 func _on_button_size_flags_changed():
 	$TimelineIndicator/Button.position = Vector2(-$TimelineIndicator/Button.size.x/2, 10)
 
 func button_update():
 	$TimelineIndicator/Button.text = \"{\" + str(beat_divisor) + \"}\"
 
+func render():
+	var time = Global.timeline_beats[beat]
+	if time > Global.timeline_visible_time_range[\"Start\"] and time < Global.timeline_visible_time_range[\"End\"]:
+		$TimelineIndicator.visible = true
+		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time), 516)
+	else:
+		$TimelineIndicator.visible = false
 
 func _on_button_pressed():
 	bd_button_clicked.emit(self)
@@ -31,7 +28,6 @@ func _on_button_pressed():
 script = SubResource("GDScript_e5bgp")
 
 [node name="TimelineIndicator" type="Node2D" parent="."]
-visible = false
 
 [node name="Line2D" type="Line2D" parent="TimelineIndicator"]
 points = PackedVector2Array(0, 0, 0, 132)

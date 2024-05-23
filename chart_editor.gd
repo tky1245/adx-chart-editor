@@ -33,6 +33,8 @@ func _ready():
 	song_length = $AudioPlayers/TrackPlayer.stream.get_length() #um
 	$PlaybackControls/TimeSlider/ProgressBar.max_value = song_length
 	get_node("FileOptions/MenuButton").get_popup().connect("index_pressed", _on_option_pressed)
+
+
 	
 	# Draw a circle
 	var center = Vector2(425, 250)
@@ -55,8 +57,6 @@ func _ready():
 			newLine.width = 2
 			newLine.closed = true
 			region.add_child(newLine)
-	
-	timeline_visible_range_update()
 	timeline_object_update()
 	timeline_render("all")
 	
@@ -71,7 +71,6 @@ func _input(event): # man that precoded slider sucks
 			else:
 				current_time = song_length * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
 		#TODO: Rerender everything 
-		timeline_visible_range_update()
 		timeline_render("all")
 	if event is InputEventMouseButton and !event.pressed:
 		bar_dragging = false
@@ -88,7 +87,6 @@ func _input(event): # man that precoded slider sucks
 			else:
 				current_time = current_time - time_delta
 			#TODO: render
-		timeline_visible_range_update()
 		timeline_render("all")
 		if event is InputEventMouseButton and !event.pressed:
 			timeline_dragging = false
@@ -98,7 +96,6 @@ func _process(delta):
 		current_time = song_length - $Timeline/SongTimer.time_left
 	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
 	$PlaybackControls/ElapsedTime.text = time_format(current_time)
-	timeline_visible_range_update()
 	timeline_render("all")
 
 
@@ -265,107 +262,157 @@ func timeline_visible_range_update(): # Update timeline, use before render
 	Global.timeline_visible_time_range["Start"] = leftmost_time
 	Global.timeline_visible_time_range["End"] = rightmost_time
 
-func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
-	if time <= Global.timeline_visible_time_range["End"] and time >= Global.timeline_visible_time_range["Start"]:
-		var pos_x = Global.timeline_leftmost_x + (Global.timeline_rightmost_x - Global.timeline_leftmost_x) / (Global.timeline_visible_time_range["End"] - Global.timeline_visible_time_range["Start"]) * (time - Global.timeline_visible_time_range["Start"])
-		return pos_x
-	else:
-		return 0
-
 # Use when editing notes
-func timeline_object_update(): # read nodes(bpm/divisor) then update timeline_beats and timeline_bar_time
+func timeline_object_update():
 	#TODO: put note reader in
-	var BPMDivisorArray: Array = [] # ["Mode": "BPM"/"BD", "Beat": int, "Value": float/int]
+	var bpm_array: Array = [] # ["Beat": int, "Value": float]
+	var bd_array: Array = [] # ["Beat": int, "Value": int]
 	if $BPMChanges.get_child_count() == 0: # No BPM?
-		BPMDivisorArray.append({"Mode": "BPM", "Beat": 0, "Value": 160})
+		bpm_array.append({"Beat": 0, "Value": 160.0})
 	else:
-		for BPMNode in $BPMChanges.get_children():
-			BPMDivisorArray.append({"Mode": "BPM", "Beat": BPMNode.beat, "Value": BPMNode.BPM})
-	if $BeatDivisorChanges.get_child_count() == 0:
-		BPMDivisorArray.append({"Mode": "BD", "Beat": 0, "Value": 4})
+		for bpm_node in $BPMChanges.get_children(): # read them all
+			bpm_array.append({"Beat": bpm_node.beat, "Value": bpm_node.bpm})
+	if $BeatDivisorChanges.get_child_count() == 0: # same for bd node
+		bd_array.append({"Beat": 0, "Value": 4})
 	else:
-		for BDNode in $BeatDivisorChanges.get_children():
-			BPMDivisorArray.append({"Mode": "BD", "Beat": BDNode.beat, "Value": BDNode.beat_divisor})
-	arrange_by_beat(BPMDivisorArray)
+		for bd_node in $BeatDivisorChanges.get_children():
+			bd_array.append({"Beat": bd_node.beat, "Value": bd_node.beat_divisor})
 	
+	# Ensure BPMDivisorArray is sorted by Beat
+	bpm_array = arrange_by_beat(bpm_array)
+	bd_array = arrange_by_beat(bd_array)
+	print("bpm_array: ", bpm_array)
+	print("bd_array: ", bd_array)
+	
+	# Reading bpm/bd and generate new beat arrays
+	Global.timeline_beats.clear()
 	var temp_time: float = 0
-	var temp_BPM = 0
-	var temp_beat_divisor = 0
-	var temp_beat = 0
-	var array_counter = 0
-	while temp_time < song_length:
-		for item in BPMDivisorArray.slice(array_counter): # Read BPM/Divisor change and check if theres one on current beat
+	var temp_bpm: float = bpm_array[0]["Value"] if bpm_array.size() > 0 else 160
+	var temp_beat_divisor: float = bd_array[0]["Value"] if bd_array.size() > 0 else 4
+	var temp_beat: int = 0 # Beat counter
+	
+	while temp_time < song_length: # only do calculation within song length
+		for item in bpm_array: # Read BPM change and check if there's one on current beat
 			if item["Beat"] == temp_beat:
-				if item["Mode"] == "BPM":
-					temp_BPM = item["Value"]
-				elif item["Mode"] == "BD":
-					temp_beat_divisor = item["Value"]
-			if item["Beat"] <= temp_beat:
-				array_counter += 1
+				temp_bpm = item["Value"]
+				break # no need to continue looping
+		for item in bd_array:
+			if item["Beat"] == temp_beat:
+				temp_beat_divisor = item["Value"]
+				break
+
+		Global.timeline_beats.append(temp_time)
+		temp_time += (60.0 / temp_bpm) / temp_beat_divisor * beats_per_bar # time calculation
+		temp_beat += 1
+		
+	# print("Global.timeline_beats: ", Global.timeline_beats)    -too long tbh
+	print("Global.timeline_beats size: ", Global.timeline_beats.size())
+	
+	# bar array starts here
+	
+	timeline_bar_time.clear()
+	temp_time = 0 # reuse some variables
+	temp_bpm = 160
+	var temp_idx = 0
+	var bpm_read = false
+	
+	if bpm_array.size() > 0:
+		temp_bpm = bpm_array[0]["Value"]
+	
+	while temp_time < song_length:
+		bpm_read = false # so that it reads bpm only 1 time
+		while temp_idx < bpm_array.size() and not bpm_read:
+			var item = bpm_array[temp_idx]
+			if temp_time >= Global.timeline_beats[item["Beat"]]:
+				temp_time = Global.timeline_beats[item["Beat"]]
+				temp_bpm = item["Value"]
+				temp_idx += 1
+				bpm_read = true
 			else:
 				break
-		Global.timeline_beats.append(temp_time)
-		temp_time += (60.0 / temp_BPM) / temp_beat_divisor
-		temp_beat += 1
-	
-	temp_time = 0
-	temp_BPM = 0
-	array_counter = 0
-	while temp_time < song_length:
-		for item in BPMDivisorArray.slice(array_counter): # correct next bar line to bpm change if theres one in the way
-			if item["Mode"] == "BPM":
-				if temp_time >= Global.timeline_beats[item["Beat"]]:
-					temp_time = Global.timeline_beats[item["Beat"]]
-					temp_BPM = item["Value"]
-					array_counter += 1
-				if temp_time > Global.timeline_beats[item["Beat"]]:
-					break
+		
 		timeline_bar_time.append(temp_time)
-		temp_time += 60.0 / temp_BPM * beats_per_bar
-	for line in $TimelineBars.get_children():
-		line.queue_free()
-	for bar_num in range(timeline_bar_time.size()):
-		var newLine = load("res://note detail stuffs/timeline_bar_line.tscn").instantiate()
-		newLine.name = "Bar" + str(bar_num)
-		newLine.time = timeline_bar_time[bar_num]
-		newLine.add_point(Vector2(120, 516))
-		newLine.add_point(Vector2(120, 648))
-		newLine.default_color = Color.DARK_GREEN
-		newLine.width = 2
-		$TimelineBars.add_child(newLine)
+		temp_time += 60.0 / temp_bpm * beats_per_bar
+
+	
 	timeline_render("bar")
+	timeline_render("beat")
+
 
 func arrange_by_beat(arr): # Bubble sort
+	var temp_arr: Array = arr
 	var swapped = false
-	for i in range(len(arr)):
+	for i in range(len(temp_arr)):
 		swapped = false
-		for j in range(len(arr) - 1):
-			if arr[j]["Beat"] > arr[j + 1]["Beat"]:
-				var temp = arr[j]["Beat"] # dumb swapping
-				arr[j]["Beat"] = arr[j + 1]["Beat"]
-				arr[j + 1]["Beat"] = temp
+		for j in range(len(temp_arr) - 1):
+			if temp_arr[j]["Beat"] > temp_arr[j + 1]["Beat"]:
+				var temp = temp_arr[j]["Beat"] # dumb swapping
+				temp_arr[j]["Beat"] = temp_arr[j + 1]["Beat"]
+				temp_arr[j + 1]["Beat"] = temp
 				swapped = true
 		if swapped == false:
 			break
+	return temp_arr
 
 func timeline_render(type: String): # Render objects on timeline
 	if type == "bar":
-
 		for line in $TimelineBars.get_children():
-			var idx = int(str(line.name).erase(2))
-			if line.time > Global.timeline_visible_time_range["Start"] and line.time < Global.timeline_visible_time_range["End"]:
-				line.visible = true
-				line.set_point_position(0, Vector2(time_to_timeline_pos_x(timeline_bar_time[idx]), 516))
-				line.set_point_position(1, Vector2(time_to_timeline_pos_x(timeline_bar_time[idx]), 648))
-			else:
-				line.visible = false
-	else: # Default, render everything 
+			line.queue_free()
+		for time in timeline_bar_time:
+			if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
+				var newLine = Line2D.new()
+				newLine.default_color = Color.DARK_GREEN
+				newLine.width = 2
+				newLine.add_point(Vector2(Global.time_to_timeline_pos_x(time), 516))
+				newLine.add_point(Vector2(Global.time_to_timeline_pos_x(time), 648))
+				$TimelineBars.add_child(newLine)
+	elif type == "beat":
+		for line in $TimelineBeats.get_children():
+			line.queue_free()
+		for time in Global.timeline_beats:
+			if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
+				var newLine = Line2D.new()
+				newLine.default_color = Color.WEB_GRAY
+				newLine.width = 2
+				newLine.add_point(Vector2(Global.time_to_timeline_pos_x(time), 516))
+				newLine.add_point(Vector2(Global.time_to_timeline_pos_x(time), 648))
+				$TimelineBeats.add_child(newLine)
+	elif type == "bpm_change":
+		for bpm_node in $BPMChanges.get_children():
+			bpm_node.render()
+	elif type == "bd_change":
+		for bd_node in $BeatDivisorChanges.get_children():
+			bd_node.render()
+	elif type == "all": # Default, render everything 
+		timeline_visible_range_update()
 		timeline_render("bar")
+		timeline_render("beat")
+		timeline_render("bpm_change")
+		timeline_render("bd_change")
 
-func time_to_beat(time: float): # Snaps time to beat
-	for beat_time in Global.timeline_beats:
-		if time > beat_time:
-			return Global.timeline_beats.find(beat_time)
+func time_to_beat(time: float) -> int:
+	if Global.timeline_beats.size() == 0:
+		return 0
+		
+	if time <= Global.timeline_beats[0]:
+		return Global.timeline_beats[0]
+
+	for i in range(Global.timeline_beats.size()):
+		var beat_time = Global.timeline_beats[i]
+
+		if time < beat_time:
+			if i == 0:
+				return beat_time # If it's before the first beat
+			else:
+				var prev_beat_time = Global.timeline_beats[i - 1]
+				# Return the closer beat
+				if (time - prev_beat_time) < (beat_time - time):
+					return i - 1
+				else:
+					return i
+
+	return Global.timeline_beats.back()
+
 
 # Handles BPM/BD change window/button
 func _on_add_bpm_node_pressed():
@@ -398,29 +445,57 @@ func _on_beat_divisor_field_text_submitted(new_text):
 			var new_node = beat_divisor_node.instantiate()
 			new_node.beat_divisor = beat_divisor
 			new_node.beat = time_to_beat(current_time)
-			new_node.connect("bpm_button_clicked", _on_bpm_node_clicked)
+			new_node.connect("bpm_button_clicked", _on_bpm_node_clicked) #TODO connect shitted
 			$BeatDivisorChanges.add_child(new_node)
 		else:
 			var node = Global.beat_change_cursor
 			node.beat_divisor = beat_divisor
+		timeline_object_update()
+		timeline_render("all")
 	$TimeLineControls/BeatDivisorWindow.visible = false
 	$TimeLineControls/BeatDivisorWindow/BeatDivisorField.text = ""
 
 func _on_bpm_field_text_submitted(new_text):
 	var bpm = int(new_text)
 	if bpm > 0:
+		var beat = time_to_beat(current_time)
+		Global.beat_change_cursor = null
+		for bpm_node in $BPMChanges.get_children(): # Check for overlaps
+			if beat == bpm_node.beat:
+				Global.beat_change_cursor = bpm_node
 		if !Global.beat_change_cursor:
 			var bpm_node = preload("res://note detail stuffs/bpm_node.tscn")
 			var new_node = bpm_node.instantiate()
 			new_node.bpm = bpm
-			new_node.beat = time_to_beat(current_time)
+			new_node.beat = beat
+			print(current_time)
+			print(new_node.beat)
 			new_node.connect("bd_button_clicked", _on_bd_node_clicked)
 			$BPMChanges.add_child(new_node)
 		else:
 			var node = Global.beat_change_cursor
 			node.bpm = bpm
+		timeline_object_update()
+		timeline_render("all")
 	$TimeLineControls/BPMWindow.visible = false
 	$TimeLineControls/BPMWindow/BPMField.text = ""
+
+func _on_delete_bpm_change_pressed():
+	if Global.beat_change_cursor:
+		Global.beat_change_cursor.queue_free()
+	timeline_object_update()
+	timeline_render("all")
+	$TimeLineControls/BPMWindow.visible = false
+	$TimeLineControls/BPMWindow/BPMField.text = ""
+	
+
+func _on_delete_bd_change_pressed():
+	if Global.beat_change_cursor:
+		Global.beat_change_cursor.queue_free()
+	timeline_object_update()
+	timeline_render("all")
+	$TimeLineControls/BeatDivisorWindow.visible = false
+	$TimeLineControls/BeatDivisorWindow/BeatDivisorField.text = ""
 
 func _on_bpm_node_clicked(node):
 	Global.beat_change_cursor = node
@@ -439,3 +514,18 @@ func _on_zoom_up_pressed():
 func _on_zoom_down_pressed():
 	if Global.timeline_zoom > 0.125:
 		Global.timeline_zoom *= 0.5
+
+
+func _on_button_pressed(): # debug button
+	#print(Global.timeline_beats) # whys there a 0 in the end
+	#print(timeline_bar_time) # error'd
+	print($BPMChanges.get_children().size())
+	print("Current time:",current_time)
+	print("Beat:", time_to_beat(current_time))
+	print(timeline_bar_time)
+
+
+
+
+
+

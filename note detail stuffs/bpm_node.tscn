@@ -5,16 +5,6 @@ script/source = "extends Node2D
 var bpm: float
 var beat: int
 signal bpm_button_clicked
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
-
-
 
 func _on_button_size_flags_changed():
 	$TimelineIndicator/Button.position = Vector2(- $TimelineIndicator/Button.size.x/2, 80)
@@ -23,7 +13,13 @@ func button_update():
 	$TimelineIndicator/Button.text = str(bpm) + \"\\nBPM\"
 
 func render():
-	pass
+	var time = Global.timeline_beats[beat]
+	if time > Global.timeline_visible_time_range[\"Start\"] and time < Global.timeline_visible_time_range[\"End\"]:
+		$TimelineIndicator.visible = true
+		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time), 516)
+	else:
+		$TimelineIndicator.visible = false
+	
 func _on_button_pressed():
 	bpm_button_clicked.emit(self)
 "
@@ -47,6 +43,7 @@ theme_override_font_sizes/font_size = 12
 text = "
 bpm
 "
+metadata/_edit_use_anchors_ = true
 
 [connection signal="pressed" from="TimelineIndicator/Button" to="." method="_on_button_pressed"]
 [connection signal="size_flags_changed" from="TimelineIndicator/Button" to="." method="_on_button_size_flags_changed"]

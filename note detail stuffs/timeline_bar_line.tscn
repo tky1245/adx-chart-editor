@@ -1,9 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://cwblrfpd7s8g5"]
-
-[sub_resource type="GDScript" id="GDScript_ovcf7"]
-script/source = "extends Line2D
-var time: float
-"
-
-[node name="TimelineBarLine" type="Line2D"]
-script = SubResource("GDScript_ovcf7")
