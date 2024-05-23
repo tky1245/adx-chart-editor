@@ -4,6 +4,10 @@ var CURRENT_CHART_PATH: String
 var current_difficulty: int
 var note_cursor
 var beat_change_cursor
+const preview_center = Vector2(425, 250)
+const preview_radius = 200
+var touch_positions: Dictionary
+var initial_note_distance = 150
 
 # for mathing and rendering
 const timeline_pointer_x = 240
@@ -21,3 +25,31 @@ func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
 		return pos_x
 	else:
 		return 0
+
+func _ready():
+	# Generate touch positions
+	for i in range(8):
+		var pos_name = "A" + str(i + 1)
+		var distance = 168.0
+		var angle = PI / 8 * (1 + i * 2)
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		touch_positions[pos_name] = pos
+	for i in range(8):
+		var pos_name = "B" + str(i + 1)
+		var distance = 91.0
+		var angle = PI / 8 * (1 + i * 2)
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		touch_positions[pos_name] = pos
+	touch_positions["C"] = preview_center
+	for i in range(8):
+		var pos_name = "D" + str(i + 1)
+		var distance = 180.0
+		var angle = PI / 4 * i
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		touch_positions[pos_name] = pos
+	for i in range(8):
+		var pos_name = "E" + str(i + 1)
+		var distance = 128.0
+		var angle = PI / 4 * i
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		touch_positions[pos_name] = pos
