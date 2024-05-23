@@ -28,7 +28,7 @@ var timeline_dragging: bool = false
 
 
 func _ready():
-	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ)
+	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location
 	load_external_song(Global.CURRENT_SONG_PATH)
 	song_length = $AudioPlayers/TrackPlayer.stream.get_length() #um
 	$PlaybackControls/TimeSlider/ProgressBar.max_value = song_length
@@ -37,12 +37,10 @@ func _ready():
 
 	
 	# Draw a circle
-	var center = Vector2(425, 250)
-	var radius = 200
 	var density = 180
 	for k in range(density):
-		var dotx = radius * sin(2 * PI * k / density) + center.x
-		var doty = radius * cos(2 * PI * k / density) + center.y
+		var dotx = Global.preview_radius * sin(2 * PI * k / density) + Global.preview_center.x
+		var doty = Global.preview_radius * cos(2 * PI * k / density) + Global.preview_center.y
 		$ChartPreview/Circle.add_point(Vector2(dotx, doty))
 	# Draw polygons
 	for region in $ChartPreview/TouchArea.get_children():
@@ -59,6 +57,12 @@ func _ready():
 			region.add_child(newLine)
 	timeline_object_update()
 	timeline_render("all")
+	# test
+	for pos_name in Global.touch_positions:
+		var lbl = Label.new()
+		lbl.text = "o"
+		lbl.position = Global.touch_positions[pos_name] - Vector2(lbl.get_theme_default_font_size()/2, lbl.get_theme_default_font_size()/2)
+		add_child(lbl)
 	
 
 func _input(event): # man that precoded slider sucks
@@ -91,7 +95,7 @@ func _input(event): # man that precoded slider sucks
 		if event is InputEventMouseButton and !event.pressed:
 			timeline_dragging = false
 		
-func _process(delta):
+func _process(_delta):
 	if !$Timeline/SongTimer.is_stopped():
 		current_time = song_length - $Timeline/SongTimer.time_left
 	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
@@ -203,7 +207,7 @@ func time_format(time_num: float): # Seconds to Time String
 		time_dict["S"] += 1
 	time_dict["MS"] = int(100 * remaining_time)
 	
-	var time_string: String
+	var time_string: String = ""
 	# Brute Forcing it
 	if time_dict["H"] > 0:
 		time_string += time_dict["H"] + ":"
@@ -233,8 +237,7 @@ func load_external_song(path): # Load a song
 		mp3.data = file.get_buffer(file.get_length())
 		$AudioPlayers/TrackPlayer.stream = mp3
 	elif path.ends_with("track.ogg"):
-		var ogg = AudioStreamOggVorbis.new()
-		ogg.load_from_buffer(file.get_buffer(file.get_length()))
+		var ogg = AudioStreamOggVorbis.load_from_buffer(file.get_buffer(file.get_length()))
 		$AudioPlayers/TrackPlayer.stream = ogg
 	else:
 		print("song not loaded")
