@@ -529,6 +529,7 @@ offset_bottom = 637.0
 text = "{Divisor}"
 
 [node name="BPMWindow" type="Node2D" parent="TimeLineControls"]
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="TimeLineControls/BPMWindow"]
 offset_left = 189.0
@@ -559,6 +560,7 @@ offset_bottom = 492.0
 text = "delete node"
 
 [node name="BeatDivisorWindow" type="Node2D" parent="TimeLineControls"]
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="TimeLineControls/BeatDivisorWindow"]
 offset_left = 189.0

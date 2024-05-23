@@ -334,7 +334,7 @@ func timeline_object_update():
 		timeline_bar_time.append(temp_time)
 		temp_time += 60.0 / temp_bpm * beats_per_bar
 
-	
+
 	timeline_render("bar")
 	timeline_render("beat")
 
@@ -440,16 +440,21 @@ func add_bd_window_show():
 func _on_beat_divisor_field_text_submitted(new_text):
 	var beat_divisor = float(new_text)
 	if beat_divisor > 0:
+		var beat = time_to_beat(current_time) if $BeatDivisorChanges.get_child_count() > 0 else 0
 		if !Global.beat_change_cursor:
+			for bd_node in $BeatDivisorChanges.get_children():
+				if beat == bd_node.beat:
+					Global.beat_change_cursor = bd_node
 			var beat_divisor_node = preload("res://note detail stuffs/beat_divisor_node.tscn")
 			var new_node = beat_divisor_node.instantiate()
 			new_node.beat_divisor = beat_divisor
-			new_node.beat = time_to_beat(current_time)
-			new_node.connect("bpm_button_clicked", _on_bpm_node_clicked) #TODO connect shitted
+			new_node.beat = beat
+			new_node.connect("bd_button_clicked", _on_bd_node_clicked, 8)
 			$BeatDivisorChanges.add_child(new_node)
 		else:
 			var node = Global.beat_change_cursor
 			node.beat_divisor = beat_divisor
+			node.button_update()
 		timeline_object_update()
 		timeline_render("all")
 	$TimeLineControls/BeatDivisorWindow.visible = false
@@ -458,23 +463,23 @@ func _on_beat_divisor_field_text_submitted(new_text):
 func _on_bpm_field_text_submitted(new_text):
 	var bpm = int(new_text)
 	if bpm > 0:
-		var beat = time_to_beat(current_time)
-		Global.beat_change_cursor = null
-		for bpm_node in $BPMChanges.get_children(): # Check for overlaps
-			if beat == bpm_node.beat:
-				Global.beat_change_cursor = bpm_node
+		var beat = time_to_beat(current_time) if $BPMChanges.get_child_count() > 0 else 0
 		if !Global.beat_change_cursor:
+			for bpm_node in $BPMChanges.get_children(): # Check for overlaps
+				if beat == bpm_node.beat:
+					Global.beat_change_cursor = bpm_node
 			var bpm_node = preload("res://note detail stuffs/bpm_node.tscn")
 			var new_node = bpm_node.instantiate()
 			new_node.bpm = bpm
 			new_node.beat = beat
 			print(current_time)
 			print(new_node.beat)
-			new_node.connect("bd_button_clicked", _on_bd_node_clicked)
+			new_node.connect("bpm_button_clicked", _on_bpm_node_clicked, 8)
 			$BPMChanges.add_child(new_node)
 		else:
 			var node = Global.beat_change_cursor
 			node.bpm = bpm
+			node.button_update()
 		timeline_object_update()
 		timeline_render("all")
 	$TimeLineControls/BPMWindow.visible = false
@@ -482,16 +487,17 @@ func _on_bpm_field_text_submitted(new_text):
 
 func _on_delete_bpm_change_pressed():
 	if Global.beat_change_cursor:
-		Global.beat_change_cursor.queue_free()
+		if Global.beat_change_cursor.beat != 0:
+			Global.beat_change_cursor.free()
 	timeline_object_update()
 	timeline_render("all")
 	$TimeLineControls/BPMWindow.visible = false
 	$TimeLineControls/BPMWindow/BPMField.text = ""
-	
 
 func _on_delete_bd_change_pressed():
 	if Global.beat_change_cursor:
-		Global.beat_change_cursor.queue_free()
+		if Global.beat_change_cursor.beat != 0:
+			Global.beat_change_cursor.free()
 	timeline_object_update()
 	timeline_render("all")
 	$TimeLineControls/BeatDivisorWindow.visible = false
