@@ -8,6 +8,7 @@ var toggle_multiplacing: bool = false
 var toggle_break: bool = false
 var toggle_ex: bool = false
 var toggle_touch: bool = false
+var toggle_firework: bool = false
 
 # Track Player
 var song_length: float
@@ -33,6 +34,14 @@ func _ready():
 	song_length = $AudioPlayers/TrackPlayer.stream.get_length() #um
 	$PlaybackControls/TimeSlider/ProgressBar.max_value = song_length
 	get_node("FileOptions/MenuButton").get_popup().connect("index_pressed", _on_option_pressed)
+	
+	# tap test
+	var tap = load("res://note detail stuffs/tap.tscn")
+	var new_note = tap.instantiate()
+	new_note.beat = 4
+	new_note.note_position = "8" 
+	new_note.tap_initialize()
+	$Notes.add_child(new_note)
 
 
 	
@@ -57,13 +66,7 @@ func _ready():
 			region.add_child(newLine)
 	timeline_object_update()
 	timeline_render("all")
-	# test
-	for pos_name in Global.touch_positions:
-		var lbl = Label.new()
-		lbl.text = "o"
-		lbl.position = Global.touch_positions[pos_name] - Vector2(lbl.get_theme_default_font_size()/2, lbl.get_theme_default_font_size()/2)
-		add_child(lbl)
-	
+
 
 func _input(event): # man that precoded slider sucks
 	if bar_dragging:
@@ -96,11 +99,14 @@ func _input(event): # man that precoded slider sucks
 			timeline_dragging = false
 		
 func _process(_delta):
+	for note in $Notes.get_children():
+		note.preview_render(current_time)
 	if !$Timeline/SongTimer.is_stopped():
 		current_time = song_length - $Timeline/SongTimer.time_left
 	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
 	$PlaybackControls/ElapsedTime.text = time_format(current_time)
 	timeline_render("all")
+	
 
 
 func _on_option_pressed(index):
@@ -169,6 +175,9 @@ func _on_ex_toggle_toggled(toggled_on):
 
 func _on_touch_toggle_toggled(toggled_on):
 	toggle_ex = toggled_on
+
+func _on_firework_toggle_toggled(toggled_on):
+	toggle_firework = toggled_on
 
 # Song Player
 func _on_play_pause_pressed(): # Play/Pause Button
@@ -532,6 +541,9 @@ func _on_button_pressed(): # debug button
 	print("Current time:",current_time)
 	print("Beat:", time_to_beat(current_time))
 	print(timeline_bar_time)
+
+
+
 
 
 

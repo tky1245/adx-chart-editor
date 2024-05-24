@@ -4,10 +4,13 @@ var CURRENT_CHART_PATH: String
 var current_difficulty: int
 var note_cursor
 var beat_change_cursor
+
+# Some chart preview variables
 const preview_center = Vector2(425, 250)
 const preview_radius = 200
 var touch_positions: Dictionary
-var initial_note_distance = 150
+var initial_note_distance = 50
+var note_speed_in_time = 0.4
 
 # for mathing and rendering
 const timeline_pointer_x = 240
@@ -18,6 +21,23 @@ var timeline_zoom: float = 1 # Goes from 2^-3 to 2^3
 var timeline_visible_time_range: Dictionary = {"Start": 0, "End": 1}
 var timeline_beats:Array = [] # arr["Beat"] = time
 var timeline_beats_lines: Array = []
+
+# Note colors
+const note_colors: Dictionary = {
+	"note_base" = Color.HOT_PINK,
+	"note_both" = Color.GOLD,
+	"note_break" = Color.ORANGE_RED,
+	"note_slider_head" = Color.CORNFLOWER_BLUE,
+	"note_highlight" = Color(Color.LIGHT_GOLDENROD, 0.5),
+	"slider" = Color.CYAN,
+	"slider_highlight" = Color.DODGER_BLUE,
+	"touch_base" = Color.LIGHT_SKY_BLUE,
+	"touch_both" = Color.GOLD,
+	"touch_hold_1" = Color.RED,
+	"touch_hold_2" = Color.YELLOW,
+	"touch_hold_3" = Color.SEA_GREEN,
+	"touch_hold_4" = Color.ROYAL_BLUE,
+}
 
 func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
 	if time <= timeline_visible_time_range["End"] and time >= timeline_visible_time_range["Start"]:
@@ -53,3 +73,6 @@ func _ready():
 		var angle = PI / 4 * i
 		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
 		touch_positions[pos_name] = pos
+
+func note_pos_mod(num: int):
+	return (num - 1) % 8 + 1
