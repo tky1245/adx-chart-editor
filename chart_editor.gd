@@ -1,6 +1,6 @@
 extends Node2D
 var previous_mouse_position: Vector2
-var beats_per_bar = 4
+
 
 # Placement Tools
 var placement_selected: String = "None"
@@ -39,11 +39,20 @@ func _ready():
 	var tap = load("res://note detail stuffs/tap.tscn")
 	var new_note = tap.instantiate()
 	new_note.beat = 4
-	new_note.note_position = "A1" 
-	new_note.touch_initialize()
+	new_note.note_position = "A1"
+	new_note.note_property_touch = true
+	new_note.initialize()
 	$Notes.add_child(new_note)
-
-
+	
+	var hold = load("res://note detail stuffs/hold.tscn")
+	var new_hold = hold.instantiate()
+	new_hold.beat = 6
+	new_hold.note_position = "3"
+	new_hold.bpm = 240.0 # what
+	new_hold.duration_x = 1
+	new_hold.duration_y = 2
+	new_hold.initialize()
+	$Notes.add_child(new_hold)
 	
 	# Draw a circle
 	var density = 180
@@ -314,7 +323,7 @@ func timeline_object_update():
 				break
 
 		Global.timeline_beats.append(temp_time)
-		temp_time += (60.0 / temp_bpm) / temp_beat_divisor * beats_per_bar # time calculation
+		temp_time += (60.0 / temp_bpm) / temp_beat_divisor * Global.beats_per_bar # time calculation
 		temp_beat += 1
 		
 	# print("Global.timeline_beats: ", Global.timeline_beats)    -too long tbh
@@ -331,7 +340,7 @@ func timeline_object_update():
 	if bpm_array.size() > 0:
 		temp_bpm = bpm_array[0]["Value"]
 	
-	while temp_time < song_length:
+	while temp_time < song_length: # insert bars
 		bpm_read = false # so that it reads bpm only 1 time
 		while temp_idx < bpm_array.size() and not bpm_read:
 			var item = bpm_array[temp_idx]
@@ -342,13 +351,21 @@ func timeline_object_update():
 				bpm_read = true
 			else:
 				break
-		
 		timeline_bar_time.append(temp_time)
-		temp_time += 60.0 / temp_bpm * beats_per_bar
-
+		temp_time += 60.0 / temp_bpm * Global.beats_per_bar
+	
+	for note in $Notes.get_children(): # put bpm into notes
+		for idx in range(bpm_array.size()):
+			if idx != bpm_array.size() - 1:
+				if note.beat >= bpm_array[idx]["Beat"] and note.beat < bpm_array[idx + 1]["Beat"]:
+					note.bpm = bpm_array[idx]["Value"]
+					break
+			else:
+				note.bpm = bpm_array[idx]["Value"]
 
 	timeline_render("bar")
 	timeline_render("beat")
+	timeline_render("note")
 
 
 func arrange_by_beat(arr): # Bubble sort
