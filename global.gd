@@ -52,26 +52,26 @@ func _ready():
 		var pos_name = "A" + str(i + 1)
 		var distance = 168.0
 		var angle = PI / 8 * (1 + i * 2)
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
 	for i in range(8):
 		var pos_name = "B" + str(i + 1)
 		var distance = 91.0
 		var angle = PI / 8 * (1 + i * 2)
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
 	touch_positions["C"] = preview_center
 	for i in range(8):
 		var pos_name = "D" + str(i + 1)
 		var distance = 180.0
 		var angle = PI / 4 * i
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
 	for i in range(8):
 		var pos_name = "E" + str(i + 1)
 		var distance = 128.0
 		var angle = PI / 4 * i
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * cos(angle)))
+		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
 
 func note_pos_mod(num: int):
