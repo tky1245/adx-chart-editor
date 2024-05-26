@@ -223,6 +223,7 @@ polygon = PackedVector2Array(311, 136, 355, 136, 355, 180, 311, 180)
 
 [node name="Circle" type="Line2D" parent="ChartPreview"]
 closed = true
+width = 4.0
 
 [node name="Timeline" type="Node2D" parent="."]
 
@@ -489,8 +490,6 @@ text = "■"
 
 [node name="BeatDivisorChanges" type="Node2D" parent="."]
 
-[node name="Notes" type="Node2D" parent="."]
-
 [node name="TimeLineControls" type="Node2D" parent="."]
 
 [node name="ColorRect2" type="ColorRect" parent="TimeLineControls"]
@@ -612,6 +611,8 @@ width = 2.0
 
 [node name="Polygon2D" type="Polygon2D" parent="TimelinePointer/Pointer"]
 polygon = PackedVector2Array(230, 513, 250, 513, 240, 530)
+
+[node name="Notes" type="Node2D" parent="."]
 
 [node name="Button" type="Button" parent="."]
 offset_left = 119.0

@@ -39,8 +39,8 @@ func _ready():
 	var tap = load("res://note detail stuffs/tap.tscn")
 	var new_note = tap.instantiate()
 	new_note.beat = 4
-	new_note.note_position = "8" 
-	new_note.tap_initialize()
+	new_note.note_position = "A1" 
+	new_note.touch_initialize()
 	$Notes.add_child(new_note)
 
 
@@ -395,12 +395,16 @@ func timeline_render(type: String): # Render objects on timeline
 	elif type == "bd_change":
 		for bd_node in $BeatDivisorChanges.get_children():
 			bd_node.render()
+	elif type == "note":
+		for node in $Notes.get_children():
+			node.timeline_object_render()
 	elif type == "all": # Default, render everything 
 		timeline_visible_range_update()
 		timeline_render("bar")
 		timeline_render("beat")
 		timeline_render("bpm_change")
 		timeline_render("bd_change")
+		timeline_render("note")
 
 func time_to_beat(time: float) -> int:
 	if Global.timeline_beats.size() == 0:
