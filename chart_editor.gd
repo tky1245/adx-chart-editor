@@ -47,8 +47,9 @@ func _ready():
 	var hold = load("res://note detail stuffs/hold.tscn")
 	var new_hold = hold.instantiate()
 	new_hold.beat = 6
-	new_hold.note_position = "3"
-	new_hold.bpm = 240.0 # what
+	new_hold.note_position = "C"
+	new_hold.bpm = 240.0
+	new_hold.note_property_touch = true # 
 	new_hold.duration_x = 1
 	new_hold.duration_y = 2
 	new_hold.initialize()
@@ -115,8 +116,6 @@ func _process(_delta):
 	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
 	$PlaybackControls/ElapsedTime.text = time_format(current_time)
 	timeline_render("all")
-	
-
 
 func _on_option_pressed(index):
 	if index == 0: #Save

@@ -144,7 +144,7 @@ func circle(color: Color, width: float, radius: float = 18, frequency: int = 360
 		var angle = i * TAU / frequency
 		newLine.add_point(Vector2(radius * sin(angle), radius * cos(angle)))
 	return newLine
-	
+
 func triangle(color: Color, width: float) -> Line2D:
 	var newLine = Line2D.new()
 	newLine.default_color = color

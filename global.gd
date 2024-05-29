@@ -37,6 +37,7 @@ const note_colors: Dictionary = {
 	"touch_hold_2" = Color.YELLOW,
 	"touch_hold_3" = Color.SEA_GREEN,
 	"touch_hold_4" = Color.ROYAL_BLUE,
+	"touch_hold_center" = Color.CYAN,
 }
 
 # Some settings

@@ -242,6 +242,7 @@ one_shot = true
 [node name="Tap" type="Node2D" parent="PlacementTools"]
 
 [node name="Highlight" type="AnimatedSprite2D" parent="PlacementTools/Tap"]
+visible = false
 position = Vector2(693, 62)
 sprite_frames = SubResource("SpriteFrames_dhqh1")
 animation = &"white"
@@ -257,6 +258,7 @@ flat = true
 [node name="Hold" type="Node2D" parent="PlacementTools"]
 
 [node name="Highlight" type="AnimatedSprite2D" parent="PlacementTools/Hold"]
+visible = false
 position = Vector2(693, 170)
 sprite_frames = SubResource("SpriteFrames_dhqh1")
 animation = &"white"
@@ -272,6 +274,7 @@ flat = true
 [node name="Slider" type="Node2D" parent="PlacementTools"]
 
 [node name="Highlight" type="AnimatedSprite2D" parent="PlacementTools/Slider"]
+visible = false
 position = Vector2(694, 281)
 sprite_frames = SubResource("SpriteFrames_dhqh1")
 animation = &"white"

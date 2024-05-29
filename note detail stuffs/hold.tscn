@@ -8,3 +8,4 @@ script = ExtResource("1_e0ya4")
 [node name="Preview" type="Node2D" parent="."]
 
 [node name="TimelineIndicator" type="Node2D" parent="."]
+clip_children = 1
