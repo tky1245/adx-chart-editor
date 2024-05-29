@@ -12,6 +12,7 @@ var note_position: String
 
 func preview_render(current_time: float) -> void:
 	if note_property_touch: # touch hold logic
+		var fade_progress: float = 0
 		var intro_progress: float = 0
 		var hold_progress: float = 0
 		var radius = 6
@@ -27,26 +28,29 @@ func preview_render(current_time: float) -> void:
 			$Preview.visible = true
 			if current_time >= time_1 - Global.note_speed_in_time and current_time < time_1 - 0.7 * Global.note_speed_in_time:
 				intro_progress = 0
-				$Preview.self_modulate.a = (current_time - (time_1 - Global.note_speed_in_time)) / (0.3 * Global.note_speed_in_time)
+				fade_progress = (current_time - (time_1 - Global.note_speed_in_time)) / (0.3 * Global.note_speed_in_time)
 				hold_progress = 0
 			elif current_time >= current_time - 0.7 * Global.note_speed_in_time and current_time < time_1:
-				$Preview.self_modulate.a = 1
+				fade_progress = 1
 				intro_progress = (current_time - (time_1 - 0.7 * Global.note_speed_in_time)) / (0.7 * Global.note_speed_in_time)
 				hold_progress = 0
 			elif current_time > time_1 and current_time < time_2:
-				$Preview.self_modulate.a = 1
+				fade_progress = 1
 				intro_progress = 1
 				hold_progress = (current_time - time_1) / (time_2 - time_1)
 			
 			for path in $Preview/NoteShape/Petals.get_children():
 				path.get_child(0).progress_ratio = intro_progress
-			
+				for node in path.get_child(0).get_children():
+					node.self_modulate.a = fade_progress
+					
 			var n = int(hold_progress * 4)
 			if hold_progress == 0.0:
 				for node in $Preview/NoteShape/ProgressCircle.get_children():
 					node.visible = false
 			else:
 				for i in range(4):
+					$Preview/NoteShape/ProgressCircle.get_child(i).self_modulate.a = fade_progress
 					if i < n:
 						$Preview/NoteShape/ProgressCircle.get_child(i).polygon = polygon
 						$Preview/NoteShape/ProgressCircle.get_child(i).visible = true
@@ -56,6 +60,8 @@ func preview_render(current_time: float) -> void:
 						$Preview/NoteShape/ProgressCircle.get_child(i).polygon = reshape(polygon, angle, )
 					else:
 						$Preview/NoteShape/ProgressCircle.get_child(i).visible = false
+			for node in $Preview/NoteShape/CenterDot.get_children():
+				node.self_modulate.a = fade_progress
 
 	else: # hold logic
 		var angle = (int(note_position) * 2 - 1) * TAU / 16
@@ -128,23 +134,24 @@ func initialize() -> void:
 		$Preview/NoteShape.add_child(petals)
 		for i in range(4):
 			var path = Path2D.new()
-			var angle = TAU / 4 * i + TAU / 8
+			var angle = TAU / 4 * i - 3 * TAU / 8
 			path.name = "Path" + str(i)
 			$Preview/NoteShape/Petals.add_child(path)
 			$Preview/NoteShape/Petals.get_child(i).position = Global.touch_positions[note_position]
-			$Preview/NoteShape/Petals.get_child(i).rotation = angle
+			$Preview/NoteShape/Petals.get_child(i).rotation = PI
 			var path_follow = PathFollow2D.new()
 			path_follow.name = "PathFollow"
 			path.add_child(path_follow)
 			path.curve = Curve2D.new()
+			path.curve.add_point(17 * Vector2(sin(angle), -cos(angle)))
 			path.curve.add_point(Vector2(0, 0))
-			path.curve.add_point(Vector2(-12, -12))
 			
 			var petal = Polygon2D.new()
 			petal.color = Global.note_colors["touch_hold_" + str(i + 1)]
 			var radius = 6
 			var distance = 22
 			petal.polygon = petal_polygon(distance, radius)
+			petal.rotation = 5 * TAU / 8
 			path_follow.add_child(petal)
 			
 			var petal_outline = Line2D.new()
@@ -153,6 +160,7 @@ func initialize() -> void:
 			petal_outline.closed = true
 			for point in petal.polygon:
 				petal_outline.add_point(point)
+			petal_outline.rotation = 5 * TAU / 8
 			path_follow.add_child(petal_outline)
 		
 		var dot_note = Node2D.new()
