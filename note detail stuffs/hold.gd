@@ -128,14 +128,17 @@ func initialize() -> void:
 		$Preview/NoteShape.add_child(petals)
 		for i in range(4):
 			var path = Path2D.new()
+			var angle = TAU / 4 * i + TAU / 8
 			path.name = "Path" + str(i)
 			$Preview/NoteShape/Petals.add_child(path)
+			$Preview/NoteShape/Petals.get_child(i).position = Global.touch_positions[note_position]
+			$Preview/NoteShape/Petals.get_child(i).rotation = angle
 			var path_follow = PathFollow2D.new()
 			path_follow.name = "PathFollow"
 			path.add_child(path_follow)
 			path.curve = Curve2D.new()
-			path.curve.add_point(Global.touch_positions[note_position])
-			path.curve.add_point(Global.touch_positions[note_position] + Vector2(12, 12).rotated(TAU / 4 * i - TAU / 8))
+			path.curve.add_point(Vector2(0, 0))
+			path.curve.add_point(Vector2(-12, -12))
 			
 			var petal = Polygon2D.new()
 			petal.color = Global.note_colors["touch_hold_" + str(i + 1)]
