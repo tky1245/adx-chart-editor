@@ -361,6 +361,7 @@ func timeline_object_update():
 					break
 			else:
 				note.bpm = bpm_array[idx]["Value"]
+		note.initialize()
 
 	timeline_render("bar")
 	timeline_render("beat")

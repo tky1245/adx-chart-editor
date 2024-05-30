@@ -85,6 +85,7 @@ func initialize(pos: String = note_position) -> void:
 		new_line.closed = true
 		new_line.position = Vector2(0, 15 * int(pos) - 6)
 		$TimelineIndicator.add_child(new_line)
+		
 	else: # tap note logic
 		for node in $Preview.get_children():
 			node.free()

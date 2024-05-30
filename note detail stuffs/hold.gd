@@ -62,7 +62,7 @@ func preview_render(current_time: float) -> void:
 						$Preview/NoteShape/ProgressCircle.get_child(i).visible = false
 			for node in $Preview/NoteShape/CenterDot.get_children():
 				node.self_modulate.a = fade_progress
-
+				
 	else: # hold logic
 		var angle = (int(note_position) * 2 - 1) * TAU / 16
 		var start_progress
@@ -74,7 +74,7 @@ func preview_render(current_time: float) -> void:
 		if current_time < time_1 - Global.note_speed_in_time or current_time > time_2:
 			$Preview.visible = false
 			for line in $Preview/NoteShape.get_children():
-				line = hexagon_shape(start_point, start_point, line)
+				line = hexagon_shape(start_point, start_point, 18, line)
 		else:
 			if current_time < time_2 and current_time > time_2 - Global.note_speed_in_time * 0.7 : # tail position
 				end_progress = (current_time - time_2 + Global.note_speed_in_time * 0.7) / (Global.note_speed_in_time * 0.7)
@@ -102,9 +102,8 @@ func preview_render(current_time: float) -> void:
 				start_progress = 0
 			start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
 			for line in $Preview/NoteShape.get_children():
-				hexagon_shape(start_point, end_point, line)
+				hexagon_shape(start_point, end_point, 18, line)
 			$Preview.visible = true
-			
 
 func initialize() -> void:
 	for node in $Preview.get_children():
@@ -185,6 +184,22 @@ func initialize() -> void:
 			var angle = i * TAU / frequency
 			center_dot_outline.add_point(Vector2(5, 0).rotated(angle))
 		$Preview/NoteShape/CenterDot.add_child(center_dot_outline)
+		
+		for node in $TimelineIndicator.get_children():
+			node.free()
+		for i in range(4):
+			var color = Global.note_colors["touch_hold_" + str(i+1)]
+			var new_line = Line2D.new()
+			var point_1 = Vector2(i / 4.0 * 60.0 * Global.beats_per_bar / bpm * (duration_x / duration_y) * Global.timeline_pixels_to_second, 0)
+			var point_2 = Vector2((i + 1) / 4.0 * 60.0 * Global.beats_per_bar / bpm * (duration_x / duration_y) * Global.timeline_pixels_to_second, 0)
+			var note_pos = int(note_position) if note_position != "C" else 8
+			new_line.add_point(point_1)
+			new_line.add_point(point_2)
+			new_line.default_color = color
+			new_line.width = 8
+			new_line.position = Vector2(0, 15 * note_pos - 6)
+			$TimelineIndicator.add_child(new_line)
+		
 	else: # hold logic
 		var new_node = Node2D.new()
 		new_node.name = "NoteShape"
@@ -212,33 +227,42 @@ func initialize() -> void:
 		note_hold.width = 8
 		$Preview/NoteShape.add_child(note_hold)
 		
+		for node in $TimelineIndicator.get_children():
+			node.free()
+
+		var new_hexagon = hexagon_shape(Vector2(0, 0), Vector2((60.0 * Global.beats_per_bar / bpm * (duration_x / duration_y)) * Global.timeline_pixels_to_second, 0), 4, null, 0)
+		new_hexagon.default_color = note_color
+		new_hexagon.width = 2
+		new_hexagon.position = Vector2(0, 15 * int(note_position) - 6)
+		$TimelineIndicator.add_child(new_hexagon)
+		
 func timeline_object_render() -> void: #TODO change visible range
-	var time = Global.timeline_beats[beat]
-	if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
+	var time_1 = Global.timeline_beats[beat]
+	var time_2 = time_1 + 60.0 * Global.beats_per_bar / bpm * (duration_x / duration_y)
+	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true
-		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time), 516)
+		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time_1), 516)
 	else:
 		$TimelineIndicator.visible = false
 
-func hexagon_shape(point_1: Vector2, point_2: Vector2, hexagon: Line2D = null) -> Line2D:
-	var angle = ((int(note_position) * 2 - 1) * TAU / 16) + TAU / 4
+func hexagon_shape(point_1: Vector2, point_2: Vector2, radius: float = 18, hexagon: Line2D = null, angle: float = ((int(note_position) * 2 - 1) * TAU / 16) + TAU / 4) -> Line2D:
 	if !hexagon:
 		var new_line = Line2D.new()
 		new_line.closed = true
-		new_line.add_point(point_1 + Vector2(-18, 0).rotated(angle - TAU / 6))
-		new_line.add_point(point_1 + Vector2(-18, 0).rotated(angle))
-		new_line.add_point(point_1 + Vector2(-18, 0).rotated(angle + TAU / 6))
-		new_line.add_point(point_2 + Vector2(-18, 0).rotated(angle + 2 * TAU / 6))
-		new_line.add_point(point_2 + Vector2(-18, 0).rotated(angle + 3 * TAU / 6))
-		new_line.add_point(point_2 + Vector2(-18, 0).rotated(angle + 4 * TAU / 6))
+		new_line.add_point(point_1 + Vector2(-radius, 0).rotated(angle - TAU / 6))
+		new_line.add_point(point_1 + Vector2(-radius, 0).rotated(angle))
+		new_line.add_point(point_1 + Vector2(-radius, 0).rotated(angle + TAU / 6))
+		new_line.add_point(point_2 + Vector2(-radius, 0).rotated(angle + 2 * TAU / 6))
+		new_line.add_point(point_2 + Vector2(-radius, 0).rotated(angle + 3 * TAU / 6))
+		new_line.add_point(point_2 + Vector2(-radius, 0).rotated(angle + 4 * TAU / 6))
 		return new_line
 	else:
-		hexagon.set_point_position(0, point_1 + Vector2(-18, 0).rotated(angle - TAU / 6))
-		hexagon.set_point_position(1, point_1 + Vector2(-18, 0).rotated(angle))
-		hexagon.set_point_position(2, point_1 + Vector2(-18, 0).rotated(angle + TAU / 6))
-		hexagon.set_point_position(3, point_2 + Vector2(18, 0).rotated(angle - TAU / 6))
-		hexagon.set_point_position(4, point_2 + Vector2(18, 0).rotated(angle))
-		hexagon.set_point_position(5, point_2 + Vector2(18, 0).rotated(angle + TAU / 6))
+		hexagon.set_point_position(0, point_1 + Vector2(-radius, 0).rotated(angle - TAU / 6))
+		hexagon.set_point_position(1, point_1 + Vector2(-radius, 0).rotated(angle))
+		hexagon.set_point_position(2, point_1 + Vector2(-radius, 0).rotated(angle + TAU / 6))
+		hexagon.set_point_position(3, point_2 + Vector2(radius, 0).rotated(angle - TAU / 6))
+		hexagon.set_point_position(4, point_2 + Vector2(radius, 0).rotated(angle))
+		hexagon.set_point_position(5, point_2 + Vector2(radius, 0).rotated(angle + TAU / 6))
 		return hexagon
 
 func petal_polygon(distance: float, radius: float) -> PackedVector2Array:

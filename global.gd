@@ -44,11 +44,8 @@ const note_colors: Dictionary = {
 var beats_per_bar = 4
 
 func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
-	if time <= timeline_visible_time_range["End"] and time >= timeline_visible_time_range["Start"]:
-		var pos_x = timeline_leftmost_x + (timeline_rightmost_x - timeline_leftmost_x) / (timeline_visible_time_range["End"] - timeline_visible_time_range["Start"]) * (time - timeline_visible_time_range["Start"])
-		return pos_x
-	else:
-		return 0
+	var pos_x = timeline_leftmost_x + (timeline_rightmost_x - timeline_leftmost_x) / (timeline_visible_time_range["End"] - timeline_visible_time_range["Start"]) * (time - timeline_visible_time_range["Start"])
+	return pos_x
 
 func _ready():
 	# Generate touch positions
