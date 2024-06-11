@@ -1,10 +1,19 @@
-[gd_scene load_steps=2 format=3 uid="uid://dqxvvrh7cq8hj"]
+[gd_scene load_steps=3 format=3 uid="uid://dqxvvrh7cq8hj"]
 
 [ext_resource type="Script" path="res://note detail stuffs/tap.gd" id="1_ra24b"]
+
+[sub_resource type="Curve2D" id="Curve2D_env6b"]
 
 [node name="Tap" type="Node2D"]
 script = ExtResource("1_ra24b")
 
-[node name="Preview" type="Node2D" parent="."]
+[node name="Note" type="Node2D" parent="."]
+
+[node name="Path2D" type="Path2D" parent="Note"]
+curve = SubResource("Curve2D_env6b")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Note/Path2D"]
+
+[node name="Sliders" type="Node2D" parent="."]
 
 [node name="TimelineIndicator" type="Node2D" parent="."]

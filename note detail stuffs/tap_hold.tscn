@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://cigm3wjf1rx8w"]
+
+[ext_resource type="Script" path="res://note detail stuffs/tap_hold.gd" id="1_yb7pe"]
+
+[node name="TapHold" type="Node2D"]
+script = ExtResource("1_yb7pe")
+
+[node name="Note" type="Node2D" parent="."]
+
+[node name="Sliders" type="Node2D" parent="."]
+
+[node name="TimelineIndicator" type="Node2D" parent="."]
+clip_children = 1

@@ -1,0 +1,51 @@
+[gd_scene load_steps=3 format=3 uid="uid://bhc0jofe4not8"]
+
+[ext_resource type="Script" path="res://note detail stuffs/touch.gd" id="1_y3c0u"]
+
+[sub_resource type="Curve2D" id="Curve2D_2i1nq"]
+
+[node name="Touch" type="Node2D"]
+script = ExtResource("1_y3c0u")
+
+[node name="Note" type="Node2D" parent="."]
+
+[node name="Segment0" type="Node2D" parent="Note"]
+
+[node name="Path2D" type="Path2D" parent="Note/Segment0"]
+curve = SubResource("Curve2D_2i1nq")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Note/Segment0/Path2D"]
+
+[node name="Segment1" type="Node2D" parent="Note"]
+
+[node name="Path2D" type="Path2D" parent="Note/Segment1"]
+curve = SubResource("Curve2D_2i1nq")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Note/Segment1/Path2D"]
+
+[node name="Segment2" type="Node2D" parent="Note"]
+
+[node name="Path2D" type="Path2D" parent="Note/Segment2"]
+curve = SubResource("Curve2D_2i1nq")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Note/Segment2/Path2D"]
+
+[node name="Segment3" type="Node2D" parent="Note"]
+
+[node name="Path2D" type="Path2D" parent="Note/Segment3"]
+curve = SubResource("Curve2D_2i1nq")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Note/Segment3/Path2D"]
+
+[node name="Segment4" type="Node2D" parent="Note"]
+
+[node name="Path2D" type="Path2D" parent="Note/Segment4"]
+curve = SubResource("Curve2D_2i1nq")
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Note/Segment4/Path2D"]
+
+[node name="CenterDot" type="Node2D" parent="Note"]
+
+[node name="Sliders" type="Node2D" parent="."]
+
+[node name="TimelineIndicator" type="Node2D" parent="."]

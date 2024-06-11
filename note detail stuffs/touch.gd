@@ -38,71 +38,76 @@ func note_render(current_time: float) -> void:
 		scale_progress = 1
 		path_progress = 1
 	
-	var note_pathfollow = $Note/Path2D/PathFollow2D
-	
-	for node in note_pathfollow.get_children():
-		node.scale = Vector2(scale_progress, scale_progress)
-		node.self_modulate.a = scale_progress
+	for i in range(5):
+		var note_pathfollow = $Note.get_child(i).get_child(0).get_child(0)
 		
-	note_pathfollow.progress_ratio = path_progress
+		for node in note_pathfollow.get_children():
+			#node.scale = Vector2(scale_progress, scale_progress)
+			node.self_modulate.a = scale_progress
+		
+		note_pathfollow.progress_ratio = path_progress
 
 func slider_render(current_time: float) -> void:
 	pass
 
-func initialize(pos: String = note_position) -> void:
-	if !note_property_touch: # tap note logic
-		var note_pos = Global.note_pos_mod(int(pos))
-		var angle = (note_pos * 2 - 1) * TAU / 16
-		$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
-		$Sliders.position = $Note.position
-		
+func initialize() -> void:
+	if note_property_touch: # touch note logic
+		var note_pos = Global.touch_positions[note_position]
+		$Note.position = note_pos
+		$Sliders.position = note_pos
 		var note_color
-		if note_property_break:
+		if note_property_break: # um break touches
 			note_color = Global.note_colors["note_break"]
 		elif note_property_both:
 			note_color = Global.note_colors["note_both"]
+		elif note_property_slider and sliders.size() > 0:
+			note_color = Global.note_colors["note_slider_head"]
 		else:
-			note_color = Global.note_colors["note_base"]
+			note_color = Global.note_colors["touch_base"]
 		
-		var note_path = $Note/Path2D
-		var note_pathfollow = $Note/Path2D/PathFollow2D
-		
-		for node in note_pathfollow.get_children():
+		for node in $Note/CenterDot.get_children():
 			node.queue_free()
 		
-		if sliders.size() == 0:
-			if note_property_ex:
-				var note_highlight = circle(Global.note_colors["note_highlight"], 18)
-				note_pathfollow.add_child(note_highlight)
-			var note_outline = circle(Color.WHITE, 11)
-			note_pathfollow.add_child(note_outline)
-			var note_circle = circle(note_color, 8)
-			note_pathfollow.add_child(note_circle)
-		else: # star tap
-			if note_property_ex:
-				var note_highlight = star(Global.note_colors["note_highlight"], 18)
-				note_pathfollow.add_child(note_highlight)
-			var note_outline = star(Color.WHITE, 11)
-			note_pathfollow.add_child(note_outline)
-			var note_star = star(note_color, 8)
-			note_pathfollow.add_child(note_star)
-			
-		var new_curve = Curve2D.new()
-		var start_point = Vector2(0, 0)
-		new_curve.add_point(start_point)
-		var end_point = (Global.preview_radius - Global.initial_note_distance) * Vector2(sin(angle), -cos(angle))
-		new_curve.add_point(end_point)
-		note_path.curve = new_curve
+		var note_center_highlight = circle(Color.WHITE, 10, 2, 16)
+		$Note/CenterDot.add_child(note_center_highlight)
+		var note_center_dot = circle(note_color, 6, 2, 16)
+		$Note/CenterDot.add_child(note_center_dot)
+		
+		if sliders.size() == 0: # normal touch
+			for i in range(4):
+				var note_path = $Note.get_child(i).get_child(0)
+				var note_pathfollow = note_path.get_child(0)
+				for node in note_pathfollow.get_children():
+					node.queue_free()
+				var note_outline = triangle(Color.WHITE, 10)
+				note_pathfollow.add_child(note_outline)
+				var note_triangle_part = triangle(note_color, 6)
+				note_pathfollow.add_child(note_triangle_part)
+				var offset = 12
+				var new_curve = Curve2D.new()
+				new_curve.add_point(Vector2(9 + offset, 0).rotated(TAU * i / 4))
+				new_curve.add_point(Vector2(9, 0).rotated(TAU * i / 4))
+				note_path.curve = new_curve
+			for node in $Note/Segment4/Path2D/PathFollow2D.get_children():
+				node.queue_free()
+		else: # touch slider's note
+			pass
 		
 		for slider in sliders: # sliders
 			pass
-			
-		# Timeline stuffs
+		
+		# Timeline stuff
 		for node in $TimelineIndicator.get_children():
 			node.free()
-		var new_line = circle(note_color, 2, 4, 16)
+		var new_line = Line2D.new()
 		new_line.default_color = note_color
-		new_line.position = Vector2(0, 15 * note_pos - 6)
+		new_line.width = 2
+		new_line.add_point(Vector2(4, 4))
+		new_line.add_point(Vector2(4, -4))
+		new_line.add_point(Vector2(-4, -4))
+		new_line.add_point(Vector2(-4, 4))
+		new_line.closed = true
+		new_line.position = Vector2(0, 15 * int(note_position) - 6)
 		$TimelineIndicator.add_child(new_line)
 
 func timeline_object_render() -> void:
@@ -123,11 +128,15 @@ func circle(color: Color, width: float, radius: float = 18, frequency: int = 360
 		newLine.add_point(Vector2(radius * sin(angle), radius * cos(angle)))
 	return newLine
 
-func star(color: Color, width: float,  radius: float = 18): # star tap
+func triangle(color: Color, width: float) -> Line2D:
 	var newLine = Line2D.new()
 	newLine.default_color = color
 	newLine.width = width
-	for i in range(5):
-		newLine.add_point(Vector2(sin(i * TAU / 5), cos(i * TAU / 5)) * radius)
-		newLine.add_point(Vector2(sin((i * 2 + 1) * TAU / 10), cos((i * 2 + 1) * TAU / 10)) * radius * sin(deg_to_rad(18) / sin(deg_to_rad(126))))
+	newLine.closed = true
+	newLine.add_point(Vector2(-2, 0))
+	newLine.add_point(Vector2(-16, 14))
+	newLine.add_point(Vector2(-16, -14))
 	return newLine
+
+func star_rhombus(color: Color, width: float,  radius: float = 18): # for touch stars
+	pass

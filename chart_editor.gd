@@ -36,24 +36,39 @@ func _ready():
 	get_node("FileOptions/MenuButton").get_popup().connect("index_pressed", _on_option_pressed)
 	
 	# tap test
-	var tap = load("res://note detail stuffs/tap.tscn")
-	var new_note = tap.instantiate()
-	new_note.beat = 4
-	new_note.note_position = "A1"
-	new_note.note_property_touch = true
-	new_note.initialize()
-	$Notes.add_child(new_note)
+	var note1_args: Dictionary = {
+		"beat" = 4,
+		"note_position" = "1",
+	}
+	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
 	
-	var hold = load("res://note detail stuffs/hold.tscn")
-	var new_hold = hold.instantiate()
-	new_hold.beat = 6
-	new_hold.note_position = "C"
-	new_hold.bpm = 240.0
-	new_hold.note_property_touch = true # 
-	new_hold.duration_x = 1
-	new_hold.duration_y = 2
-	new_hold.initialize()
-	$Notes.add_child(new_hold)
+	# touch test
+	var note2_args: Dictionary = {
+		"beat" = 5,
+		"note_position" = "C",
+		"note_property_touch" = true,
+	}
+	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
+	
+	# tap hold test
+	var note3_args: Dictionary = {
+		"beat" = 6,
+		"note_position" = "5",
+		"duration_arr" = [1, 4],
+		"bpm" = 240,
+		"note_property_break" = true
+	}
+	$Notes.add_child(Note.new_note(Note.type.TAP_HOLD, note3_args))
+	
+	# touch hold test
+	var note4_args: Dictionary = {
+		"beat" = 8,
+		"note_position" = "C",
+		"duration_arr" = [1, 2],
+		"bpm" = 240,
+		"note_property_touch" = true,
+	}
+	$Notes.add_child(Note.new_note(Note.type.TOUCH_HOLD, note4_args))
 	
 	# Draw a circle
 	var density = 180
