@@ -5,6 +5,7 @@ enum type{
 	TOUCH,
 	TOUCH_HOLD
 }
+var slider_shape_length: Dictionary
 
 func new_note(note_type: type, args: Dictionary) -> Node:
 	var note
@@ -27,6 +28,6 @@ func new_note(note_type: type, args: Dictionary) -> Node:
 
 	return note
 
-func slider(target_pos: int, slider_shape: String, duration: Array, delay: Array) -> Dictionary:
+func slider(slider_shape_arr: Array, duration_arr: Array, delay_arr: Array) -> Dictionary:
 	var new_dict: Dictionary = {}
 	return new_dict

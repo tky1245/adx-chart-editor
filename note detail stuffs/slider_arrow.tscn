@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3 uid="uid://7yc71243llvx"]
+
+[sub_resource type="GDScript" id="GDScript_86dtu"]
+script/source = "extends Node2D
+var visible_threshold: float
+
+func set_slider_arrow(color: Color, visible_threshold_value: float, wifi: bool = false, wifi_length: float = 0) -> void:
+	visible_threshold = visible_threshold_value
+	var new_polygon = $Polygon2D
+	var polygon_shape: PackedVector2Array = []
+	var width = 12
+	var offset = 4.5
+	var height = 11
+	if !wifi:
+		polygon_shape.append(Vector2(-offset+width/2, offset+height))
+		polygon_shape.append(Vector2(offset+width/2, 0))
+		polygon_shape.append(Vector2(-offset+width/2, -offset-height))
+		polygon_shape.append(Vector2(-offset-width/2, -offset-height))
+		polygon_shape.append(Vector2(offset-width/2, 0))
+		polygon_shape.append(Vector2(-offset-width/2, offset+height))
+	else:
+		polygon_shape.append(Vector2(offset+width/2-wifi_length*sin(TAU/16), wifi_length*cos(TAU/16)))
+		polygon_shape.append(Vector2(offset+width/2, 0))
+		polygon_shape.append(Vector2(offset+width/2-wifi_length*sin(TAU/16), -wifi_length*cos(TAU/16)))
+		var shorter_length = wifi_length - width * sin(TAU/16)
+		polygon_shape.append(Vector2(offset-width/2-shorter_length*sin(TAU/16), -shorter_length*cos(TAU/16)))
+		polygon_shape.append(Vector2(offset-width/2, 0))
+		polygon_shape.append(Vector2(offset-width/2-shorter_length*sin(TAU/16), shorter_length*cos(TAU/16)))
+	new_polygon.color = color
+	new_polygon.polygon = polygon_shape
+	$Outline.clear_points()
+	
+	for point in polygon_shape:
+		$Outline.add_point(point)
+
+func visible_toggle(progress: float): # Use progress ratio for progress here
+	visible = false if progress > visible_threshold else true
+		
+"
+
+[node name="SliderArrow" type="Node2D"]
+script = SubResource("GDScript_86dtu")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+
+[node name="Outline" type="Line2D" parent="."]
+closed = true
+width = 1.0
+default_color = Color(0, 0, 0, 1)

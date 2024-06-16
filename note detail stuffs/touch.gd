@@ -52,7 +52,7 @@ func slider_render(current_time: float) -> void:
 
 func initialize() -> void:
 	if note_property_touch: # touch note logic
-		var note_pos = Global.touch_positions[note_position]
+		var note_pos = Global.preview_center + Global.touch_positions[note_position]
 		$Note.position = note_pos
 		$Sliders.position = note_pos
 		var note_color
@@ -61,7 +61,7 @@ func initialize() -> void:
 		elif note_property_both:
 			note_color = Global.note_colors["note_both"]
 		elif note_property_slider and sliders.size() > 0:
-			note_color = Global.note_colors["note_slider_head"]
+			note_color = Global.note_colors["star_outer"]
 		else:
 			note_color = Global.note_colors["touch_base"]
 		

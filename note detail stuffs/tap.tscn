@@ -7,13 +7,13 @@
 [node name="Tap" type="Node2D"]
 script = ExtResource("1_ra24b")
 
+[node name="Sliders" type="Node2D" parent="."]
+
 [node name="Note" type="Node2D" parent="."]
 
 [node name="Path2D" type="Path2D" parent="Note"]
 curve = SubResource("Curve2D_env6b")
 
 [node name="PathFollow2D" type="PathFollow2D" parent="Note/Path2D"]
-
-[node name="Sliders" type="Node2D" parent="."]
 
 [node name="TimelineIndicator" type="Node2D" parent="."]

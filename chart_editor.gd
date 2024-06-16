@@ -36,16 +36,23 @@ func _ready():
 	get_node("FileOptions/MenuButton").get_popup().connect("index_pressed", _on_option_pressed)
 	
 	# tap test
+	# slider test
 	var note1_args: Dictionary = {
 		"beat" = 4,
 		"note_position" = "1",
+		"note_property_star" = true,
+		"sliders" = [{
+			"duration_arr" = [1, 2],
+			"delay_arr" = [1, 4],
+			"slider_shape_arr" = [["-", "3", 0.0], ["-", "7", 0.0], ["-", "D5", 0.0], ["-", "E3", 0.0], ["-", "8", 0.0]]
+		}],
 	}
 	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
 	
 	# touch test
 	var note2_args: Dictionary = {
 		"beat" = 5,
-		"note_position" = "C",
+		"note_position" = "C8",
 		"note_property_touch" = true,
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
@@ -63,7 +70,7 @@ func _ready():
 	# touch hold test
 	var note4_args: Dictionary = {
 		"beat" = 8,
-		"note_position" = "C",
+		"note_position" = "C8",
 		"duration_arr" = [1, 2],
 		"bpm" = 240,
 		"note_property_touch" = true,
@@ -490,15 +497,22 @@ func _on_beat_divisor_field_text_submitted(new_text):
 	if beat_divisor > 0:
 		var beat = time_to_beat(current_time) if $BeatDivisorChanges.get_child_count() > 0 else 0
 		if !Global.beat_change_cursor:
+			var node_existed: bool
 			for bd_node in $BeatDivisorChanges.get_children():
 				if beat == bd_node.beat:
 					Global.beat_change_cursor = bd_node
-			var beat_divisor_node = preload("res://note detail stuffs/beat_divisor_node.tscn")
-			var new_node = beat_divisor_node.instantiate()
-			new_node.beat_divisor = beat_divisor
-			new_node.beat = beat
-			new_node.connect("bd_button_clicked", _on_bd_node_clicked, 8)
-			$BeatDivisorChanges.add_child(new_node)
+					node_existed = true
+			if !node_existed:
+				var beat_divisor_node = preload("res://note detail stuffs/beat_divisor_node.tscn")
+				var new_node = beat_divisor_node.instantiate()
+				new_node.beat_divisor = beat_divisor
+				new_node.beat = beat
+				new_node.connect("bd_button_clicked", _on_bd_node_clicked, 8)
+				$BeatDivisorChanges.add_child(new_node)
+			else:
+				var node = Global.beat_change_cursor
+				node.beat_divisor = beat_divisor
+				node.button_update()
 		else:
 			var node = Global.beat_change_cursor
 			node.beat_divisor = beat_divisor
@@ -513,17 +527,24 @@ func _on_bpm_field_text_submitted(new_text):
 	if bpm > 0:
 		var beat = time_to_beat(current_time) if $BPMChanges.get_child_count() > 0 else 0
 		if !Global.beat_change_cursor:
+			var node_existed: bool
 			for bpm_node in $BPMChanges.get_children(): # Check for overlaps
 				if beat == bpm_node.beat:
 					Global.beat_change_cursor = bpm_node
-			var bpm_node = preload("res://note detail stuffs/bpm_node.tscn")
-			var new_node = bpm_node.instantiate()
-			new_node.bpm = bpm
-			new_node.beat = beat
-			print(current_time)
-			print(new_node.beat)
-			new_node.connect("bpm_button_clicked", _on_bpm_node_clicked, 8)
-			$BPMChanges.add_child(new_node)
+					node_existed = true
+			if !node_existed:
+				var bpm_node = preload("res://note detail stuffs/bpm_node.tscn")
+				var new_node = bpm_node.instantiate()
+				new_node.bpm = bpm
+				new_node.beat = beat
+				print(current_time)
+				print(new_node.beat)
+				new_node.connect("bpm_button_clicked", _on_bpm_node_clicked, 8)
+				$BPMChanges.add_child(new_node)
+			else:
+				var node = Global.beat_change_cursor
+				node.bpm = bpm
+				node.button_update()
 		else:
 			var node = Global.beat_change_cursor
 			node.bpm = bpm

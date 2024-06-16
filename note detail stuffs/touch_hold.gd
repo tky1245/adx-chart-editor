@@ -90,7 +90,7 @@ func initialize() -> void:
 	else:
 		duration = 60.0 * Global.beats_per_bar / bpm * (float(duration_arr[0]) / duration_arr[1])
 	if note_property_touch: # touch hold logic
-		$Note.position = Global.touch_positions[note_position]
+		$Note.position = Global.preview_center + Global.touch_positions[note_position]
 		for node in $Note/ProgressCircle.get_children():
 			node.queue_free()
 		for i in range(4): # Progress bar
@@ -202,7 +202,6 @@ func reshape(petal: PackedVector2Array, angle: float, sign: int = 1) -> PackedVe
 	# Handle the special case when the angle is 1/4 TAU
 	if abs(angle - TAU / 4) < 1e-6:
 		vertical = true
-		print("Handling vertical line case.")
 	else:
 		m = -tan(angle)
 	
@@ -244,5 +243,4 @@ func reshape(petal: PackedVector2Array, angle: float, sign: int = 1) -> PackedVe
 					var intersect_y = -abs((a2 * c1 - a1 * c2) / denominator)
 					var new_point = Vector2(intersect_x, intersect_y)
 					new_polygon.append(new_point)
-	print("angle: ", angle, ", point count: ", new_polygon)
 	return new_polygon

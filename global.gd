@@ -27,7 +27,6 @@ const note_colors: Dictionary = {
 	"note_base" = Color.HOT_PINK,
 	"note_both" = Color.GOLD,
 	"note_break" = Color.ORANGE_RED,
-	"note_slider_head" = Color.CORNFLOWER_BLUE,
 	"note_highlight" = Color(Color.LIGHT_GOLDENROD, 0.5),
 	"slider" = Color.CYAN,
 	"slider_highlight" = Color.DODGER_BLUE,
@@ -38,6 +37,12 @@ const note_colors: Dictionary = {
 	"touch_hold_3" = Color.SEA_GREEN,
 	"touch_hold_4" = Color.ROYAL_BLUE,
 	"touch_hold_center" = Color.CYAN,
+	"star_outer" = Color.SKY_BLUE,
+	"star_inner" = Color.CORNFLOWER_BLUE,
+	"star_both_outer" = Color.LIGHT_GOLDENROD,
+	"star_both_inner" = Color.GOLD,
+	"star_break_outer" = Color.LIGHT_SALMON,
+	"star_break_inner" = Color.ORANGE_RED,
 }
 
 # Some settings
@@ -53,26 +58,35 @@ func _ready():
 		var pos_name = "A" + str(i + 1)
 		var distance = 168.0
 		var angle = PI / 8 * (1 + i * 2)
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
+		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
 	for i in range(8):
 		var pos_name = "B" + str(i + 1)
 		var distance = 91.0
 		var angle = PI / 8 * (1 + i * 2)
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
+		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
-	touch_positions["C"] = preview_center
+	for i in range(8):
+		var pos_name = "C" + str(i + 1)
+		var pos = Vector2(0, 0)
+		touch_positions[pos_name] = pos
 	for i in range(8):
 		var pos_name = "D" + str(i + 1)
 		var distance = 180.0
 		var angle = PI / 4 * i
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
+		var pos = Vector2(distance * sin(angle), distance * -cos(angle))
 		touch_positions[pos_name] = pos
 	for i in range(8):
 		var pos_name = "E" + str(i + 1)
 		var distance = 128.0
 		var angle = PI / 4 * i
-		var pos = Vector2(preview_center + Vector2(distance * sin(angle), distance * -cos(angle)))
+		var pos = Vector2(distance * sin(angle), distance * -cos(angle))
+		touch_positions[pos_name] = pos
+	for i in range(8):
+		var pos_name = str(i + 1)
+		var distance = preview_radius
+		var angle = PI / 8 * (1 + i * 2)
+		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
 
 func note_pos_mod(num: int):
