@@ -314,18 +314,18 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 				var point_angle = angle_1 + i * TAU / frequency 
 				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
 	elif shape == "v": 
-		curve.add_point(Vector2(Global.preview_center - initial_position))
-		curve.add_point(Vector2(target_position - initial_position))
+		curve.add_point(Vector2(0, 0))
+		curve.add_point(Vector2(target_position))
 	elif shape == "s":
 		var head_bearing = atan2(Global.touch_positions[slider_head_position].x, -Global.touch_positions[slider_head_position].y)
-		curve.add_point(Global.preview_center + Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)) - initial_position)
-		curve.add_point(Global.preview_center + Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)) - initial_position)
-		curve.add_point(Vector2(target_position - initial_position))
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)))
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)))
+		curve.add_point(Vector2(target_position))
 	elif shape == "z":
 		var head_bearing = atan2(Global.touch_positions[slider_head_position].x, -Global.touch_positions[slider_head_position].y)
-		curve.add_point(Global.preview_center + Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)) - initial_position)
-		curve.add_point(Global.preview_center + Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)) - initial_position)
-		curve.add_point(Vector2(target_position - initial_position))
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)))
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)))
+		curve.add_point(Vector2(target_position))
 	elif shape == "p":
 		pass
 	elif shape == "q":
