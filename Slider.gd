@@ -81,7 +81,7 @@ func slider_render(current_time: float) -> void:
 		for arrow_path_follow in arrow_path.get_children():
 			for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
 				arrow.visible_toggle(slider_progress)
-			var total_distance: float
+			var total_distance: float = 0
 			for arr in slider_shape_arr: # Calculate total distance
 				total_distance += arr[2]
 			for i in range(slider_shape_arr.size()): # Move stars along the path
@@ -355,7 +355,7 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 			curve.add_point(circle_radius * Vector2(cos(point_angle), sin(point_angle)))
 		curve.add_point(Vector2(target_position))
 	elif shape == "pp": # ccw
-		var circle_radius = (Global.preview_radius - 14) / 2
+		var circle_radius = (Global.preview_radius - 14.0) / 2
 		var initial_bearing = atan2(initial_position.y, initial_position.x)
 		var circle_center = circle_radius * Vector2(cos(initial_bearing + TAU*3/16), sin(initial_bearing + TAU*3/16))
 		var intro_tangent_bearing = initial_bearing - TAU/4
@@ -372,7 +372,7 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 			curve.add_point(circle_center + circle_radius * Vector2(cos(point_angle), sin(point_angle)))
 		curve.add_point(Vector2(target_position))
 	elif shape == "qq": # cw
-		var circle_radius = (Global.preview_radius - 14) / 2
+		var circle_radius = (Global.preview_radius - 14.0) / 2
 		var initial_bearing = atan2(initial_position.y, initial_position.x)
 		var circle_center = circle_radius * Vector2(cos(initial_bearing - TAU*3/16), sin(initial_bearing - TAU*3/16))
 		var intro_tangent_bearing = initial_bearing + TAU/4

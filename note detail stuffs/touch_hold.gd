@@ -194,7 +194,7 @@ func petal_polygon(distance: float, radius: float) -> PackedVector2Array:
 		polygon_points.append((Vector2(distance, 0) + Vector2(sin(angle), -cos(angle)) * radius))
 	return polygon_points
 
-func reshape(petal: PackedVector2Array, angle: float, sign: int = 1) -> PackedVector2Array:
+func reshape(petal: PackedVector2Array, angle: float, point_sign: int = 1) -> PackedVector2Array:
 	var new_polygon: PackedVector2Array = []
 	var m: float
 	var vertical = false
@@ -222,14 +222,14 @@ func reshape(petal: PackedVector2Array, angle: float, sign: int = 1) -> PackedVe
 			side0 = m * x0 - y0
 			side1 = m * x1 - y1
 
-		if (side0 * sign) >= 0:
+		if (side0 * point_sign) >= 0:
 			new_polygon.append(Vector2(x0, y0))
 
 		if (side0 * side1) < 0: # Edge crosses the cutting line
 			if vertical:
 				var intersect_x = 0.0
 				var intersect_y = y0 + (0.0 - x0) * (y1 - y0) / (x1 - x0)
-				var new_point = Vector2(intersect_x, intersect_y)
+				var _new_point = Vector2(intersect_x, intersect_y)
 			else:
 				var a1 = y1 - y0
 				var b1 = x0 - x1
