@@ -9,15 +9,15 @@ func set_slider_arrow(color: Color, visible_threshold_value: float, wifi: bool =
 	var new_polygon = $Polygon2D
 	var polygon_shape: PackedVector2Array = []
 	var width = 12
-	var height = 11
+	var height = 15
 	if !wifi:
-		var offset = 4.5
-		polygon_shape.append(Vector2(-offset+width/2, offset+height))
+		var offset = 10
+		polygon_shape.append(Vector2(width/2, height))
 		polygon_shape.append(Vector2(offset+width/2, 0))
-		polygon_shape.append(Vector2(-offset+width/2, -offset-height))
-		polygon_shape.append(Vector2(-offset-width/2, -offset-height))
+		polygon_shape.append(Vector2(width/2, -height))
+		polygon_shape.append(Vector2(-width/2, -height))
 		polygon_shape.append(Vector2(offset-width/2, 0))
-		polygon_shape.append(Vector2(-offset-width/2, offset+height))
+		polygon_shape.append(Vector2(-width/2, height))
 	else:
 		var offset = 15
 		var longer_length = wifi_length + width * sin(TAU/16)

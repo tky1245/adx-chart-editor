@@ -277,7 +277,7 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		var frequency: int = 360
 		if int(initial_note_position) in [1, 2, 7, 8]: # ccw
 			var total_angle = angle_1 - angle_2
-			if total_angle < 0:
+			while total_angle < 0:
 				total_angle += TAU
 			for i in range(total_angle / TAU * frequency):
 				var radius = radius_start + (radius_end - radius_start) * i
@@ -299,7 +299,7 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		var frequency: int = 360
 		if int(initial_note_position) in [3, 4, 5, 6]: # ccw
 			var total_angle = angle_1 - angle_2
-			if total_angle < 0:
+			while total_angle < 0:
 				total_angle += TAU
 			for i in range(total_angle / TAU * frequency):
 				var radius = radius_start + (radius_end - radius_start) * i
@@ -326,14 +326,67 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)))
 		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)))
 		curve.add_point(Vector2(target_position))
-	elif shape == "p":
-		pass
-	elif shape == "q":
-		pass
-	elif shape == "pp":
-		pass
-	elif shape == "qq":
-		pass
+	elif shape == "p": # ccw
+		var circle_radius = Global.preview_radius * sin(TAU / 16)
+		var intro_distance = initial_position.distance_to(Vector2(0, 0))
+		var intro_tangent_bearing = atan2(initial_position.y, initial_position.x) - abs(acos(circle_radius / intro_distance))
+		var outro_distance = target_position.distance_to(Vector2(0, 0))
+		var outro_tangent_bearing = atan2(target_position.y, target_position.x) + abs(acos(circle_radius / outro_distance))
+		var frequency: int = 360
+		var total_angle = intro_tangent_bearing - outro_tangent_bearing
+		while total_angle < TAU/16:
+			total_angle += TAU
+		for i in range(total_angle / TAU * frequency):
+			var point_angle = intro_tangent_bearing - i * TAU / frequency 
+			curve.add_point(circle_radius * Vector2(cos(point_angle), sin(point_angle)))
+		curve.add_point(Vector2(target_position))
+	elif shape == "q": # cw
+		var circle_radius = Global.preview_radius * sin(TAU / 16)
+		var intro_distance = initial_position.distance_to(Vector2(0, 0))
+		var intro_tangent_bearing = atan2(initial_position.y, initial_position.x) + abs(acos(circle_radius / intro_distance))
+		var outro_distance = target_position.distance_to(Vector2(0, 0))
+		var outro_tangent_bearing = atan2(target_position.y, target_position.x) - abs(acos(circle_radius / outro_distance))
+		var frequency: int = 360
+		var total_angle = - intro_tangent_bearing + outro_tangent_bearing
+		while total_angle < TAU/16:
+			total_angle += TAU
+		for i in range(total_angle / TAU * frequency):
+			var point_angle = intro_tangent_bearing + i * TAU / frequency 
+			curve.add_point(circle_radius * Vector2(cos(point_angle), sin(point_angle)))
+		curve.add_point(Vector2(target_position))
+	elif shape == "pp": # ccw
+		var circle_radius = (Global.preview_radius - 14) / 2
+		var initial_bearing = atan2(initial_position.y, initial_position.x)
+		var circle_center = circle_radius * Vector2(cos(initial_bearing + TAU*3/16), sin(initial_bearing + TAU*3/16))
+		var intro_tangent_bearing = initial_bearing - TAU/4
+		var outro_relative_angle = abs(acos(circle_radius / target_position.distance_to(circle_center)))
+		var outro_tangent_bearing = atan2(Vector2(target_position - circle_center).y, Vector2(target_position - circle_center).x) + outro_relative_angle
+		var total_angle = intro_tangent_bearing - outro_tangent_bearing
+		var frequency = 360
+		
+		while total_angle < TAU/4:
+			total_angle += TAU
+		print(rad_to_deg(total_angle))
+		for i in range(total_angle / TAU * frequency):
+			var point_angle = intro_tangent_bearing - i * TAU / frequency 
+			curve.add_point(circle_center + circle_radius * Vector2(cos(point_angle), sin(point_angle)))
+		curve.add_point(Vector2(target_position))
+	elif shape == "qq": # cw
+		var circle_radius = (Global.preview_radius - 14) / 2
+		var initial_bearing = atan2(initial_position.y, initial_position.x)
+		var circle_center = circle_radius * Vector2(cos(initial_bearing - TAU*3/16), sin(initial_bearing - TAU*3/16))
+		var intro_tangent_bearing = initial_bearing + TAU/4
+		var outro_relative_angle = abs(acos(circle_radius / target_position.distance_to(circle_center)))
+		var outro_tangent_bearing = atan2(Vector2(target_position - circle_center).y, Vector2(target_position - circle_center).x) - outro_relative_angle
+		var total_angle = -intro_tangent_bearing + outro_tangent_bearing
+		var frequency = 360
+		while total_angle < TAU/4:
+			total_angle += TAU
+		print(rad_to_deg(total_angle))
+		for i in range(total_angle / TAU * frequency):
+			var point_angle = intro_tangent_bearing + i * TAU / frequency 
+			curve.add_point(circle_center + circle_radius * Vector2(cos(point_angle), sin(point_angle)))
+		curve.add_point(Vector2(target_position))
 	return curve
 		
 func star(color: Color, width: float,  radius: float = 18) -> Line2D: # star tap
