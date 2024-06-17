@@ -198,7 +198,8 @@ func reshape(petal: PackedVector2Array, angle: float, sign: int = 1) -> PackedVe
 	var new_polygon: PackedVector2Array = []
 	var m: float
 	var vertical = false
-
+	if abs(angle - TAU / 4) < 1e-6:
+		return new_polygon
 	# Handle the special case when the angle is 1/4 TAU
 	if abs(angle - TAU / 4) < 1e-6:
 		vertical = true
