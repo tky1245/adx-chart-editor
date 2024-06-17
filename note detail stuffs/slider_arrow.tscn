@@ -9,9 +9,9 @@ func set_slider_arrow(color: Color, visible_threshold_value: float, wifi: bool =
 	var new_polygon = $Polygon2D
 	var polygon_shape: PackedVector2Array = []
 	var width = 12
-	var offset = 4.5
 	var height = 11
 	if !wifi:
+		var offset = 4.5
 		polygon_shape.append(Vector2(-offset+width/2, offset+height))
 		polygon_shape.append(Vector2(offset+width/2, 0))
 		polygon_shape.append(Vector2(-offset+width/2, -offset-height))
@@ -19,13 +19,15 @@ func set_slider_arrow(color: Color, visible_threshold_value: float, wifi: bool =
 		polygon_shape.append(Vector2(offset-width/2, 0))
 		polygon_shape.append(Vector2(-offset-width/2, offset+height))
 	else:
-		polygon_shape.append(Vector2(offset+width/2-wifi_length*sin(TAU/16), wifi_length*cos(TAU/16)))
+		var offset = 15
+		var longer_length = wifi_length + width * sin(TAU/16)
+		polygon_shape.append(Vector2(offset+width/2-longer_length*sin(TAU/16), longer_length*cos(TAU/16)))
 		polygon_shape.append(Vector2(offset+width/2, 0))
-		polygon_shape.append(Vector2(offset+width/2-wifi_length*sin(TAU/16), -wifi_length*cos(TAU/16)))
-		var shorter_length = wifi_length - width * sin(TAU/16)
-		polygon_shape.append(Vector2(offset-width/2-shorter_length*sin(TAU/16), -shorter_length*cos(TAU/16)))
+		polygon_shape.append(Vector2(offset+width/2-longer_length*sin(TAU/16), -longer_length*cos(TAU/16)))
+		
+		polygon_shape.append(Vector2(offset-width/2-wifi_length*sin(TAU/16), -wifi_length*cos(TAU/16)))
 		polygon_shape.append(Vector2(offset-width/2, 0))
-		polygon_shape.append(Vector2(offset-width/2-shorter_length*sin(TAU/16), shorter_length*cos(TAU/16)))
+		polygon_shape.append(Vector2(offset-width/2-wifi_length*sin(TAU/16), wifi_length*cos(TAU/16)))
 	new_polygon.color = color
 	new_polygon.polygon = polygon_shape
 	$Outline.clear_points()

@@ -97,7 +97,6 @@ func slider_render(current_time: float) -> void:
 					path_progress = 0
 				elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
 					path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
-					print(path_progress)
 					for path in path_holder.get_children():
 						var path_follow = path.get_child(0)
 						path_follow.progress_ratio = path_progress
@@ -125,6 +124,7 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		var new_node = Node2D.new()
 		var new_path = Path2D.new()
 		var path_curve
+		
 		if i == 0:
 			path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_head_position)
 		else:
@@ -137,20 +137,30 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		slider_shape_arr[i][2] = path_curve.get_baked_length() # do length calculation beforehand
 		if slider_shape_arr[i][0] == "w": # wifi slider handling, add 2 side star paths
 			var target_pos = Global.touch_positions[slider_shape_arr[i][1]]
-			var distance = sqrt(target_pos.x ^ 2 + target_pos.y ^ 2) * cos(TAU/16)
+			var distance = target_pos.distance_to(Vector2(0, 0)) * cos(TAU/16)
 			var bearing = atan2(target_pos.y, target_pos.x)
+			var path_left = Path2D.new()
 			var curve_left = Curve2D.new()
-			curve_left.add_point(Vector2(0, 0))
-			curve_left.add_point(distance * Vector2(cos(bearing + TAU/16), sin(bearing + TAU/16)))
-			new_node.add_child(curve_left)
+			if i == 0:
+				curve_left.add_point(Global.touch_positions[slider_head_position])
+			else:
+				curve_left.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
+			curve_left.add_point(distance * Vector2(cos(bearing + TAU/8), sin(bearing + TAU/8)))
+			path_left.curve = curve_left
+			new_node.add_child(path_left)
 			var path_follow_left = PathFollow2D.new()
-			curve_left.add_child(path_follow_left)
+			path_left.add_child(path_follow_left)
+			var path_right = Path2D.new()
 			var curve_right = Curve2D.new()
-			curve_left.add_point(Vector2(0, 0))
-			curve_left.add_point(distance * Vector2(cos(bearing - TAU/16), sin(bearing - TAU/16)))
-			new_node.add_child(curve_right)
+			if i == 0:
+				curve_right.add_point(Global.touch_positions[slider_head_position])
+			else:
+				curve_right.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
+			curve_right.add_point(distance * Vector2(cos(bearing - TAU/8), sin(bearing - TAU/8)))
+			path_right.curve = curve_right
+			new_node.add_child(path_right)
 			var path_follow_right = PathFollow2D.new()
-			curve_right.add_child(path_follow_right)
+			path_right.add_child(path_follow_right)
 	# Set color
 	var slider_color
 	if slider_property_break:
@@ -175,33 +185,50 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	for node in $SliderArrows.get_children():
 		node.queue_free()
 	# Generate slider arrows from each segments
-	var distance: float = 20
-	var elapsed_distance: float = 0
 	var total_distance: float
 	for arr in slider_shape_arr: # Calculate total distance
 		total_distance += arr[2]
-	for i in range(slider_shape_arr.size()):  
+	for idx in range(slider_shape_arr.size()): 
+		var i = slider_shape_arr.size() - idx - 1
+		var elapsed_distance: float = 0
+		if i != 0:
+			for j in range(i):
+				elapsed_distance += slider_shape_arr[j][2]
+		print(elapsed_distance)
 		var new_path = Path2D.new()
 		var path_curve = $SliderSegments.get_child(i).get_child(0).curve
 		new_path.curve = path_curve
 		$SliderArrows.add_child(new_path)
-		var temp_distance = 0.0
-		for j in range(int(slider_shape_arr[i][2] / distance)):
-			var new_path_follow = PathFollow2D.new()
-			new_path.add_child(new_path_follow)
-			temp_distance += distance / 2
-			new_path_follow.set_progress(temp_distance)
-			var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
-			var new_arrow = slider_arrow.instantiate()
-			var visible_threshold = (temp_distance + elapsed_distance) / total_distance
-			if slider_shape_arr[i][0] != "w":
+		if slider_shape_arr[i][0] != "w":
+			var distance: float = 20
+			var temp_distance = 0.0
+			for j in range(int(slider_shape_arr[i][2] / distance)):
+				temp_distance += distance * 0.5
+				var new_path_follow = PathFollow2D.new()
+				new_path.add_child(new_path_follow)
+				new_path_follow.set_progress(temp_distance)
+				var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
+				var new_arrow = slider_arrow.instantiate()
+				var visible_threshold = (temp_distance + elapsed_distance) / total_distance
 				new_arrow.set_slider_arrow(slider_color, visible_threshold)
-			else:
-				var temp_length = slider_shape_arr[i][2] * sin(TAU/16)
-				new_arrow.set_slider_arrow(slider_color, visible_threshold, true, temp_length)
-			new_path_follow.add_child(new_arrow)
-			temp_distance += distance / 2
-		elapsed_distance += slider_shape_arr[i][2]
+				new_path_follow.add_child(new_arrow)
+				temp_distance += distance * 0.5
+		else:
+			var distance: float = 33.3
+			var temp_distance = 0.0
+			for j in range(int(slider_shape_arr[i][2] / distance)):
+				if j != 0:
+					var new_path_follow = PathFollow2D.new()
+					new_path.add_child(new_path_follow)
+					new_path_follow.set_progress(temp_distance)
+					var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
+					var new_arrow = slider_arrow.instantiate()
+					var visible_threshold = (temp_distance + elapsed_distance) / total_distance
+					var temp_length = slider_shape_arr[i][2] * sin(TAU/16) * (j / (slider_shape_arr[i][2] / distance))
+					new_arrow.set_slider_arrow(slider_color, visible_threshold, true, temp_length)
+					new_path_follow.add_child(new_arrow)
+				temp_distance += distance
+
 	
 	# Add stars for each path
 	for path_holder in $SliderSegments.get_children():
@@ -239,45 +266,53 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 	var curve = Curve2D.new()
 	var initial_position = Global.touch_positions[initial_note_position]
 	var target_position = Global.touch_positions[target_note_position]
-	curve.add_point(Vector2(initial_position))
+	curve.add_point(Vector2(initial_position)) # from previous pos
 	if shape == "-" or shape == "w": # straight line, ezpz
 		curve.add_point(Vector2(target_position))
 	elif shape == "<":
-		var radius = Vector2(initial_position).distance_to(Vector2(0, 0))
-		var angle_1 = atan2(initial_position.x, -initial_position.y)
-		var angle_2 = atan2(target_position.x, -target_position.y)
+		var radius_start = Vector2(initial_position).distance_to(Vector2(0, 0))
+		var radius_end = Vector2(target_position).distance_to(Vector2(0, 0))
+		var angle_1 = atan2(initial_position.y, initial_position.x)
+		var angle_2 = atan2(target_position.y, target_position.x)
+		var frequency: int = 360
 		if int(initial_note_position) in [1, 2, 7, 8]: # ccw
 			var total_angle = angle_1 - angle_2
 			if total_angle < 0:
 				total_angle += TAU
-			for i in range(total_angle / TAU * 360):
-				var point_angle = angle_1 - 1 / total_angle 
-				curve.add_point(radius * Vector2(sin(point_angle), -cos(point_angle)))
+			for i in range(total_angle / TAU * frequency):
+				var radius = radius_start + (radius_end - radius_start) * i
+				var point_angle = angle_1 - i * TAU / frequency 
+				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
 		elif int(initial_note_position) in [3, 4, 5, 6]: # cw
 			var total_angle = angle_2 - angle_1
 			if total_angle < 0:
 				total_angle += TAU
-			for i in range(total_angle / TAU * 360):
-				var point_angle = angle_1 + 1 / total_angle
-				curve.add_point(Vector2(sin(point_angle), -cos(point_angle)))
+			for i in range(total_angle / TAU * frequency):
+				var radius = radius_start + (radius_end - radius_start) * i
+				var point_angle = angle_1 + i * TAU / frequency 
+				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
 	elif shape == ">": # we do a bit of copy pasta
-		var radius = Vector2(initial_position).distance_to(Vector2(0, 0))
-		var angle_1 = atan2(initial_position.x, -initial_position.y)
-		var angle_2 = atan2(target_position.x, -target_position.y)
-		if int(slider_head_position) in [3, 4, 5, 6]: # ccw
-			for i in range(60):
-				var total_angle = angle_1 - angle_2
-				if total_angle < 0:
-					total_angle += TAU
-				var point_angle = angle_1 - 1 / total_angle 
-				curve.add_point(radius * Vector2(sin(point_angle), -cos(point_angle)))
-		elif int(slider_head_position) in [1, 2, 7, 8]: # cw
-			for i in range(60):
-				var total_angle = angle_2 - angle_1
-				if total_angle < 0:
-					total_angle += TAU
-				var point_angle = angle_1 + 1 / total_angle
-				curve.add_point(Vector2(sin(point_angle), -cos(point_angle)))
+		var radius_start = Vector2(initial_position).distance_to(Vector2(0, 0))
+		var radius_end = Vector2(target_position).distance_to(Vector2(0, 0))
+		var angle_1 = atan2(initial_position.y, initial_position.x)
+		var angle_2 = atan2(target_position.y, target_position.x)
+		var frequency: int = 360
+		if int(initial_note_position) in [3, 4, 5, 6]: # ccw
+			var total_angle = angle_1 - angle_2
+			if total_angle < 0:
+				total_angle += TAU
+			for i in range(total_angle / TAU * frequency):
+				var radius = radius_start + (radius_end - radius_start) * i
+				var point_angle = angle_1 - i * TAU / frequency 
+				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
+		elif int(initial_note_position) in [1, 2, 7, 8]: # cw
+			var total_angle = angle_2 - angle_1
+			if total_angle < 0:
+				total_angle += TAU
+			for i in range(total_angle / TAU * 360):
+				var radius = radius_start + (radius_end - radius_start) * i
+				var point_angle = angle_1 + i * TAU / frequency 
+				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
 	elif shape == "v": 
 		curve.add_point(Vector2(Global.preview_center - initial_position))
 		curve.add_point(Vector2(target_position - initial_position))
@@ -320,9 +355,9 @@ func arrow_line(color: Color, distance: float) -> Node2D:
 		var new_line = Line2D.new()
 		new_line.default_color = color
 		new_line.width = 1
-		new_line.add_point(Vector2(0 + temp_distance, 3))
-		new_line.add_point(Vector2(3 + temp_distance, 0))
-		new_line.add_point(Vector2(0 + temp_distance, -3))
+		new_line.add_point(Vector2(-3 + temp_distance, 3))
+		new_line.add_point(Vector2(0 + temp_distance, 0))
+		new_line.add_point(Vector2(-3 + temp_distance, -3))
 		new_node.add_child(new_line)
 		
 	return new_node

@@ -42,9 +42,10 @@ func _ready():
 		"note_position" = "1",
 		"note_property_star" = true,
 		"sliders" = [{
-			"duration_arr" = [1, 2],
+			"duration_arr" = [1, 1],
 			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "3", 0.0], ["-", "7", 0.0], ["-", "D5", 0.0], ["-", "E3", 0.0], ["-", "8", 0.0]]
+			"slider_shape_arr" = [["-", "5", 0.0], [">", "2", 0.0], ["-", "6", 0.0], ["<", "1", 0.0]]
+			#"slider_shape_arr" = [[">", "5", 0.0]],
 		}],
 	}
 	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
