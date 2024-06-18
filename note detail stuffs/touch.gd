@@ -48,30 +48,34 @@ func note_render(current_time: float) -> void:
 		note_pathfollow.progress_ratio = path_progress
 
 func slider_render(current_time: float) -> void:
-	pass
+	for slider in $Sliders.get_children():
+		slider.slider_render(current_time)
 
 func initialize() -> void:
 	if note_property_touch: # touch note logic
 		var note_pos = Global.preview_center + Global.touch_positions[note_position]
 		$Note.position = note_pos
 		$Sliders.position = note_pos
+		
 		var note_color
+		var note_color_inner
 		if note_property_break: # um break touches
 			note_color = Global.note_colors["note_break"]
 		elif note_property_both:
 			note_color = Global.note_colors["note_both"]
-		elif note_property_slider and sliders.size() > 0:
+		elif sliders.size() > 0:
 			note_color = Global.note_colors["star_outer"]
+			note_color_inner = Global.note_colors["star_inner"]
 		else:
 			note_color = Global.note_colors["touch_base"]
 		
 		for node in $Note/CenterDot.get_children():
 			node.queue_free()
-		
-		var note_center_highlight = circle(Color.WHITE, 10, 2, 16)
-		$Note/CenterDot.add_child(note_center_highlight)
-		var note_center_dot = circle(note_color, 6, 2, 16)
-		$Note/CenterDot.add_child(note_center_dot)
+		if sliders.size() == 0:
+			var note_center_highlight = circle(Color.WHITE, 10, 2, 16)
+			$Note/CenterDot.add_child(note_center_highlight)
+			var note_center_dot = circle(note_color, 6, 2, 16)
+			$Note/CenterDot.add_child(note_center_dot)
 		
 		if sliders.size() == 0: # normal touch
 			for i in range(4):
@@ -91,10 +95,34 @@ func initialize() -> void:
 			for node in $Note/Segment4/Path2D/PathFollow2D.get_children():
 				node.queue_free()
 		else: # touch slider's note
-			pass
+			for i in range(5):
+				var note_path = $Note.get_child(i).get_child(0)
+				var note_pathfollow = note_path.get_child(0)
+				for node in note_pathfollow.get_children():
+					node.queue_free()
+				var note_polygon = Polygon2D.new()
+				note_polygon.polygon = star_rhombus(note_color_inner)
+				note_polygon.color = note_color
+				note_polygon.rotation = PI
+				note_pathfollow.add_child(note_polygon)
+				var outline = Line2D.new()
+				for point in note_polygon.polygon:
+					outline.add_point(point)
+				outline.default_color = note_color_inner
+				outline.width = 2
+				outline.rotation = PI
+				note_pathfollow.add_child(outline)
+				var new_curve = Curve2D.new()
+				new_curve.add_point(Vector2(20, 0).rotated(TAU * i / 5))
+				new_curve.add_point(Vector2(0, 0))
+				note_path.curve = new_curve
 		
-		for slider in sliders: # sliders
-			pass
+		for node in $Sliders.get_children():
+			node.queue_free()
+		for slider_args in sliders: # make sliders
+			if sliders.size() > 1:
+				slider_args["slider_property_both"] = true
+			create_slider(slider_args)
 		
 		# Timeline stuff
 		for node in $TimelineIndicator.get_children():
@@ -111,13 +139,14 @@ func initialize() -> void:
 		$TimelineIndicator.add_child(new_line)
 
 func timeline_object_render() -> void:
-	if !note_property_slider:
-		var time = Global.timeline_beats[beat]
-		if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
-			$TimelineIndicator.visible = true
-			$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time), 516)
-		else:
-			$TimelineIndicator.visible = false
+	var time = Global.timeline_beats[beat]
+	if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
+		$TimelineIndicator.visible = true
+		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time), 516)
+	else:
+		$TimelineIndicator.visible = false
+	for slider in $Sliders.get_children():
+		slider.timeline_object_render()
 
 func circle(color: Color, width: float, radius: float = 18, frequency: int = 360) -> Line2D:
 	var newLine = Line2D.new()
@@ -138,5 +167,28 @@ func triangle(color: Color, width: float) -> Line2D:
 	newLine.add_point(Vector2(-16, -14))
 	return newLine
 
-func star_rhombus(color: Color, width: float,  radius: float = 18): # for touch stars
-	pass
+func star_rhombus(color: Color, radius: float = 26) -> PackedVector2Array: # for touch stars
+	var inner_radius = 16
+	var new_polygon: PackedVector2Array = []
+	new_polygon.append(Vector2(radius - radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), -radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
+	new_polygon.append(Vector2(radius, 0))
+	new_polygon.append(Vector2(radius - radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
+	new_polygon.append(Vector2(inner_radius - inner_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), -inner_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
+	new_polygon.append(Vector2(inner_radius, 0))
+	new_polygon.append(Vector2(inner_radius - inner_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), inner_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
+	return new_polygon
+
+func create_slider(slider_args: Dictionary):
+	var slider = preload("res://note detail stuffs/slider.tscn")
+	var new_slider = slider.instantiate()
+	new_slider.beat = beat
+	new_slider.bpm = bpm
+	new_slider.slider_head_position = note_position
+	for key in slider_args:
+		new_slider.set(key, slider_args[key])
+	new_slider.initialize($Sliders.position - Global.preview_center)
+	$Sliders.add_child(new_slider)
+
+func delete_slider(slider_index: int):
+	$Sliders.get_child(slider_index).queue_free()
+	sliders.pop_at(slider_index)

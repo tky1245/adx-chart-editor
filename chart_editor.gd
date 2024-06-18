@@ -53,8 +53,13 @@ func _ready():
 	# touch test
 	var note2_args: Dictionary = {
 		"beat" = 5,
-		"note_position" = "C8",
+		"note_position" = "E3",
 		"note_property_touch" = true,
+		"sliders" = [{
+			"duration_arr" = [1, 1],
+			"delay_arr" = [1, 4],
+			"slider_shape_arr" = [["-", "E6", 0.0]],
+		}]
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
 	
