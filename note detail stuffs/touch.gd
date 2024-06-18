@@ -101,7 +101,7 @@ func initialize() -> void:
 				for node in note_pathfollow.get_children():
 					node.queue_free()
 				var note_polygon = Polygon2D.new()
-				note_polygon.polygon = star_rhombus(note_color_inner)
+				note_polygon.polygon = star_rhombus()
 				note_polygon.color = note_color
 				note_polygon.rotation = PI
 				note_pathfollow.add_child(note_polygon)
@@ -167,12 +167,11 @@ func triangle(color: Color, width: float) -> Line2D:
 	newLine.add_point(Vector2(-16, -14))
 	return newLine
 
-func star_rhombus(color: Color, radius: float = 26) -> PackedVector2Array: # for touch stars
-	var inner_radius = 16
+func star_rhombus(inner_radius: float = 16, outer_radius: float = 26) -> PackedVector2Array: # for touch stars
 	var new_polygon: PackedVector2Array = []
-	new_polygon.append(Vector2(radius - radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), -radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
-	new_polygon.append(Vector2(radius, 0))
-	new_polygon.append(Vector2(radius - radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
+	new_polygon.append(Vector2(outer_radius - outer_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), -outer_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
+	new_polygon.append(Vector2(outer_radius, 0))
+	new_polygon.append(Vector2(outer_radius - outer_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), outer_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
 	new_polygon.append(Vector2(inner_radius - inner_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), -inner_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
 	new_polygon.append(Vector2(inner_radius, 0))
 	new_polygon.append(Vector2(inner_radius - inner_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), inner_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))

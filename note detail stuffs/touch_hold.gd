@@ -81,8 +81,10 @@ func note_render(current_time: float) -> void:
 					progress_circle_polygon.polygon = reshape(polygon, angle, )
 				else:
 					progress_circle_polygon.visible = false
+
 func slider_render(current_time: float) -> void:
-	pass
+	for slider in $Sliders.get_children():
+		slider.slider_render(current_time)
 
 func initialize() -> void:
 	if duration_arr[1] == 0:

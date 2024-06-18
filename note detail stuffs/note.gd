@@ -21,13 +21,8 @@ func new_note(note_type: type, args: Dictionary) -> Node:
 	elif note_type == type.TOUCH_HOLD:
 		var touch_hold = preload("res://note detail stuffs/touch_hold.tscn")
 		note = touch_hold.instantiate()
-	
-	
 	for key in args:
 		note.set(key, args[key])
 
 	return note
 
-func slider(slider_shape_arr: Array, duration_arr: Array, delay_arr: Array) -> Dictionary:
-	var new_dict: Dictionary = {}
-	return new_dict

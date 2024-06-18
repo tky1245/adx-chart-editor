@@ -8,8 +8,8 @@ func set_slider_arrow(color: Color, visible_threshold_value: float, wifi: bool =
 	visible_threshold = visible_threshold_value
 	var new_polygon = $Polygon2D
 	var polygon_shape: PackedVector2Array = []
-	var width = 12
-	var height = 15
+	var width: float = 12
+	var height: float = 15
 	if !wifi:
 		var offset = 10
 		polygon_shape.append(Vector2(width/2, height))

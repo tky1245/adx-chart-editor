@@ -66,7 +66,8 @@ func note_render(current_time: float) -> void:
 				line.scale = Vector2(intro_progress, intro_progress)
 
 func slider_render(current_time: float) -> void:
-	pass
+	for slider in $Sliders.get_children():
+		slider.slider_render(current_time)
 
 func initialize() -> void:
 	if duration_arr[1] == 0:

@@ -185,7 +185,7 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	for node in $SliderArrows.get_children():
 		node.queue_free()
 	# Generate slider arrows from each segments
-	var total_distance: float
+	var total_distance: float = 0
 	for arr in slider_shape_arr: # Calculate total distance
 		total_distance += arr[2]
 	for idx in range(slider_shape_arr.size()): 
