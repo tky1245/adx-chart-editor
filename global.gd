@@ -24,25 +24,66 @@ var timeline_beats_lines: Array = []
 
 # Note colors
 const note_colors: Dictionary = {
-	"note_base" = Color.HOT_PINK,
-	"note_both" = Color.GOLD,
-	"note_break" = Color.ORANGE_RED,
-	"note_highlight" = Color(Color.LIGHT_GOLDENROD, 0.5),
-	"slider" = Color.CYAN,
-	"slider_highlight" = Color.DODGER_BLUE,
-	"touch_base" = Color.LIGHT_SKY_BLUE,
-	"touch_both" = Color.GOLD,
+	# Tap/Tap hold 
+	"tap_inner_base" = Color.HOT_PINK,
+	"tap_inner_both" = Color.GOLD,
+	"tap_inner_break" = Color.ORANGE_RED,
+	"tap_outer_base" = Color.WHITE,
+	"tap_outer_both" = Color.WHITE,
+	"tap_outer_break" = Color.WHITE,
+	"tap_highlight_ex_base" = Color(Color.HOT_PINK, 0.4),
+	"tap_highlight_ex_both" = Color(Color.GOLD, 0.4),
+	"tap_highlight_ex_break" = Color(Color.GOLD, 0.4),
+	"tap_indicator_base" = Color.HOT_PINK,
+	"tap_indicator_both" = Color.GOLD,
+	"tap_indicator_break" = Color.ORANGE_RED,
+	
+	# Star tap/Slider star
+	"star_inner_base" = Color.CORNFLOWER_BLUE,
+	"star_inner_both" = Color.YELLOW,
+	"star_inner_break" = Color.ORANGE_RED,
+	"star_outer_base" = Color.SKY_BLUE,
+	"star_outer_both" = Color.LIGHT_GOLDENROD,
+	"star_outer_break" = Color.LIGHT_SALMON,
+	"star_highlight_ex_base" = Color(Color.SKY_BLUE, 0.4),
+	"star_highlight_ex_both" = Color(Color.YELLOW, 0.4),
+	"star_highlight_ex_break" = Color(Color.YELLOW, 0.4),
+	"star_indicator_base" = Color.SKY_BLUE,
+	"star_indicator_both" = Color.YELLOW,
+	"star_indicator_break" = Color.ORANGE_RED,
+	
+	# Slider arrow
+	"slider_top_base" = Color.SKY_BLUE,
+	"slider_top_both" = Color.YELLOW,
+	"slider_top_break" = Color.ORANGE,
+	"slider_bottom_both" = Color.YELLOW,
+	"slider_bottom_base" = Color.SKY_BLUE,
+	"slider_bottom_break" = Color.YELLOW,
+	"slider_indicator_base" = Color.SKY_BLUE,
+	"slider_indicator_both" = Color.YELLOW,
+	"slider_indicator_break" = Color.ORANGE,
+	
+	# Touch
+	"touch_inner_base" = Color.DODGER_BLUE,
+	"touch_inner_both" = Color.SANDY_BROWN,
+	"touch_inner_break" = Color.ORANGE_RED,
+	"touch_outer_base" = Color.SKY_BLUE,
+	"touch_outer_both" = Color.YELLOW,
+	"touch_outer_break" = Color.ORANGE,
+	"touch_indicator_base" = Color.SKY_BLUE,
+	"touch_indicator_both" = Color.YELLOW,
+	"touch_indicator_break" = Color.ORANGE_RED,
+	"touch_highlight_ex_base" = Color(Color.SKY_BLUE, 0.4),
+	"touch_highlight_ex_both" = Color(Color.YELLOW, 0.4),
+	"touch_highlight_ex_break" = Color(Color.YELLOW, 0.4),
+	
+	# Touch hold
 	"touch_hold_1" = Color.RED,
 	"touch_hold_2" = Color.YELLOW,
 	"touch_hold_3" = Color.SEA_GREEN,
 	"touch_hold_4" = Color.ROYAL_BLUE,
 	"touch_hold_center" = Color.CYAN,
-	"star_outer" = Color.SKY_BLUE,
-	"star_inner" = Color.CORNFLOWER_BLUE,
-	"star_both_outer" = Color.LIGHT_GOLDENROD,
-	"star_both_inner" = Color.GOLD,
-	"star_break_outer" = Color.LIGHT_SALMON,
-	"star_break_inner" = Color.ORANGE_RED,
+	
 }
 
 # Some settings

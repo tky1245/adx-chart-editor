@@ -4,36 +4,56 @@
 script/source = "extends Node2D
 var visible_threshold: float
 
-func set_slider_arrow(color: Color, visible_threshold_value: float, wifi: bool = false, wifi_length: float = 0) -> void:
+func set_slider_arrow(top_color: Color, bottom_color: Color, visible_threshold_value: float, wifi: bool = false, wifi_length: float = 0) -> void:
 	visible_threshold = visible_threshold_value
-	var new_polygon = $Polygon2D
-	var polygon_shape: PackedVector2Array = []
+	for node in $Polygons.get_children():
+		node.queue_free()
 	var width: float = 12
 	var height: float = 15
 	if !wifi:
+		var polygon_top = Polygon2D.new()
+		var polygon_shape_top: PackedVector2Array = []
 		var offset = 10
-		polygon_shape.append(Vector2(width/2, height))
-		polygon_shape.append(Vector2(offset+width/2, 0))
-		polygon_shape.append(Vector2(width/2, -height))
-		polygon_shape.append(Vector2(-width/2, -height))
-		polygon_shape.append(Vector2(offset-width/2, 0))
-		polygon_shape.append(Vector2(-width/2, height))
+		polygon_shape_top.append(Vector2(offset+width/2, 0))
+		polygon_shape_top.append(Vector2(width/2, -height))
+		polygon_shape_top.append(Vector2(-width/2, -height))
+		polygon_shape_top.append(Vector2(offset-width/2, 0))
+		polygon_top.polygon = polygon_shape_top
+		polygon_top.color = top_color
+		$Polygons.add_child(polygon_top)
+		var polygon_bottom = Polygon2D.new()
+		var polygon_shape_bottom: PackedVector2Array = []
+		polygon_shape_bottom.append(Vector2(width/2, height))
+		polygon_shape_bottom.append(Vector2(offset+width/2, 0))
+		polygon_shape_bottom.append(Vector2(offset-width/2, 0))
+		polygon_shape_bottom.append(Vector2(-width/2, height))
+		polygon_bottom.polygon = polygon_shape_bottom
+		polygon_bottom.color = bottom_color
+		$Polygons.add_child(polygon_bottom)
+		$Outline.clear_points()
+		$Outline.add_point(Vector2(width/2, height))
+		$Outline.add_point(Vector2(offset+width/2, 0))
+		$Outline.add_point(Vector2(width/2, -height))
+		$Outline.add_point(Vector2(-width/2, -height))
+		$Outline.add_point(Vector2(offset-width/2, 0))
+		$Outline.add_point(Vector2(-width/2, height))
 	else:
+		var new_polygon = Polygon2D.new()
+		var polygon_shape: PackedVector2Array = []
 		var offset = 15
 		var longer_length = wifi_length + width * sin(TAU/16)
 		polygon_shape.append(Vector2(offset+width/2-longer_length*sin(TAU/16), longer_length*cos(TAU/16)))
 		polygon_shape.append(Vector2(offset+width/2, 0))
 		polygon_shape.append(Vector2(offset+width/2-longer_length*sin(TAU/16), -longer_length*cos(TAU/16)))
-		
 		polygon_shape.append(Vector2(offset-width/2-wifi_length*sin(TAU/16), -wifi_length*cos(TAU/16)))
 		polygon_shape.append(Vector2(offset-width/2, 0))
 		polygon_shape.append(Vector2(offset-width/2-wifi_length*sin(TAU/16), wifi_length*cos(TAU/16)))
-	new_polygon.color = color
-	new_polygon.polygon = polygon_shape
-	$Outline.clear_points()
-	
-	for point in polygon_shape:
-		$Outline.add_point(point)
+		new_polygon.color = top_color
+		new_polygon.polygon = polygon_shape
+		$Polygons.add_child(new_polygon)
+		$Outline.clear_points()
+		for point in polygon_shape:
+			$Outline.add_point(point)
 
 func visible_toggle(progress: float): # Use progress ratio for progress here
 	visible = false if progress > visible_threshold else true
@@ -43,7 +63,7 @@ func visible_toggle(progress: float): # Use progress ratio for progress here
 [node name="SliderArrow" type="Node2D"]
 script = SubResource("GDScript_86dtu")
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
+[node name="Polygons" type="Node2D" parent="."]
 
 [node name="Outline" type="Line2D" parent="."]
 closed = true

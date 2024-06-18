@@ -162,25 +162,33 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 			var path_follow_right = PathFollow2D.new()
 			path_right.add_child(path_follow_right)
 	# Set color
-	var slider_color
+	var slider_arrow_color_top
+	var slider_arrow_color_bottom
+	var slider_arrow_color_timeline_indicator
 	if slider_property_break:
-		slider_color = Global.note_colors["note_break"]
+		slider_arrow_color_top = Global.note_colors["slider_top_break"]
+		slider_arrow_color_bottom = Global.note_colors["slider_bottom_break"]
+		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_break"]
 	elif slider_property_both:
-		slider_color = Global.note_colors["note_both"]
+		slider_arrow_color_top = Global.note_colors["slider_top_both"]
+		slider_arrow_color_bottom = Global.note_colors["slider_bottom_both"]
+		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_both"]
 	else:
-		slider_color = Global.note_colors["star_outer"]
+		slider_arrow_color_top = Global.note_colors["slider_top_base"]
+		slider_arrow_color_bottom = Global.note_colors["slider_bottom_base"]
+		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_base"]
 	
 	var star_color_inner
 	var star_color_outer
 	if slider_property_break:
-		star_color_inner = Global.note_colors["star_break_inner"]
-		star_color_outer = Global.note_colors["star_break_outer"]
+		star_color_inner = Global.note_colors["star_inner_break"]
+		star_color_outer = Global.note_colors["star_outer_break"]
 	elif slider_property_both:
-		star_color_inner = Global.note_colors["star_both_inner"]
-		star_color_outer = Global.note_colors["star_both_outer"]
+		star_color_inner = Global.note_colors["star_inner_both"]
+		star_color_outer = Global.note_colors["star_outer_both"]
 	else:
-		star_color_inner = Global.note_colors["star_inner"]
-		star_color_outer = Global.note_colors["star_outer"]
+		star_color_inner = Global.note_colors["star_inner_base"]
+		star_color_outer = Global.note_colors["star_outer_base"]
 	
 	for node in $SliderArrows.get_children():
 		node.queue_free()
@@ -210,7 +218,7 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 				var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
 				var new_arrow = slider_arrow.instantiate()
 				var visible_threshold = (temp_distance + elapsed_distance) / total_distance
-				new_arrow.set_slider_arrow(slider_color, visible_threshold)
+				new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold)
 				new_path_follow.add_child(new_arrow)
 				temp_distance += distance * 0.5
 		else:
@@ -225,10 +233,9 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 					var new_arrow = slider_arrow.instantiate()
 					var visible_threshold = (temp_distance + elapsed_distance) / total_distance
 					var temp_length = slider_shape_arr[i][2] * sin(TAU/16) * (j / (slider_shape_arr[i][2] / distance))
-					new_arrow.set_slider_arrow(slider_color, visible_threshold, true, temp_length)
+					new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold, true, temp_length)
 					new_path_follow.add_child(new_arrow)
 				temp_distance += distance
-
 	
 	# Add stars for each path
 	for path_holder in $SliderSegments.get_children():
@@ -247,7 +254,7 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	
 	for node in $TimelineIndicator.get_children():
 		node.free()
-	var line_node = arrow_line(slider_color, duration * Global.timeline_pixels_to_second)
+	var line_node = arrow_line(slider_arrow_color_timeline_indicator, duration * Global.timeline_pixels_to_second)
 	var head_pos = int(slider_head_position) if slider_head_position != "C" else 8
 	line_node.position = Vector2(0, 15 * int(head_pos) - 6)
 	$TimelineIndicator.add_child(line_node)
@@ -421,10 +428,3 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 	else:
 		for child_node in node.get_children():
 			set_node_images_transparency(child_node, transparency)
-			
-func set_node_images_scale(node: Node2D, scale_value: float) -> void:
-	if node.get_children().size() == 0:
-		node.scale = Vector2(scale_value, scale_value)
-	else:
-		for child_node in node.get_children():
-			set_node_images_transparency(child_node, scale_value)

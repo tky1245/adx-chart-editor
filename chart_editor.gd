@@ -40,13 +40,13 @@ func _ready():
 	var note1_args: Dictionary = {
 		"beat" = 4,
 		"note_position" = "1",
-		"note_property_star" = true,
-		"sliders" = [{
-			"duration_arr" = [1, 1],
-			"delay_arr" = [1, 4],
+		"note_property_star" = false,
+		#"sliders" = [{
+			#"duration_arr" = [1, 1],
+			#"delay_arr" = [1, 4],
 			#"slider_shape_arr" = [["-", "5", 0.0], [">", "2", 0.0], ["-", "6", 0.0], ["<", "1", 0.0]]
-			"slider_shape_arr" = [["pp", "8", 0.0]],
-		}],
+			#"slider_shape_arr" = [["pp", "8", 0.0]],
+		#}],
 	}
 	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
 	
@@ -55,11 +55,11 @@ func _ready():
 		"beat" = 5,
 		"note_position" = "E3",
 		"note_property_touch" = true,
-		"sliders" = [{
-			"duration_arr" = [1, 1],
-			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "E6", 0.0]],
-		}]
+		#"sliders" = [{
+			#"duration_arr" = [1, 1],
+			#"delay_arr" = [1, 4],
+			#"slider_shape_arr" = [["-", "E6", 0.0]],
+		#}]
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
 	

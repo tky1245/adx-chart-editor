@@ -79,31 +79,47 @@ func initialize() -> void:
 			node.queue_free()
 		var angle = (int(note_position) * 2 - 1) * TAU / 16
 		$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
-		if note_property_ex:
-			var note_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
-			note_highlight.color = Global.note_colors["note_highlight"]
-			note_highlight.width = 18
-			$Note.add_child(note_highlight)
-		var note_outline = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
+		
+		# Colors
+		var note_color_timeline_indicator
+		var note_color_outer
+		var note_color_inner
+		var note_color_highlight_ex
+
+		if note_property_break:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
+			note_color_outer = Global.note_colors["tap_outer_break"]
+			note_color_inner = Global.note_colors["tap_inner_break"]
+			note_color_highlight_ex = Global.note_colors["tap_highlight_ex_break"]
+		elif note_property_both:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]
+			note_color_outer = Global.note_colors["tap_outer_both"]
+			note_color_inner = Global.note_colors["tap_inner_both"]
+			note_color_highlight_ex = Global.note_colors["tap_highlight_ex_both"]
+		else:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_base"]
+			note_color_outer = Global.note_colors["tap_outer_base"]
+			note_color_inner = Global.note_colors["tap_inner_base"]
+			note_color_highlight_ex = Global.note_colors["tap_highlight_ex_base"]
+		
+		var note_outline = hexagon_shape(Vector2(0, 0), Vector2(0, 0)) # TODO: redraw holds
 		note_outline.default_color = Color.WHITE
 		note_outline.width = 11
 		$Note.add_child(note_outline)
-		var note_color
-		if note_property_break:
-			note_color = Global.note_colors["note_break"]
-		elif note_property_both:
-			note_color = Global.note_colors["note_both"]
-		else:
-			note_color = Global.note_colors["note_base"]
+		if note_property_ex:
+			var note_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
+			note_highlight.color = note_color_highlight_ex
+			note_highlight.width = 18
+			$Note.add_child(note_highlight)
 		var note_hold = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
-		note_hold.default_color = note_color
+		note_hold.default_color = note_color_inner
 		note_hold.width = 8
 		$Note.add_child(note_hold)
 		
 		for node in $TimelineIndicator.get_children():
 			node.free()
 		var new_hexagon = hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0), 4, null, 0)
-		new_hexagon.default_color = note_color
+		new_hexagon.default_color = note_color_timeline_indicator
 		new_hexagon.width = 2
 		new_hexagon.position = Vector2(0, 15 * int(note_position) - 6)
 		$TimelineIndicator.add_child(new_hexagon)

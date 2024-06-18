@@ -62,42 +62,62 @@ func initialize(pos: String = note_position) -> void:
 		$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
 		$Sliders.position = $Note.position
 		
-		var note_color
+		# Colors
+		var note_color_timeline_indicator
+		var note_color_outer
 		var note_color_inner
-		if note_property_break:
-			note_color = Global.note_colors["note_break"]
+		var note_color_outline = Color.BLACK
+		var note_color_highlight_ex
+		if note_property_break and note_property_star:
+			note_color_timeline_indicator = Global.note_colors["star_indicator_break"]
+			note_color_outer = Global.note_colors["star_outer_break"]
+			note_color_inner = Global.note_colors["star_inner_break"]
+			note_color_highlight_ex = Global.note_colors["star_highlight_ex_break"]
+		elif note_property_break:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
+			note_color_outer = Global.note_colors["tap_outer_break"]
+			note_color_inner = Global.note_colors["tap_inner_break"]
+			note_color_highlight_ex = Global.note_colors["tap_highlight_ex_break"]
 		elif note_property_both and note_property_star:
-			note_color = Global.note_colors["star_both_outer"]
-			note_color_inner = Global.note_colors["star_both_inner"]
+			note_color_timeline_indicator = Global.note_colors["star_indicator_both"]
+			note_color_outer = Global.note_colors["star_outer_both"]
+			note_color_inner = Global.note_colors["star_inner_both"]
+			note_color_highlight_ex = Global.note_colors["star_highlight_ex_both"]
 		elif note_property_both:
-			note_color = Global.note_colors["note_both"]
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]
+			note_color_outer = Global.note_colors["tap_outer_both"]
+			note_color_inner = Global.note_colors["tap_inner_both"]
+			note_color_highlight_ex = Global.note_colors["tap_highlight_ex_both"]
 		elif note_property_star:
-			note_color = Global.note_colors["star_outer"]
-			note_color_inner = Global.note_colors["star_inner"]
+			note_color_timeline_indicator = Global.note_colors["star_indicator_base"]
+			note_color_outer = Global.note_colors["star_outer_base"]
+			note_color_inner = Global.note_colors["star_inner_base"]
+			note_color_highlight_ex = Global.note_colors["star_highlight_ex_base"]
 		else:
-			note_color = Global.note_colors["note_base"]
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_base"]
+			note_color_outer = Global.note_colors["tap_outer_base"]
+			note_color_inner = Global.note_colors["tap_inner_base"]
+			note_color_highlight_ex = Global.note_colors["tap_highlight_ex_base"]
 		
+		# Adding note shape
 		var note_path = $Note/Path2D
 		var note_pathfollow = $Note/Path2D/PathFollow2D
-		
 		for node in note_pathfollow.get_children():
 			node.queue_free()
-		
 		if sliders.size() == 0:
 			if note_property_ex:
-				var note_highlight = circle(Global.note_colors["note_highlight"], 18)
-				note_pathfollow.add_child(note_highlight)
-			var note_outline = circle(Color.WHITE, 11)
+				note_pathfollow.add_child(note_color_highlight_ex)
+			var note_outline = circle(Color.WHITE, 11) # TODO: redo tap drawing
 			note_pathfollow.add_child(note_outline)
-			var note_circle = circle(note_color, 8)
+			var note_circle = circle(note_color_inner, 8)
 			note_pathfollow.add_child(note_circle)
 		else: # star tap
 			if note_property_ex:
-				var note_highlight = star(Global.note_colors["note_highlight"], 17)
+				var note_highlight = star(note_color_highlight_ex, 5, 26)
 				note_pathfollow.add_child(note_highlight)
 			var note_star_inner = star(note_color_inner, 4, 15)
 			note_pathfollow.add_child(note_star_inner)
-			var note_star_outer = star(note_color, 1, 19)
+			var note_star_outer = star(note_color_outer, 1, 19)
 			note_pathfollow.add_child(note_star_outer)
 			var note_outline_in = star(Color.WHITE, 1, 10)
 			note_pathfollow.add_child(note_outline_in)
@@ -106,7 +126,7 @@ func initialize(pos: String = note_position) -> void:
 			var note_outline_out_2 = star(Color.BLACK, 1, 24)
 			note_pathfollow.add_child(note_outline_out_2)
 			
-			
+		# Setting note path
 		var new_curve = Curve2D.new()
 		var start_point = Vector2(0, 0)
 		new_curve.add_point(start_point)
@@ -120,12 +140,11 @@ func initialize(pos: String = note_position) -> void:
 			if sliders.size() > 1:
 				slider_args["slider_property_both"] = true
 			create_slider(slider_args)
-			
+		
 		# Timeline stuffs
 		for node in $TimelineIndicator.get_children():
 			node.free()
-		var new_line = circle(note_color, 2, 4, 16)
-		new_line.default_color = note_color
+		var new_line = circle(note_color_timeline_indicator, 2, 4, 16)
 		new_line.position = Vector2(0, 15 * note_pos - 6)
 		$TimelineIndicator.add_child(new_line)
 		#TODO: add mini star for star taps
