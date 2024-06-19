@@ -89,88 +89,99 @@ func slider_render(current_time: float) -> void:
 		slider.slider_render(current_time)
 
 func initialize() -> void:
+	set_duration()
+	set_note_position()
+	touch_hold_draw()
+
+
+func set_duration(arr: Array = duration_arr) -> void:
+	duration_arr = arr
 	if duration_arr[1] == 0:
 		duration = duration_arr[0]
 	else:
 		duration = 60.0 * Global.beats_per_bar / bpm * (float(duration_arr[0]) / duration_arr[1])
-	if note_property_touch: # touch hold logic
-		$Note.position = Global.preview_center + Global.touch_positions[note_position]
-		for node in $Note/ProgressCircle.get_children():
+
+func set_note_position(pos: String = note_position) -> void:
+	note_position = pos
+	$Note.position = Global.preview_center + Global.touch_positions[note_position]
+
+func touch_hold_draw() -> void:
+	for node in $Note/ProgressCircle.get_children():
+		node.queue_free()
+	for i in range(4): # Progress bar
+		var petal = Polygon2D.new()
+		petal.name = "Petal" + str(i)
+		petal.color = Global.note_colors["touch_hold_" + str(i + 1)]
+		var radius = 6
+		var distance = 27
+		petal.polygon = petal_polygon(distance, radius)
+		petal.rotation = i * TAU / 4
+		$Note/ProgressCircle.add_child(petal)
+	for i in range(4): # 4 segments
+		var note_path = $Note/Segments.get_child(i).get_child(0)
+		var note_pathfollow = note_path.get_child(0)
+		for node in note_pathfollow.get_children():
 			node.queue_free()
-		for i in range(4): # Progress bar
-			var petal = Polygon2D.new()
-			petal.name = "Petal" + str(i)
-			petal.color = Global.note_colors["touch_hold_" + str(i + 1)]
-			var radius = 6
-			var distance = 27
-			petal.polygon = petal_polygon(distance, radius)
-			petal.rotation = i * TAU / 4
-			$Note/ProgressCircle.add_child(petal)
-		for i in range(4): # 4 segments
-			var note_path = $Note/Segments.get_child(i).get_child(0)
-			var note_pathfollow = note_path.get_child(0)
-			for node in note_pathfollow.get_children():
-				node.queue_free()
-			var angle = TAU / 4 * i - 3 * TAU / 8
-			note_path.rotation = PI
-			note_path.curve = Curve2D.new()
-			note_path.curve.add_point(17 * Vector2(sin(angle), -cos(angle)))
-			note_path.curve.add_point(Vector2(0, 0))
-			
-			var petal = Polygon2D.new()
-			petal.color = Global.note_colors["touch_hold_" + str(i + 1)]
-			var radius = 6
-			var distance = 22
-			petal.polygon = petal_polygon(distance, radius)
-			petal.rotation = 5 * TAU / 8
-			note_pathfollow.add_child(petal)
-			
-			var petal_outline = Line2D.new()
-			petal_outline.default_color = Color.BLACK
-			petal_outline.width = 1
-			petal_outline.closed = true
-			for point in petal.polygon:
-				petal_outline.add_point(point)
-			petal_outline.rotation = 5 * TAU / 8
-			note_pathfollow.add_child(petal_outline)
+		var angle = TAU / 4 * i - 3 * TAU / 8
+		note_path.rotation = PI
+		note_path.curve = Curve2D.new()
+		note_path.curve.add_point(17 * Vector2(sin(angle), -cos(angle)))
+		note_path.curve.add_point(Vector2(0, 0))
 		
-		for node in $Note/CenterDot.get_children():
-			node.queue_free()
-		var center_dot = Polygon2D.new()
-		center_dot.color = Global.note_colors["touch_hold_center"]
-		var polygon_points: PackedVector2Array = []
-		var frequency = 8
-		for i in range(frequency):
-			var angle = i * TAU / frequency
-			polygon_points.append(Vector2(5, 0).rotated(angle))
-		center_dot.polygon = polygon_points
-		$Note/CenterDot.add_child(center_dot)
-		var center_dot_outline = Line2D.new()
-		center_dot_outline.default_color = Color.BLACK
-		center_dot_outline.width = 1
-		center_dot_outline.closed = true
-		for i in range(frequency):
-			var angle = i * TAU / frequency
-			center_dot_outline.add_point(Vector2(5, 0).rotated(angle))
-		$Note/CenterDot.add_child(center_dot_outline)
-		if sliders.size() != 0:
-			pass
+		var petal = Polygon2D.new()
+		petal.color = Global.note_colors["touch_hold_" + str(i + 1)]
+		var radius = 6
+		var distance = 22
+		petal.polygon = petal_polygon(distance, radius)
+		petal.rotation = 5 * TAU / 8
+		note_pathfollow.add_child(petal)
 		
-		# Timeline
-		for node in $TimelineIndicator.get_children():
-			node.free()
-		for i in range(4):
-			var color = Global.note_colors["touch_hold_" + str(i+1)]
-			var new_line = Line2D.new()
-			var point_1 = Vector2(i / 4.0 * duration * Global.timeline_pixels_to_second, 0)
-			var point_2 = Vector2((i + 1) / 4.0 * duration * Global.timeline_pixels_to_second, 0)
-			var note_pos = int(note_position) if note_position != "C" else 8
-			new_line.add_point(point_1)
-			new_line.add_point(point_2)
-			new_line.default_color = color
-			new_line.width = 8
-			new_line.position = Vector2(0, 15 * note_pos - 6)
-			$TimelineIndicator.add_child(new_line)
+		var petal_outline = Line2D.new()
+		petal_outline.default_color = Color.BLACK
+		petal_outline.width = 1
+		petal_outline.closed = true
+		for point in petal.polygon:
+			petal_outline.add_point(point)
+		petal_outline.rotation = 5 * TAU / 8
+		note_pathfollow.add_child(petal_outline)
+
+	for node in $Note/CenterDot.get_children():
+		node.queue_free()
+	var center_dot = Polygon2D.new()
+	center_dot.color = Global.note_colors["touch_hold_center"]
+	var polygon_points: PackedVector2Array = []
+	var frequency = 8
+	for i in range(frequency):
+		var angle = i * TAU / frequency
+		polygon_points.append(Vector2(5, 0).rotated(angle))
+	center_dot.polygon = polygon_points
+	$Note/CenterDot.add_child(center_dot)
+	var center_dot_outline = Line2D.new()
+	center_dot_outline.default_color = Color.BLACK
+	center_dot_outline.width = 1
+	center_dot_outline.closed = true
+	for i in range(frequency):
+		var angle = i * TAU / frequency
+		center_dot_outline.add_point(Vector2(5, 0).rotated(angle))
+	$Note/CenterDot.add_child(center_dot_outline)
+	if sliders.size() != 0:
+		pass
+
+	# Timeline
+	for node in $TimelineIndicator.get_children():
+		node.free()
+	for i in range(4):
+		var color = Global.note_colors["touch_hold_" + str(i+1)]
+		var new_line = Line2D.new()
+		var point_1 = Vector2(i / 4.0 * duration * Global.timeline_pixels_to_second, 0)
+		var point_2 = Vector2((i + 1) / 4.0 * duration * Global.timeline_pixels_to_second, 0)
+		var note_pos = int(note_position) if note_position != "C" else 8
+		new_line.add_point(point_1)
+		new_line.add_point(point_2)
+		new_line.default_color = color
+		new_line.width = 8
+		new_line.position = Vector2(0, 15 * note_pos - 6)
+		$TimelineIndicator.add_child(new_line)
 
 func timeline_object_render() -> void: #TODO change visible range
 	var time_1 = Global.timeline_beats[beat]
