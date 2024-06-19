@@ -10,6 +10,7 @@ var delay: float
 var slider_head_position: String
 var slider_shape_arr: Array # contains matches of [shape, target_position, length]
 
+
 var position_offset: Vector2
 #var shape_length: Dictionary
 
@@ -109,14 +110,8 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	position_offset = -parent_position
 	position = position_offset
 	
-	if duration_arr[1] == 0:
-		duration = duration_arr[0]
-	else:
-		duration = 60.0 * Global.beats_per_bar / bpm * (float(duration_arr[0]) / duration_arr[1])
-	if delay_arr[1] == 0:
-		delay = delay_arr[0]
-	else:
-		delay = 60.0 * Global.beats_per_bar / bpm * (float(delay_arr[0]) / delay_arr[1])
+	set_duration()
+	set_delay()
 	for node in $SliderSegments.get_children(): # Clean up
 		node.queue_free()
 	# Generate slider segments according to array
@@ -259,7 +254,20 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	line_node.position = Vector2(0, 15 * int(head_pos) - 6)
 	$TimelineIndicator.add_child(line_node)
 
-	
+func set_duration(arr: Array = duration_arr) -> void:
+	duration_arr = arr
+	if duration_arr[1] == 0:
+		duration = duration_arr[0]
+	else:
+		duration = 60.0 * Global.beats_per_bar / bpm * (float(duration_arr[0]) / duration_arr[1])
+
+func set_delay(arr: Array = delay_arr) -> void:
+	delay_arr = arr
+	if delay_arr[1] == 0:
+		delay = delay_arr[0]
+	else:
+		delay = 60.0 * Global.beats_per_bar / bpm * (float(delay_arr[0]) / delay_arr[1])
+
 func timeline_object_render() -> void:
 	var time_1 = Global.timeline_beats[beat] + delay
 	var time_2 = time_1 + duration
@@ -428,3 +436,4 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 	else:
 		for child_node in node.get_children():
 			set_node_images_transparency(child_node, transparency)
+

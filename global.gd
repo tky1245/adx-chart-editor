@@ -31,7 +31,7 @@ const note_colors: Dictionary = {
 	"tap_outer_base" = Color.WHITE,
 	"tap_outer_both" = Color.WHITE,
 	"tap_outer_break" = Color.WHITE,
-	"tap_highlight_ex_base" = Color(Color.HOT_PINK, 0.4),
+	"tap_highlight_ex_base" = Color(Color.PINK, 0.7),
 	"tap_highlight_ex_both" = Color(Color.GOLD, 0.4),
 	"tap_highlight_ex_break" = Color(Color.GOLD, 0.4),
 	"tap_indicator_base" = Color.HOT_PINK,
@@ -45,7 +45,7 @@ const note_colors: Dictionary = {
 	"star_outer_base" = Color.SKY_BLUE,
 	"star_outer_both" = Color.LIGHT_GOLDENROD,
 	"star_outer_break" = Color.LIGHT_SALMON,
-	"star_highlight_ex_base" = Color(Color.SKY_BLUE, 0.4),
+	"star_highlight_ex_base" = Color(Color.SKY_BLUE, 0.7),
 	"star_highlight_ex_both" = Color(Color.YELLOW, 0.4),
 	"star_highlight_ex_break" = Color(Color.YELLOW, 0.4),
 	"star_indicator_base" = Color.SKY_BLUE,
@@ -132,3 +132,7 @@ func _ready():
 
 func note_pos_mod(num: int):
 	return (num - 1) % 8 + 1
+
+
+			
+			

@@ -40,16 +40,16 @@ func _ready():
 	var note1_args: Dictionary = {
 		"beat" = 4,
 		"note_position" = "1",
-		"note_property_star" = false,
-		#"sliders" = [{
-			#"duration_arr" = [1, 1],
-			#"delay_arr" = [1, 4],
-			#"slider_shape_arr" = [["-", "5", 0.0], [">", "2", 0.0], ["-", "6", 0.0], ["<", "1", 0.0]]
+		"note_property_star" = true,
+		"selected" = true,
+		"sliders" = [{
+			"duration_arr" = [1, 1],
+			"delay_arr" = [1, 4],
+			"slider_shape_arr" = [["-", "5", 0.0], [">", "2", 0.0], ["-", "6", 0.0], ["<", "1", 0.0]]
 			#"slider_shape_arr" = [["pp", "8", 0.0]],
-		#}],
+		}],
 	}
 	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
-	
 	# touch test
 	var note2_args: Dictionary = {
 		"beat" = 5,
@@ -69,7 +69,8 @@ func _ready():
 		"note_position" = "5",
 		"duration_arr" = [1, 4],
 		"bpm" = 240,
-		"note_property_break" = true
+		"note_property_break" = true,
+		"note_property_ex" = true,
 	}
 	$Notes.add_child(Note.new_note(Note.type.TAP_HOLD, note3_args))
 	
@@ -441,8 +442,8 @@ func timeline_render(type: String): # Render objects on timeline
 		for bd_node in $BeatDivisorChanges.get_children():
 			bd_node.render()
 	elif type == "note":
-		for node in $Notes.get_children():
-			node.timeline_object_render()
+		for note in $Notes.get_children():
+			note.timeline_object_render()
 	elif type == "all": # Default, render everything 
 		timeline_visible_range_update()
 		timeline_render("bar")
@@ -604,12 +605,5 @@ func _on_button_pressed(): # debug button
 	print("Current time:",current_time)
 	print("Beat:", time_to_beat(current_time))
 	print(timeline_bar_time)
-
-
-
-
-
-
-
-
+	print($ChartPreview/SelectedHighlight.points)
 

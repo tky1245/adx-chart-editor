@@ -58,6 +58,7 @@ func set_slider_arrow(top_color: Color, bottom_color: Color, visible_threshold_v
 func visible_toggle(progress: float): # Use progress ratio for progress here
 	visible = false if progress > visible_threshold else true
 		
+
 "
 
 [node name="SliderArrow" type="Node2D"]

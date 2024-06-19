@@ -225,6 +225,12 @@ polygon = PackedVector2Array(311, 136, 355, 136, 355, 180, 311, 180)
 closed = true
 width = 4.0
 
+[node name="SelectedHighlight" type="Node2D" parent="ChartPreview"]
+
+[node name="Line2D" type="Line2D" parent="ChartPreview/SelectedHighlight"]
+closed = true
+width = 3.0
+
 [node name="Timeline" type="Node2D" parent="."]
 
 [node name="NoteTimeline" type="ColorRect" parent="Timeline"]

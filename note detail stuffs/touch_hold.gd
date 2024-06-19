@@ -11,6 +11,8 @@ var note_property_both: bool
 var note_position: String
 var sliders: Array = []
 
+var selected: bool
+
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
