@@ -70,6 +70,7 @@ func initialize() -> void:
 		if sliders.size() > 1:
 			slider_args["slider_property_both"] = true
 		create_slider(slider_args)
+	set_selected()
 
 func tap_draw() -> void:
 	# Colors
@@ -106,6 +107,10 @@ func tap_draw() -> void:
 	note_pathfollow.add_child(note_outline)
 	var note_circle = circle(note_color_inner, 8)
 	note_pathfollow.add_child(note_circle)
+	var selected_highlight = circle(Color.LIME, 3, 30)
+	selected_highlight.name = "SelectedHighlight"
+	note_pathfollow.add_child(selected_highlight)
+	
 	
 	# Timeline stuffs
 	for node in $TimelineIndicator.get_children():
@@ -154,6 +159,9 @@ func star_draw() -> void:
 	note_pathfollow.add_child(note_outline_out)
 	var note_outline_out_2 = star(Color.BLACK, 1, 24)
 	note_pathfollow.add_child(note_outline_out_2)
+	var selected_highlight = star(Color.LIME, 3, 35)
+	selected_highlight.name = "SelectedHighlight"
+	note_pathfollow.add_child(selected_highlight)
 	
 	# Timeline stuffs
 	for node in $TimelineIndicator.get_children():
@@ -222,3 +230,8 @@ func star(color: Color, width: float,  radius: float = 18) -> Line2D: # star tap
 		newLine.add_point(Vector2(cos((i * 2 + 1) * TAU / 10), sin((i * 2 + 1) * TAU / 10)) * radius * 1.3 * sin(deg_to_rad(18) / sin(deg_to_rad(126))))
 	return newLine
 
+func set_selected(option: bool = selected):
+	selected = option
+	$Note/Path2D/PathFollow2D/SelectedHighlight.visible = selected
+	for slider_node in $Sliders.get_children():
+		slider_node.set_selected(selected)

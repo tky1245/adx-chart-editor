@@ -377,6 +377,11 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "EX"
 
+[node name="Star" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Star"
+
 [node name="HoldSlideChange" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
 layout_mode = 2
 

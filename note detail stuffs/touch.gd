@@ -44,7 +44,20 @@ func note_render(current_time: float) -> void:
 	for i in range(5):
 		var note_pathfollow = $Note.get_child(i).get_child(0).get_child(0)
 		note_pathfollow.progress_ratio = path_progress
+	
+	var size = 45 - path_progress * 18
+	var line = $Note/SelectedHighlight
+	line.clear_points()
+	if note_property_star:
+		for i in range(5):
+			var vec = Vector2(cos(i * TAU/5), sin(i * TAU/5)) * size / cos(TAU/10)
+			line.add_point(vec)
+	else:
+		for i in range(4):
+			var vec = Vector2(cos(i * TAU/4+TAU/8), sin(i * TAU/4+TAU/8)) * size / cos(TAU/8)
+			line.add_point(vec)
 
+	
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
@@ -55,6 +68,9 @@ func initialize() -> void:
 		touch_star_draw()
 	else:
 		touch_draw()
+	
+	# Selected highlight
+	$Note/SelectedHighlight.default_color = Color.LIME
 
 
 func touch_draw() -> void:
@@ -135,6 +151,8 @@ func touch_draw() -> void:
 		note_path.curve = new_curve
 	for node in $Note/Segment4/Path2D/PathFollow2D.get_children():
 		node.queue_free()
+	
+	
 	
 	# Timeline stuff
 	for node in $TimelineIndicator.get_children():
@@ -312,3 +330,9 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 	else:
 		for child_node in node.get_children():
 			set_node_images_transparency(child_node, transparency)
+
+func set_selected(option: bool = selected):
+	selected = option
+	$Note/SelectedHighlight.visible = selected
+	for slider_node in $Sliders.get_children():
+		slider_node.set_selected(selected)

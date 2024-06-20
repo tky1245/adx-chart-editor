@@ -45,8 +45,8 @@ func _ready():
 		"sliders" = [{
 			"duration_arr" = [1, 1],
 			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "5", 0.0], [">", "2", 0.0], ["-", "6", 0.0], ["<", "1", 0.0]]
-			#"slider_shape_arr" = [["pp", "8", 0.0]],
+			"slider_shape_arr" = [["-", "7", 0.0], ["-", "5", 0.0], ["-", "8", 0.0]]
+			#"slider_shape_arr" = [["w", "2", 0.0]],
 		}],
 	}
 	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
@@ -55,6 +55,7 @@ func _ready():
 		"beat" = 5,
 		"note_position" = "E3",
 		"note_property_touch" = true,
+		"selected" = true,
 		#"sliders" = [{
 			#"duration_arr" = [1, 1],
 			#"delay_arr" = [1, 4],
@@ -69,6 +70,7 @@ func _ready():
 		"note_position" = "5",
 		"duration_arr" = [1, 4],
 		"bpm" = 240,
+		"selected" = true,
 		"note_property_break" = true,
 		"note_property_ex" = true,
 	}
@@ -81,6 +83,7 @@ func _ready():
 		"duration_arr" = [1, 2],
 		"bpm" = 240,
 		"note_property_touch" = true,
+		"selected" = true,
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH_HOLD, note4_args))
 	

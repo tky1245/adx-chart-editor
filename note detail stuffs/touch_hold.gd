@@ -83,6 +83,13 @@ func note_render(current_time: float) -> void:
 					progress_circle_polygon.polygon = reshape(polygon, angle, )
 				else:
 					progress_circle_polygon.visible = false
+		
+		# Selected Highlight
+		var new_polygon: PackedVector2Array = []
+		for i in range(4):
+			var poly = petal_polygon(39-17*path_progress, 6)
+			new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
+		$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -182,6 +189,9 @@ func touch_hold_draw() -> void:
 		new_line.width = 8
 		new_line.position = Vector2(0, 15 * note_pos - 6)
 		$TimelineIndicator.add_child(new_line)
+	
+	$Note/SelectedHighlight.default_color = Color.LIME
+	
 
 func timeline_object_render() -> void: #TODO change visible range
 	var time_1 = Global.timeline_beats[beat]
@@ -260,3 +270,9 @@ func reshape(petal: PackedVector2Array, angle: float, point_sign: int = 1) -> Pa
 					var new_point = Vector2(intersect_x, intersect_y)
 					new_polygon.append(new_point)
 	return new_polygon
+
+func set_selected(option: bool = selected):
+	selected = option
+	$Note/SelectedHighlight.visible = selected
+	for slider_node in $Sliders.get_children():
+		slider_node.set_selected(selected)

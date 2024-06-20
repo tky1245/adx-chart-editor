@@ -10,6 +10,7 @@ var delay: float
 var slider_head_position: String
 var slider_shape_arr: Array # contains matches of [shape, target_position, length]
 
+var selected: bool
 
 var position_offset: Vector2
 #var shape_length: Dictionary
@@ -40,6 +41,7 @@ func slider_render(current_time: float) -> void:
 		var transparency = (current_time - slide_intro_time - Global.note_speed_in_time * 0.5) / (Global.note_speed_in_time * 0.5) 
 		transparency = transparency if transparency >= 0 else 0
 		set_node_images_transparency($SliderArrows, transparency)
+		set_node_images_transparency($SelectedHighlight, transparency)
 		$SliderSegments.visible = false
 		slider_progress = 0
 		transparency_value = initial_transparency
@@ -77,6 +79,8 @@ func slider_render(current_time: float) -> void:
 				for node in path_follow.get_children():
 					node.scale = Vector2(scale_value, scale_value)
 	set_node_images_transparency($SliderSegments, transparency_value)
+	$SelectedHighlight.visible = selected and $SliderArrows.visible
+	
 	
 	for arrow_path in $SliderArrows.get_children():
 		for arrow_path_follow in arrow_path.get_children():
@@ -107,11 +111,10 @@ func slider_render(current_time: float) -> void:
 					path_progress = 1
 	
 func initialize(parent_position: Vector2) -> void: # set up all the shape positions
-	position_offset = -parent_position
-	position = position_offset
-	
+	set_position_offset(-parent_position)
 	set_duration()
 	set_delay()
+	
 	for node in $SliderSegments.get_children(): # Clean up
 		node.queue_free()
 	# Generate slider segments according to array
@@ -132,26 +135,29 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		slider_shape_arr[i][2] = path_curve.get_baked_length() # do length calculation beforehand
 		if slider_shape_arr[i][0] == "w": # wifi slider handling, add 2 side star paths
 			var target_pos = Global.touch_positions[slider_shape_arr[i][1]]
-			var distance = target_pos.distance_to(Vector2(0, 0)) * cos(TAU/16)
-			var bearing = atan2(target_pos.y, target_pos.x)
+			var initial_pos = Global.touch_positions[slider_shape_arr[i-1][1]] if i != 0 else Global.touch_positions[slider_head_position]
+			var distance = target_pos.distance_to(initial_pos) * cos(TAU/16)
+			var relative_pos = target_pos - initial_pos
+			var relative_bearing = atan2(relative_pos.y, relative_pos.x)
 			var path_left = Path2D.new()
 			var curve_left = Curve2D.new()
 			if i == 0:
 				curve_left.add_point(Global.touch_positions[slider_head_position])
 			else:
 				curve_left.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
-			curve_left.add_point(distance * Vector2(cos(bearing + TAU/8), sin(bearing + TAU/8)))
+			curve_left.add_point(initial_pos + distance * Vector2(cos(relative_bearing + TAU/16), sin(relative_bearing + TAU/16)))
 			path_left.curve = curve_left
 			new_node.add_child(path_left)
 			var path_follow_left = PathFollow2D.new()
 			path_left.add_child(path_follow_left)
+			
 			var path_right = Path2D.new()
 			var curve_right = Curve2D.new()
 			if i == 0:
 				curve_right.add_point(Global.touch_positions[slider_head_position])
 			else:
 				curve_right.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
-			curve_right.add_point(distance * Vector2(cos(bearing - TAU/8), sin(bearing - TAU/8)))
+			curve_right.add_point(initial_pos + distance * Vector2(cos(relative_bearing - TAU/16), sin(relative_bearing - TAU/16)))
 			path_right.curve = curve_right
 			new_node.add_child(path_right)
 			var path_follow_right = PathFollow2D.new()
@@ -253,6 +259,31 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	var head_pos = int(slider_head_position) if slider_head_position != "C" else 8
 	line_node.position = Vector2(0, 15 * int(head_pos) - 6)
 	$TimelineIndicator.add_child(line_node)
+	
+	# Draw highlight based on existing paths
+	var curve: PackedVector2Array = []
+	for i in range(slider_shape_arr.size()):
+		if i == 0:
+			var path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_head_position).get_baked_points()
+			curve.append_array(path_curve)
+		else:
+			var path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_shape_arr[i-1][1]).get_baked_points()
+			path_curve.remove_at(0)
+			curve.append_array(path_curve)
+	for node in $SelectedHighlight.get_children():
+		node.queue_free()
+	
+	var new_curve_arr = Geometry2D.offset_polyline(curve, 20)
+	for new_curve in new_curve_arr:
+		var highlight_line = Line2D.new()
+		highlight_line.closed = true
+		highlight_line.width = 3
+		highlight_line.default_color = Color.LIME
+		
+		highlight_line.points = new_curve
+		$SelectedHighlight.add_child(highlight_line)
+	
+			
 
 func set_duration(arr: Array = duration_arr) -> void:
 	duration_arr = arr
@@ -267,6 +298,10 @@ func set_delay(arr: Array = delay_arr) -> void:
 		delay = delay_arr[0]
 	else:
 		delay = 60.0 * Global.beats_per_bar / bpm * (float(delay_arr[0]) / delay_arr[1])
+
+func set_position_offset(offset = position_offset):
+	position_offset = offset
+	position = position_offset
 
 func timeline_object_render() -> void:
 	var time_1 = Global.timeline_beats[beat] + delay
@@ -437,3 +472,5 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 		for child_node in node.get_children():
 			set_node_images_transparency(child_node, transparency)
 
+func set_selected(option: bool):
+	selected = option

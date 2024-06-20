@@ -46,9 +46,10 @@ curve = SubResource("Curve2D_2i1nq")
 
 [node name="CenterDot" type="Node2D" parent="Note"]
 
+[node name="SelectedHighlight" type="Line2D" parent="Note"]
+closed = true
+width = 3.0
+
 [node name="Sliders" type="Node2D" parent="."]
 
 [node name="TimelineIndicator" type="Node2D" parent="."]
-
-[node name="Polygon2D" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(-2, 0, -15.757, 13.757, -20, 9.515, 2.243, 0, -20, -9.515, -15.757, -13.757)

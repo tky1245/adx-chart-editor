@@ -63,9 +63,11 @@ func note_render(current_time: float) -> void:
 		var start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
 		var end_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * end_progress
 		for line in $Note.get_children():
-				hexagon_shape(start_point, end_point, 18, line)
+				var radius = 18 if line.name != "SelectedHighlight" else 32
+				hexagon_shape(start_point, end_point, radius, line)
 				line.self_modulate.a = intro_progress
 				line.scale = Vector2(intro_progress, intro_progress)
+	
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -102,19 +104,25 @@ func tap_hold_draw() -> void:
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_base"]
 	
 	# Tap hold
-	var note_outline = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
-	note_outline.default_color = Color.WHITE
-	note_outline.width = 11
-	$Note.add_child(note_outline)
 	if note_property_ex:
 		var note_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
 		note_highlight.default_color = note_color_highlight_ex
 		note_highlight.width = 18
 		$Note.add_child(note_highlight)
+	var note_outline = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
+	note_outline.default_color = Color.WHITE
+	note_outline.width = 11
+	$Note.add_child(note_outline)
 	var note_hold = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
 	note_hold.default_color = note_color_inner
 	note_hold.width = 8
 	$Note.add_child(note_hold)
+	
+	var selected_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0), 32)
+	selected_highlight.name = "SelectedHighlight"
+	selected_highlight.default_color = Color.LIME
+	selected_highlight.width = 3
+	$Note.add_child(selected_highlight)
 	
 	# Timeline indicator
 	for node in $TimelineIndicator.get_children():
@@ -167,3 +175,9 @@ func hexagon_shape(point_1: Vector2, point_2: Vector2, radius: float = 18, hexag
 		hexagon.set_point_position(4, point_2 + Vector2(radius, 0).rotated(angle))
 		hexagon.set_point_position(5, point_2 + Vector2(radius, 0).rotated(angle + TAU / 6))
 		return hexagon
+
+func set_selected(option: bool = selected):
+	selected = option
+	$Note/SelectedHighlight.visible = selected
+	for slider_node in $Sliders.get_children():
+		slider_node.set_selected(selected)

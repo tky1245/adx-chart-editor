@@ -43,6 +43,9 @@ curve = SubResource("Curve2D_s80wk")
 
 [node name="CenterDot" type="Node2D" parent="Note"]
 
+[node name="SelectedHighlight" type="Line2D" parent="Note"]
+width = 3.0
+
 [node name="Sliders" type="Node2D" parent="."]
 
 [node name="TimelineIndicator" type="Node2D" parent="."]
