@@ -7,6 +7,8 @@
 [node name="TouchHold" type="Node2D"]
 script = ExtResource("1_c71yu")
 
+[node name="Sliders" type="Node2D" parent="."]
+
 [node name="Note" type="Node2D" parent="."]
 
 [node name="ProgressCircle" type="Node2D" parent="Note"]
@@ -46,7 +48,5 @@ curve = SubResource("Curve2D_s80wk")
 [node name="SelectedHighlight" type="Line2D" parent="Note"]
 closed = true
 width = 3.0
-
-[node name="Sliders" type="Node2D" parent="."]
 
 [node name="TimelineIndicator" type="Node2D" parent="."]

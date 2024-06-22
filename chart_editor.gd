@@ -26,7 +26,7 @@ var note_objects: Array = [] # {"Beat": int, "Node": Node} # to be removed
 var timeline_dragging: bool = false
 
 # note edit
-var selected_notes: Array
+var selected_notes: Array[Node2D]
 
 func _ready():
 	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location
@@ -109,7 +109,6 @@ func _ready():
 	timeline_object_update()
 	timeline_render("all")
 
-
 func _input(event): # man that precoded slider sucks
 	if bar_dragging:
 		if event is InputEventMouse:
@@ -156,9 +155,6 @@ func _on_option_pressed(index):
 		pass
 	if index == 2: #Return to menu
 		get_tree().change_scene_to_file("res://main_menu.tscn")
-
-
-
 
 # Placement Tool Toggles
 func _on_tap_toggle_pressed():
@@ -302,11 +298,22 @@ func _on_progress_bar_gui_input(event): # Song Progress Bar Dragged
 
 func _on_note_timeline_gui_input(event): # Timeline Dragged
 	if event is InputEventMouseButton and event.pressed:
-		timeline_dragging = true
-		$PlaybackControls/PlayPause.text = "▶" # Stop the song from continue playing
-		$Timeline/SongTimer.stop()
-		$AudioPlayers/TrackPlayer.stop()
-		previous_mouse_position = Vector2(-1, -1)
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			timeline_dragging = true
+			$PlaybackControls/PlayPause.text = "▶" # Stop the song from continue playing
+			$Timeline/SongTimer.stop()
+			$AudioPlayers/TrackPlayer.stop()
+			previous_mouse_position = Vector2(-1, -1)
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) <  Global.timeline_beats.size() - 1:
+				current_time = Global.timeline_beats[time_to_beat(current_time) + 1]
+			else:
+				current_time =  Global.timeline_beats[time_to_beat(current_time)]
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) > 0:
+				current_time = Global.timeline_beats[time_to_beat(current_time) - 1]
+			else:
+				current_time =  Global.timeline_beats[time_to_beat(current_time)]
 
 func timeline_visible_range_update(): # Update timeline, use before render
 	var leftmost_time: float = current_time + float(Global.timeline_leftmost_x - Global.timeline_pointer_x) / Global.timeline_pixels_to_second / Global.timeline_zoom
@@ -399,7 +406,6 @@ func timeline_object_update():
 	timeline_render("beat")
 	timeline_render("note")
 
-
 func arrange_by_beat(arr): # Bubble sort
 	var temp_arr: Array = arr
 	var swapped = false
@@ -477,7 +483,6 @@ func time_to_beat(time: float) -> int:
 					return i
 
 	return Global.timeline_beats.back()
-
 
 # Handles BPM/BD change window/button
 func _on_add_bpm_node_pressed():
@@ -590,7 +595,6 @@ func _on_bd_node_clicked(node):
 	Global.beat_change_cursor = node
 	add_bd_window_show()
 
-
 # we got them zoomies
 func _on_zoom_up_pressed():
 	if Global.timeline_zoom < 8:
@@ -599,7 +603,6 @@ func _on_zoom_up_pressed():
 func _on_zoom_down_pressed():
 	if Global.timeline_zoom > 0.125:
 		Global.timeline_zoom *= 0.5
-
 
 func _on_button_pressed(): # debug button
 	#print(Global.timeline_beats) # whys there a 0 in the end
