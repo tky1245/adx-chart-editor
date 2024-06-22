@@ -599,10 +599,14 @@ func _on_bd_node_clicked(node):
 func _on_zoom_up_pressed():
 	if Global.timeline_zoom < 8:
 		Global.timeline_zoom *= 2
-
+	for note in $Notes.get_children():
+		note.timeline_object_draw()
+		
 func _on_zoom_down_pressed():
 	if Global.timeline_zoom > 0.125:
 		Global.timeline_zoom *= 0.5
+	for note in $Notes.get_children():
+		note.timeline_object_draw()
 
 func _on_button_pressed(): # debug button
 	#print(Global.timeline_beats) # whys there a 0 in the end

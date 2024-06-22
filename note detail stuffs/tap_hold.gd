@@ -138,7 +138,7 @@ func timeline_object_draw() -> void:
 	$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
 	$TimelineIndicator.add_child(new_hexagon)
 	var indicator_highlight = Line2D.new()
-	var poly = Geometry2D.offset_polygon(hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0), 4, null, 0).points, 4)[0]
+	var poly = Geometry2D.offset_polygon(hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second / Global.timeline_zoom, 0), 4, null, 0).points, 4)[0]
 	indicator_highlight.points = poly
 	indicator_highlight.closed = true
 	indicator_highlight.default_color = Color.LIME
