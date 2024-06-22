@@ -67,7 +67,6 @@ func note_render(current_time: float) -> void:
 				hexagon_shape(start_point, end_point, radius, line)
 				line.self_modulate.a = intro_progress
 				line.scale = Vector2(intro_progress, intro_progress)
-	
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -79,26 +78,22 @@ func initialize() -> void:
 	tap_hold_draw()
 	for slider in sliders: #soontm
 		pass
-		
+
 func tap_hold_draw() -> void:
 	# Colors
-	var note_color_timeline_indicator
 	var note_color_outer
 	var note_color_inner
 	var note_color_highlight_ex
 
 	if note_property_break:
-		note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
 		note_color_outer = Global.note_colors["tap_outer_break"]
 		note_color_inner = Global.note_colors["tap_inner_break"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_break"]
 	elif note_property_both:
-		note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]
 		note_color_outer = Global.note_colors["tap_outer_both"]
 		note_color_inner = Global.note_colors["tap_inner_both"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_both"]
 	else:
-		note_color_timeline_indicator = Global.note_colors["tap_indicator_base"]
 		note_color_outer = Global.note_colors["tap_outer_base"]
 		note_color_inner = Global.note_colors["tap_inner_base"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_base"]
@@ -124,14 +119,34 @@ func tap_hold_draw() -> void:
 	selected_highlight.width = 3
 	$Note.add_child(selected_highlight)
 	
-	# Timeline indicator
+	timeline_object_draw()
+
+func timeline_object_draw() -> void:
+	var note_color_timeline_indicator
+	if note_property_break:
+		note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
+	elif note_property_both:
+		note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]
+	else:
+		note_color_timeline_indicator = Global.note_colors["tap_indicator_base"]
+	
 	for node in $TimelineIndicator.get_children():
 		node.free()
 	var new_hexagon = hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0), 4, null, 0)
 	new_hexagon.default_color = note_color_timeline_indicator
 	new_hexagon.width = 2
-	new_hexagon.position = Vector2(0, 15 * int(note_position) - 6)
+	$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
 	$TimelineIndicator.add_child(new_hexagon)
+	var indicator_highlight = Line2D.new()
+	var poly = Geometry2D.offset_polygon(hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0), 4, null, 0).points, 4)[0]
+	indicator_highlight.points = poly
+	indicator_highlight.closed = true
+	indicator_highlight.default_color = Color.LIME
+	indicator_highlight.width = 2
+	$TimelineIndicator.add_child(indicator_highlight)
+	
+	for slider in $Sliders.get_children():
+		slider.timeline_object_draw()
 
 func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
@@ -152,7 +167,7 @@ func timeline_object_render() -> void: #TODO change visible range
 	var time_2 = time_1 + duration
 	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true
-		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time_1), 516)
+		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time_1)
 	else:
 		$TimelineIndicator.visible = false
 

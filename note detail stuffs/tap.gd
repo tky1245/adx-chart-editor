@@ -74,23 +74,19 @@ func initialize() -> void:
 
 func tap_draw() -> void:
 	# Colors
-	var note_color_timeline_indicator
 	var note_color_outer
 	var note_color_inner
 	var note_color_highlight_ex
 
 	if note_property_break:
-		note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
 		note_color_outer = Global.note_colors["tap_outer_break"]
 		note_color_inner = Global.note_colors["tap_inner_break"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_break"]
 	elif note_property_both:
-		note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]
 		note_color_outer = Global.note_colors["tap_outer_both"]
 		note_color_inner = Global.note_colors["tap_inner_both"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_both"]
 	else:
-		note_color_timeline_indicator = Global.note_colors["tap_indicator_base"]
 		note_color_outer = Global.note_colors["tap_outer_base"]
 		note_color_inner = Global.note_colors["tap_inner_base"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_base"]
@@ -110,33 +106,22 @@ func tap_draw() -> void:
 	var selected_highlight = circle(Color.LIME, 3, 30)
 	selected_highlight.name = "SelectedHighlight"
 	note_pathfollow.add_child(selected_highlight)
-	
-	
-	# Timeline stuffs
-	for node in $TimelineIndicator.get_children():
-		node.free()
-	var new_line = circle(note_color_timeline_indicator, 2, 4, 16)
-	new_line.position = Vector2(0, 15 * int(note_position) - 6)
-	$TimelineIndicator.add_child(new_line)
+	timeline_object_draw()
 	
 func star_draw() -> void:
 	# Colors
-	var note_color_timeline_indicator
 	var note_color_outer
 	var note_color_inner
 	var note_color_highlight_ex
 	if note_property_break:
-		note_color_timeline_indicator = Global.note_colors["star_indicator_break"]
 		note_color_outer = Global.note_colors["star_outer_break"]
 		note_color_inner = Global.note_colors["star_inner_break"]
 		note_color_highlight_ex = Global.note_colors["star_highlight_ex_break"]
 	elif note_property_both:
-		note_color_timeline_indicator = Global.note_colors["star_indicator_both"]
 		note_color_outer = Global.note_colors["star_outer_both"]
 		note_color_inner = Global.note_colors["star_inner_both"]
 		note_color_highlight_ex = Global.note_colors["star_highlight_ex_both"]
 	else:
-		note_color_timeline_indicator = Global.note_colors["star_indicator_base"]
 		note_color_outer = Global.note_colors["star_outer_base"]
 		note_color_inner = Global.note_colors["star_inner_base"]
 		note_color_highlight_ex = Global.note_colors["star_highlight_ex_base"]
@@ -162,20 +147,53 @@ func star_draw() -> void:
 	var selected_highlight = star(Color.LIME, 3, 35)
 	selected_highlight.name = "SelectedHighlight"
 	note_pathfollow.add_child(selected_highlight)
+	timeline_object_draw()
+
+func timeline_object_draw() -> void:
+	if !note_property_star:
+		var note_color_timeline_indicator
+		if note_property_break:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
+		elif note_property_both:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]
+		else:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_base"]
+		
+		$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
+		for node in $TimelineIndicator.get_children():
+			node.free()
+		var new_line = circle(note_color_timeline_indicator, 2, 4, 16)
+		$TimelineIndicator.add_child(new_line)
+		var highlight_line = circle(Color.LIME, 2, 8, 16)
+		highlight_line.name = "IndicatorHighlight"
+		$TimelineIndicator.add_child(highlight_line)
+	else:
+		var note_color_timeline_indicator
+		if note_property_break:
+			note_color_timeline_indicator = Global.note_colors["star_indicator_break"]
+		elif note_property_both:
+			note_color_timeline_indicator = Global.note_colors["star_indicator_both"]
+		else:
+			note_color_timeline_indicator = Global.note_colors["star_indicator_base"]
+		
+		$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
+		for node in $TimelineIndicator.get_children():
+			node.free()
+		var new_line = star(note_color_timeline_indicator, 2, 6)
+		$TimelineIndicator.add_child(new_line)
+		var highlight_line = star(Color.LIME, 2, 12)
+		highlight_line.name = "IndicatorHighlight"
+		$TimelineIndicator.add_child(highlight_line)
 	
-	# Timeline stuffs
-	for node in $TimelineIndicator.get_children():
-		node.free()
-	var new_line = star(note_color_timeline_indicator, 2, 6)
-	new_line.position = Vector2(0, 15 * int(note_position) - 6)
-	$TimelineIndicator.add_child(new_line)
+	for slider in $Sliders.get_children():
+		slider.timeline_object_draw()
 
 func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
 	var angle = (Global.note_pos_mod(int(pos)) * 2 - 1) * TAU / 16
 	$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
 	$Sliders.position = $Note.position
-	
+	$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
 	# Setting note path
 	var new_curve = Curve2D.new()
 	var start_point = Vector2(0, 0)
@@ -203,7 +221,7 @@ func timeline_object_render() -> void:
 	var time = Global.timeline_beats[beat]
 	if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true
-		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time), 516)
+		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)
 	else:
 		$TimelineIndicator.visible = false
 	for slider in $Sliders.get_children():
@@ -233,5 +251,7 @@ func star(color: Color, width: float,  radius: float = 18) -> Line2D: # star tap
 func set_selected(option: bool = selected):
 	selected = option
 	$Note/Path2D/PathFollow2D/SelectedHighlight.visible = selected
+	var s = $TimelineIndicator.get_children()
+	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)

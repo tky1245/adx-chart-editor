@@ -173,8 +173,10 @@ func touch_hold_draw() -> void:
 	$Note/CenterDot.add_child(center_dot_outline)
 	if sliders.size() != 0:
 		pass
+	timeline_object_draw()
+	$Note/SelectedHighlight.default_color = Color.LIME
 
-	# Timeline
+func timeline_object_draw() -> void:
 	for node in $TimelineIndicator.get_children():
 		node.free()
 	for i in range(4):
@@ -187,18 +189,24 @@ func touch_hold_draw() -> void:
 		new_line.add_point(point_2)
 		new_line.default_color = color
 		new_line.width = 8
-		new_line.position = Vector2(0, 15 * note_pos - 6)
+		$TimelineIndicator.position = Vector2(0, 15 * note_pos + 510)
 		$TimelineIndicator.add_child(new_line)
-	
-	$Note/SelectedHighlight.default_color = Color.LIME
-	
+	var indicator_highlight = Line2D.new()
+	var poly = Geometry2D.offset_polyline([Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0)], 8)[0]
+	indicator_highlight.points = poly
+	indicator_highlight.closed = true
+	indicator_highlight.default_color = Color.LIME
+	indicator_highlight.width = 2
+	$TimelineIndicator.add_child(indicator_highlight)
+	for slider in $Sliders.get_children():
+		slider.timeline_object_draw()
 
 func timeline_object_render() -> void: #TODO change visible range
 	var time_1 = Global.timeline_beats[beat]
 	var time_2 = time_1 + duration
 	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true
-		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time_1), 516)
+		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time_1)
 	else:
 		$TimelineIndicator.visible = false
 

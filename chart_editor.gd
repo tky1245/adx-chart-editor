@@ -26,7 +26,7 @@ var note_objects: Array = [] # {"Beat": int, "Node": Node} # to be removed
 var timeline_dragging: bool = false
 
 # note edit
-
+var selected_notes: Array
 
 func _ready():
 	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location

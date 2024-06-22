@@ -11,10 +11,7 @@ var slider_head_position: String
 var slider_shape_arr: Array # contains matches of [shape, target_position, length]
 
 var selected: bool
-
 var position_offset: Vector2
-#var shape_length: Dictionary
-
 
 func slider_render(current_time: float) -> void:
 	var slide_intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
@@ -165,20 +162,16 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	# Set color
 	var slider_arrow_color_top
 	var slider_arrow_color_bottom
-	var slider_arrow_color_timeline_indicator
 	if slider_property_break:
 		slider_arrow_color_top = Global.note_colors["slider_top_break"]
 		slider_arrow_color_bottom = Global.note_colors["slider_bottom_break"]
-		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_break"]
 	elif slider_property_both:
 		slider_arrow_color_top = Global.note_colors["slider_top_both"]
 		slider_arrow_color_bottom = Global.note_colors["slider_bottom_both"]
-		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_both"]
 	else:
 		slider_arrow_color_top = Global.note_colors["slider_top_base"]
 		slider_arrow_color_bottom = Global.note_colors["slider_bottom_base"]
-		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_base"]
-	
+		
 	var star_color_inner
 	var star_color_outer
 	if slider_property_break:
@@ -238,6 +231,7 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 					new_path_follow.add_child(new_arrow)
 				temp_distance += distance
 	
+	
 	# Add stars for each path
 	for path_holder in $SliderSegments.get_children():
 		for path in path_holder.get_children():
@@ -252,13 +246,6 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 			path_follow.add_child(note_outline_out)
 			var note_outline_out_2 = star(Color.BLACK, 1, 24)
 			path_follow.add_child(note_outline_out_2)
-	
-	for node in $TimelineIndicator.get_children():
-		node.free()
-	var line_node = arrow_line(slider_arrow_color_timeline_indicator, duration * Global.timeline_pixels_to_second)
-	var head_pos = int(slider_head_position) if slider_head_position != "C" else 8
-	line_node.position = Vector2(0, 15 * int(head_pos) - 6)
-	$TimelineIndicator.add_child(line_node)
 	
 	# Draw highlight based on existing paths
 	var curve: PackedVector2Array = []
@@ -283,7 +270,30 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		highlight_line.points = new_curve
 		$SelectedHighlight.add_child(highlight_line)
 	
-			
+	timeline_object_draw()
+	
+func timeline_object_draw() -> void:
+	var slider_arrow_color_timeline_indicator
+	if slider_property_break:
+		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_break"]
+	elif slider_property_both:
+		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_both"]
+	else:
+		slider_arrow_color_timeline_indicator = Global.note_colors["slider_indicator_base"]
+	
+	var head_pos = int(slider_head_position) if slider_head_position != "C" else 8
+	$TimelineIndicator.position = Vector2(0, 15 * int(head_pos) + 510) - Global.preview_center
+	for node in $TimelineIndicator.get_children():
+		node.free()
+	var line_node = arrow_line(slider_arrow_color_timeline_indicator, duration * Global.timeline_pixels_to_second)
+	$TimelineIndicator.add_child(line_node)
+	var indicator_highlight = Line2D.new()
+	var poly = Geometry2D.offset_polygon([Vector2(0, -3), Vector2(0, 3), Vector2(duration * Global.timeline_pixels_to_second, 3), Vector2(duration * Global.timeline_pixels_to_second, -3)],4)[0]
+	indicator_highlight.points = poly
+	indicator_highlight.closed = true
+	indicator_highlight.default_color = Color.LIME
+	indicator_highlight.width = 2
+	$TimelineIndicator.add_child(indicator_highlight)
 
 func set_duration(arr: Array = duration_arr) -> void:
 	duration_arr = arr
@@ -308,7 +318,7 @@ func timeline_object_render() -> void:
 	var time_2 = time_1 + duration
 	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true
-		$TimelineIndicator.position = Vector2(Global.time_to_timeline_pos_x(time_1), 516) - Global.preview_center
+		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time_1) - Global.preview_center.x
 	else:
 		$TimelineIndicator.visible = false
 
