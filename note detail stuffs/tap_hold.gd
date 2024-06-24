@@ -13,6 +13,23 @@ var sliders: Array = []
 
 var selected: bool
 
+func _input(event):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if $Note.visible:
+			var note_selected_highlight = $Note.get_child($Note.get_child_count()-1)
+			if Geometry2D.is_point_in_polygon(event.position, note_selected_highlight.points * Transform2D(0.0, -note_selected_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+		if $TimelineIndicator.visible:
+			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
@@ -67,6 +84,7 @@ func note_render(current_time: float) -> void:
 				hexagon_shape(start_point, end_point, radius, line)
 				line.self_modulate.a = intro_progress
 				line.scale = Vector2(intro_progress, intro_progress)
+
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -132,13 +150,14 @@ func timeline_object_draw() -> void:
 	
 	for node in $TimelineIndicator.get_children():
 		node.free()
-	var new_hexagon = hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0), 4, null, 0)
+	var new_hexagon = hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second * Global.timeline_zoom, 0), 4, null, 0)
 	new_hexagon.default_color = note_color_timeline_indicator
 	new_hexagon.width = 2
 	$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
 	$TimelineIndicator.add_child(new_hexagon)
 	var indicator_highlight = Line2D.new()
-	var poly = Geometry2D.offset_polygon(hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second / Global.timeline_zoom, 0), 4, null, 0).points, 4)[0]
+	var poly = Geometry2D.offset_polygon(hexagon_shape(Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second * Global.timeline_zoom, 0), 4, null, 0).points, 4)[0]
+	indicator_highlight.name = "IndicatorHighlight"
 	indicator_highlight.points = poly
 	indicator_highlight.closed = true
 	indicator_highlight.default_color = Color.LIME
@@ -155,6 +174,7 @@ func set_note_position(pos: String = note_position) -> void:
 	var angle = (int(note_position) * 2 - 1) * TAU / 16
 	$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
 
+	
 func set_duration(arr: Array = duration_arr) -> void:
 	duration_arr = arr
 	if duration_arr[1] == 0:
@@ -194,5 +214,6 @@ func hexagon_shape(point_1: Vector2, point_2: Vector2, radius: float = 18, hexag
 func set_selected(option: bool = selected):
 	selected = option
 	$Note/SelectedHighlight.visible = selected
+	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)

@@ -13,6 +13,37 @@ var slider_shape_arr: Array # contains matches of [shape, target_position, lengt
 var selected: bool
 var position_offset: Vector2
 
+func _input(event):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if $SliderArrows.visible:
+			var area_arr: Array[PackedVector2Array]
+			var area_exclude_arr: Array[PackedVector2Array]
+			for line in $SelectedHighlight.get_children():
+				var poly = line.points
+				if Geometry2D.is_polygon_clockwise(poly):
+					area_exclude_arr.append(poly)
+				else:
+					area_arr.append(poly)
+			if Geometry2D.is_point_in_polygon(event.position, area_arr[0] * Transform2D(0.0, -$SelectedHighlight.global_position)):
+				var in_excluded_area: bool = false
+				for poly in area_exclude_arr:
+					if Geometry2D.is_point_in_polygon(event.position, poly * Transform2D(0.0, -$SelectedHighlight.global_position)):
+						in_excluded_area = true
+				if in_excluded_area == false:
+					var note = get_parent().get_parent()
+					if Global.selected_notes == [note]:
+						Global.selected_notes.clear()
+					else:
+						Global.selected_notes = [note]
+		if $TimelineIndicator.visible:
+			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
+				var note = get_parent().get_parent()
+				if Global.selected_notes == [note]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [note]
+
 func slider_render(current_time: float) -> void:
 	var slide_intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
 	var slide_head_hit_time = Global.timeline_beats[beat]
@@ -106,7 +137,7 @@ func slider_render(current_time: float) -> void:
 				else:
 					path_holder.visible = false
 					path_progress = 1
-	
+
 func initialize(parent_position: Vector2) -> void: # set up all the shape positions
 	set_position_offset(-parent_position)
 	set_duration()
@@ -271,7 +302,7 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		$SelectedHighlight.add_child(highlight_line)
 	
 	timeline_object_draw()
-	
+
 func timeline_object_draw() -> void:
 	var slider_arrow_color_timeline_indicator
 	if slider_property_break:
@@ -285,10 +316,11 @@ func timeline_object_draw() -> void:
 	$TimelineIndicator.position = Vector2(0, 15 * int(head_pos) + 510) - Global.preview_center
 	for node in $TimelineIndicator.get_children():
 		node.free()
-	var line_node = arrow_line(slider_arrow_color_timeline_indicator, duration * Global.timeline_pixels_to_second)
+	var line_node = arrow_line(slider_arrow_color_timeline_indicator, duration * Global.timeline_pixels_to_second * Global.timeline_zoom)
 	$TimelineIndicator.add_child(line_node)
 	var indicator_highlight = Line2D.new()
-	var poly = Geometry2D.offset_polygon([Vector2(0, -3), Vector2(0, 3), Vector2(duration * Global.timeline_pixels_to_second, 3), Vector2(duration * Global.timeline_pixels_to_second, -3)],4)[0]
+	var poly = Geometry2D.offset_polygon([Vector2(0, -3), Vector2(0, 3), Vector2(duration * Global.timeline_pixels_to_second * Global.timeline_zoom, 3), Vector2(duration * Global.timeline_pixels_to_second * Global.timeline_zoom, -3)],4)[0]
+	indicator_highlight.name = "IndicatorHighlight"
 	indicator_highlight.points = poly
 	indicator_highlight.closed = true
 	indicator_highlight.default_color = Color.LIME
@@ -484,3 +516,4 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 
 func set_selected(option: bool):
 	selected = option
+	$TimelineIndicator/IndicatorHighlight.visible = selected

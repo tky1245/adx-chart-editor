@@ -26,7 +26,7 @@ var note_objects: Array = [] # {"Beat": int, "Node": Node} # to be removed
 var timeline_dragging: bool = false
 
 # note edit
-var selected_notes: Array[Node2D]
+
 
 func _ready():
 	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location
@@ -41,7 +41,6 @@ func _ready():
 		"beat" = 4,
 		"note_position" = "1",
 		"note_property_star" = true,
-		"selected" = true,
 		"sliders" = [{
 			"duration_arr" = [1, 1],
 			"delay_arr" = [1, 4],
@@ -55,7 +54,6 @@ func _ready():
 		"beat" = 5,
 		"note_position" = "E3",
 		"note_property_touch" = true,
-		"selected" = true,
 		#"sliders" = [{
 			#"duration_arr" = [1, 1],
 			#"delay_arr" = [1, 4],
@@ -70,7 +68,6 @@ func _ready():
 		"note_position" = "5",
 		"duration_arr" = [1, 4],
 		"bpm" = 240,
-		"selected" = true,
 		"note_property_break" = true,
 		"note_property_ex" = true,
 	}
@@ -83,7 +80,6 @@ func _ready():
 		"duration_arr" = [1, 2],
 		"bpm" = 240,
 		"note_property_touch" = true,
-		"selected" = true,
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH_HOLD, note4_args))
 	
@@ -138,6 +134,13 @@ func _input(event): # man that precoded slider sucks
 		timeline_render("all")
 		if event is InputEventMouseButton and !event.pressed:
 			timeline_dragging = false
+	
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		for note in $Notes.get_children():
+			if note in Global.selected_notes:
+				note.set_selected(true)
+			else:
+				note.set_selected(false)
 		
 func _process(_delta):
 	for note in $Notes.get_children():
@@ -615,5 +618,5 @@ func _on_button_pressed(): # debug button
 	print("Current time:",current_time)
 	print("Beat:", time_to_beat(current_time))
 	print(timeline_bar_time)
-	print($ChartPreview/SelectedHighlight.points)
+
 

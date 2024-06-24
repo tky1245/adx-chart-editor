@@ -12,6 +12,23 @@ var sliders: Array = [] # Consists of dicts
 
 var selected: bool
 
+func _input(event): # Handling note select
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if $Note.visible:
+			var note_selected_highlight = $Note/Path2D/PathFollow2D.get_child($Note/Path2D/PathFollow2D.get_child_count() - 1)
+			if Geometry2D.is_point_in_polygon(event.position, note_selected_highlight.points * Transform2D(-note_selected_highlight.rotation, Vector2(0, 0)) * Transform2D(0.0, -note_selected_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+		if $TimelineIndicator.visible:
+			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
@@ -51,7 +68,7 @@ func note_render(current_time: float) -> void:
 	#TODO: spin the note
 	if note_property_star:
 		for node in note_pathfollow.get_children():
-			node.rotation = current_time * TAU * 10
+			node.rotation = current_time * TAU * 4
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -147,6 +164,8 @@ func star_draw() -> void:
 	var selected_highlight = star(Color.LIME, 3, 35)
 	selected_highlight.name = "SelectedHighlight"
 	note_pathfollow.add_child(selected_highlight)
+	
+	
 	timeline_object_draw()
 
 func timeline_object_draw() -> void:
@@ -184,7 +203,7 @@ func timeline_object_draw() -> void:
 		var highlight_line = star(Color.LIME, 2, 12)
 		highlight_line.name = "IndicatorHighlight"
 		$TimelineIndicator.add_child(highlight_line)
-	
+		
 	for slider in $Sliders.get_children():
 		slider.timeline_object_draw()
 
@@ -251,10 +270,11 @@ func star(color: Color, width: float,  radius: float = 18) -> Line2D: # star tap
 func set_selected(option: bool = selected):
 	selected = option
 	$Note/Path2D/PathFollow2D/SelectedHighlight.visible = selected
-	var s = $TimelineIndicator.get_children()
 	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)
 
 func set_duration():
 	pass
+
+

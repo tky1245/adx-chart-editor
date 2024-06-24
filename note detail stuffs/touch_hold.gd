@@ -13,6 +13,23 @@ var sliders: Array = []
 
 var selected: bool
 
+func _input(event): # Handling note select
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if $Note.visible:
+			var note_selected_highlight = $Note/SelectedHighlight
+			if Geometry2D.is_point_in_polygon(event.position, note_selected_highlight.points * Transform2D(0.0, -note_selected_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+		if $TimelineIndicator.visible:
+			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
@@ -112,6 +129,7 @@ func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
 	$Note.position = Global.preview_center + Global.touch_positions[note_position]
 
+
 func touch_hold_draw() -> void:
 	for node in $Note/ProgressCircle.get_children():
 		node.queue_free()
@@ -182,8 +200,8 @@ func timeline_object_draw() -> void:
 	for i in range(4):
 		var color = Global.note_colors["touch_hold_" + str(i+1)]
 		var new_line = Line2D.new()
-		var point_1 = Vector2(i / 4.0 * duration * Global.timeline_pixels_to_second, 0)
-		var point_2 = Vector2((i + 1) / 4.0 * duration * Global.timeline_pixels_to_second, 0)
+		var point_1 = Vector2(i / 4.0 * duration * Global.timeline_pixels_to_second * Global.timeline_zoom, 0)
+		var point_2 = Vector2((i + 1) / 4.0 * duration * Global.timeline_pixels_to_second * Global.timeline_zoom, 0)
 		var note_pos = int(note_position) if note_position != "C" else 8
 		new_line.add_point(point_1)
 		new_line.add_point(point_2)
@@ -192,7 +210,8 @@ func timeline_object_draw() -> void:
 		$TimelineIndicator.position = Vector2(0, 15 * note_pos + 510)
 		$TimelineIndicator.add_child(new_line)
 	var indicator_highlight = Line2D.new()
-	var poly = Geometry2D.offset_polyline([Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second, 0)], 8)[0]
+	var poly = Geometry2D.offset_polyline([Vector2(0, 0), Vector2(duration * Global.timeline_pixels_to_second * Global.timeline_zoom, 0)], 8)[0]
+	indicator_highlight.name = "IndicatorHighlight"
 	indicator_highlight.points = poly
 	indicator_highlight.closed = true
 	indicator_highlight.default_color = Color.LIME
@@ -282,5 +301,7 @@ func reshape(petal: PackedVector2Array, angle: float, point_sign: int = 1) -> Pa
 func set_selected(option: bool = selected):
 	selected = option
 	$Note/SelectedHighlight.visible = selected
+	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)
+

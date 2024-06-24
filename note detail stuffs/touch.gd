@@ -12,6 +12,23 @@ var sliders: Array = []
 
 var selected: bool
 
+func _input(event): # Handling note select
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if $Note.visible:
+			var note_selected_highlight = $Note/SelectedHighlight
+			if Geometry2D.is_point_in_polygon(event.position, note_selected_highlight.points * Transform2D(0.0, -note_selected_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+		if $TimelineIndicator.visible:
+			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
+				if Global.selected_notes == [self]:
+					Global.selected_notes.clear()
+				else:
+					Global.selected_notes = [self]
+
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
@@ -56,6 +73,7 @@ func note_render(current_time: float) -> void:
 		for i in range(4):
 			var vec = Vector2(cos(i * TAU/4+TAU/8), sin(i * TAU/4+TAU/8)) * size / cos(TAU/8)
 			line.add_point(vec)
+
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -218,6 +236,7 @@ func timeline_object_draw() -> void:
 		$TimelineIndicator.add_child(new_line)
 		var indicator_highlight = Line2D.new()
 		var poly = [Vector2(8, 8), Vector2(8, -8), Vector2(-8, -8), Vector2(-8, 8)]
+		indicator_highlight.name = "IndicatorHighlight"
 		indicator_highlight.points = poly
 		indicator_highlight.closed = true
 		indicator_highlight.default_color = Color.LIME
@@ -246,6 +265,7 @@ func timeline_object_draw() -> void:
 		$TimelineIndicator.add_child(new_line)
 		var indicator_highlight = Line2D.new()
 		var poly = [Vector2(8, 8), Vector2(8, -8), Vector2(-8, -8), Vector2(-8, 8)]
+		indicator_highlight.name = "IndicatorHighlight"
 		indicator_highlight.points = poly
 		indicator_highlight.closed = true
 		indicator_highlight.default_color = Color.LIME
@@ -353,8 +373,10 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 func set_selected(option: bool = selected):
 	selected = option
 	$Note/SelectedHighlight.visible = selected
+	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)
 
 func set_duration():
 	pass
+
