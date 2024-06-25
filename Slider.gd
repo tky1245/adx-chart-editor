@@ -196,7 +196,6 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		if i != 0:
 			for j in range(i):
 				elapsed_distance += slider_shape_arr[j][2]
-		print(elapsed_distance)
 		var new_path = Path2D.new()
 		var path_curve = $SliderSegments.get_child(i).get_child(0).curve
 		new_path.curve = path_curve
@@ -427,7 +426,6 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		
 		while total_angle < TAU/4:
 			total_angle += TAU
-		print(rad_to_deg(total_angle))
 		for i in range(total_angle / TAU * frequency):
 			var point_angle = intro_tangent_bearing - i * TAU / frequency 
 			curve.add_point(circle_center + circle_radius * Vector2(cos(point_angle), sin(point_angle)))
@@ -443,7 +441,6 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		var frequency = 360
 		while total_angle < TAU/4:
 			total_angle += TAU
-		print(rad_to_deg(total_angle))
 		for i in range(total_angle / TAU * frequency):
 			var point_angle = intro_tangent_bearing + i * TAU / frequency 
 			curve.add_point(circle_center + circle_radius * Vector2(cos(point_angle), sin(point_angle)))

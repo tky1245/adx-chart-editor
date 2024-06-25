@@ -337,6 +337,7 @@ offset_top = 35.0
 offset_right = 1107.0
 offset_bottom = 479.0
 theme = ExtResource("2_3k4yr")
+scroll_vertical = 10
 horizontal_scroll_mode = 0
 
 [node name="Properties" type="VBoxContainer" parent="NoteDetails/ScrollContainer"]
@@ -359,10 +360,14 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Note Pos:"
 
-[node name="LineEdit" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos"]
+[node name="NotePos1" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos"]
+layout_mode = 2
+max_length = 2
+
+[node name="NotePos2" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos"]
 layout_mode = 2
 placeholder_text = "1-8"
-max_length = 1
+max_length = 2
 
 [node name="NodeBX" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
 layout_mode = 2
@@ -643,6 +648,8 @@ text = "btn"
 [connection signal="toggled" from="PlacementTools/EXToggle" to="." method="_on_ex_toggle_toggled"]
 [connection signal="toggled" from="PlacementTools/TouchToggle" to="." method="_on_touch_toggle_toggled"]
 [connection signal="toggled" from="PlacementTools/FireworkToggle" to="." method="_on_firework_toggle_toggled"]
+[connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1" to="." method="_on_note_pos_1_text_changed"]
+[connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2" to="." method="_on_note_pos_2_text_changed"]
 [connection signal="gui_input" from="PlaybackControls/TimeSlider/ProgressBar" to="." method="_on_progress_bar_gui_input"]
 [connection signal="pressed" from="PlaybackControls/PlayPause" to="." method="_on_play_pause_pressed"]
 [connection signal="pressed" from="PlaybackControls/Stop" to="." method="_on_stop_pressed"]

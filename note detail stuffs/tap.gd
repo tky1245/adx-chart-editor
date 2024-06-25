@@ -1,17 +1,16 @@
 extends Node2D
-
-var beat: int
-var bpm: float
-var note_property_break: bool
-var note_property_ex: bool
-var note_property_touch: bool
-var note_property_firework: bool
-var note_property_both: bool
-var note_property_star: bool
-var note_position: String
+var type = Note.type.TAP
+var beat: int = 0
+var bpm: float = 0.0
+var note_property_break: bool = false
+var note_property_ex: bool = false
+var note_property_firework: bool = false
+var note_property_both: bool = false
+var note_property_star: bool = false
+var note_position: String = ""
 var sliders: Array = [] # Consists of dicts
 
-var selected: bool
+var selected: bool = false
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
@@ -204,6 +203,12 @@ func set_note_position(pos: String = note_position) -> void:
 	var end_point = (Global.preview_radius - Global.initial_note_distance) * Vector2(sin(angle), -cos(angle))
 	new_curve.add_point(end_point)
 	$Note/Path2D.curve = new_curve
+	for slider in $Sliders.get_children():
+		slider.queue_free()
+	for slider_args in sliders: # make sliders
+		if sliders.size() > 1:
+			slider_args["slider_property_both"] = true
+		create_slider(slider_args)
 
 func create_slider(slider_args: Dictionary) -> void:
 	var slider = preload("res://note detail stuffs/slider.tscn")
@@ -272,3 +277,18 @@ func select_area() -> Array:
 	for slider in $Sliders.get_children():
 		arr.append_array(slider.select_area())
 	return arr
+
+func get_args() -> Dictionary:
+	var new_dict: Dictionary = {
+	"beat": beat,
+	"bpm": bpm,
+	"note_property_break": note_property_break,
+	"note_property_ex": note_property_ex,
+	"note_property_firework": note_property_firework,
+	"note_property_both": note_property_both,
+	"note_property_star": note_property_star,
+	"note_position": note_position,
+	"sliders": sliders,
+	"selected": selected,
+	}
+	return new_dict

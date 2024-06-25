@@ -1,73 +1,71 @@
 extends Node2D
-
-var beat: int
-var bpm: float
+var type = Note.type.TAP_HOLD
+var beat: int = 0
+var bpm: float = 0.0
 var duration_arr: Array = [1, 4] # [x, y]: x/y of a bar; if y = 0, use x as seconds
-var duration: float
-var note_property_break: bool
-var note_property_ex: bool
-var note_property_touch: bool
-var note_property_firework: bool
-var note_property_both: bool
-var note_position: String
+var duration: float = 0.0
+var note_property_break: bool = false
+var note_property_ex: bool = false
+var note_property_firework: bool = false
+var note_property_both: bool = false
+var note_position: String = ""
 var sliders: Array = []
 
-var selected: bool
+var selected: bool = false
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
 
 func note_render(current_time: float) -> void:
-	if !note_property_touch: # hold logic
-		var angle = (int(note_position) * 2 - 1) * TAU / 16
-		
-		var intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
-		var move_time_start_point = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
-		var judge_time_start_point = Global.timeline_beats[beat]
-		var move_time_end_point = Global.timeline_beats[beat] + duration - Global.note_speed_in_time * 0.7
-		var judge_time_end_point = Global.timeline_beats[beat] + duration
-		
-		var intro_progress: float
-		var start_progress: float
-		var end_progress: float
-		
-		if current_time < intro_time:
-			$Note.visible = false
-			intro_progress = 0
-			start_progress = 0
-			end_progress = 0
-		elif current_time < move_time_start_point:
-			$Note.visible = true
-			intro_progress = (current_time - intro_time) / (move_time_start_point - intro_time)
-			start_progress = 0
-			end_progress = 0
-		elif current_time >= judge_time_end_point:
-			$Note.visible = false
-			intro_progress = 1
-			start_progress = 1
-			end_progress = 1
+	var angle = (int(note_position) * 2 - 1) * TAU / 16
+	
+	var intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
+	var move_time_start_point = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
+	var judge_time_start_point = Global.timeline_beats[beat]
+	var move_time_end_point = Global.timeline_beats[beat] + duration - Global.note_speed_in_time * 0.7
+	var judge_time_end_point = Global.timeline_beats[beat] + duration
+	
+	var intro_progress: float
+	var start_progress: float
+	var end_progress: float
+	
+	if current_time < intro_time:
+		$Note.visible = false
+		intro_progress = 0
+		start_progress = 0
+		end_progress = 0
+	elif current_time < move_time_start_point:
+		$Note.visible = true
+		intro_progress = (current_time - intro_time) / (move_time_start_point - intro_time)
+		start_progress = 0
+		end_progress = 0
+	elif current_time >= judge_time_end_point:
+		$Note.visible = false
+		intro_progress = 1
+		start_progress = 1
+		end_progress = 1
+	else:
+		$Note.visible = true
+		intro_progress = 1
+		if current_time < judge_time_start_point:
+			start_progress = (current_time - move_time_start_point) / (judge_time_start_point - move_time_start_point)
 		else:
-			$Note.visible = true
-			intro_progress = 1
-			if current_time < judge_time_start_point:
-				start_progress = (current_time - move_time_start_point) / (judge_time_start_point - move_time_start_point)
-			else:
-				start_progress = 1
-			if current_time < move_time_end_point:
-				end_progress = 0
-			elif current_time < judge_time_end_point:
-				end_progress = (current_time - move_time_end_point) / (judge_time_end_point - move_time_end_point)
-			else:
-				end_progress = 1
-		
-		var start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
-		var end_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * end_progress
-		for line in $Note.get_children():
-				var radius = 18 if line.name != "SelectedHighlight" else 32
-				hexagon_shape(start_point, end_point, radius, line)
-				line.self_modulate.a = intro_progress
-				line.scale = Vector2(intro_progress, intro_progress)
+			start_progress = 1
+		if current_time < move_time_end_point:
+			end_progress = 0
+		elif current_time < judge_time_end_point:
+			end_progress = (current_time - move_time_end_point) / (judge_time_end_point - move_time_end_point)
+		else:
+			end_progress = 1
+	
+	var start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
+	var end_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * end_progress
+	for line in $Note.get_children():
+			var radius = 18 if line.name != "SelectedHighlight" else 32
+			hexagon_shape(start_point, end_point, radius, line)
+			line.self_modulate.a = intro_progress
+			line.scale = Vector2(intro_progress, intro_progress)
 
 
 func slider_render(current_time: float) -> void:
@@ -102,6 +100,8 @@ func tap_hold_draw() -> void:
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_base"]
 	
 	# Tap hold
+	for node in $Note.get_children():
+		node.queue_free()
 	if note_property_ex:
 		var note_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
 		note_highlight.default_color = note_color_highlight_ex
@@ -154,11 +154,11 @@ func timeline_object_draw() -> void:
 
 func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
-	for node in $Note.get_children():
-		node.queue_free()
+
 	var angle = (int(note_position) * 2 - 1) * TAU / 16
 	$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
-
+	for slider in $Sliders.get_children():
+		slider.initialize($Note.position - Global.preview_center)
 	
 func set_duration(arr: Array = duration_arr) -> void:
 	duration_arr = arr
@@ -214,3 +214,19 @@ func select_area() -> Array:
 	for slider in $Sliders.get_children():
 		arr.append_array(slider.select_area())
 	return arr
+
+func get_args() -> Dictionary:
+	var new_dict: Dictionary = {
+	"beat": beat,
+	"bpm": bpm,
+	"duration_arr": duration_arr,
+	"duration": duration,
+	"note_property_break": note_property_break,
+	"note_property_ex": note_property_ex,
+	"note_property_firework": note_property_firework,
+	"note_property_both": note_property_both,
+	"note_position": note_position,
+	"sliders": sliders,
+	"selected": selected,
+	}
+	return new_dict

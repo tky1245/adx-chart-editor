@@ -44,7 +44,7 @@ func _ready():
 		"sliders" = [{
 			"duration_arr" = [1, 1],
 			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "7", 0.0], ["-", "5", 0.0], ["-", "8", 0.0]]
+			"slider_shape_arr" = [["-", "7", 0.0], ["-", "7", 0.0], ["-", "5", 0.0], ["-", "8", 0.0]]
 			#"slider_shape_arr" = [["w", "2", 0.0]],
 		}],
 	}
@@ -52,13 +52,15 @@ func _ready():
 	# touch test
 	var note2_args: Dictionary = {
 		"beat" = 5,
-		"note_position" = "E3",
+		"note_position" = "B2",
 		"note_property_touch" = true,
-		#"sliders" = [{
-			#"duration_arr" = [1, 1],
-			#"delay_arr" = [1, 4],
-			#"slider_shape_arr" = [["-", "E6", 0.0]],
-		#}]
+		"note_property_star" = true,
+		"sliders" = [{
+			"duration_arr" = [1, 1],
+			"delay_arr" = [1, 4],
+			#"slider_shape_arr" = [["<", "C4", 0.0], ["<", "A7", 0.0], ["<", "C6", 0.0], [">", "A3", 0.0]],
+			"slider_shape_arr" = [["<", "B4", 0.0]],
+		}]
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
 	
@@ -105,7 +107,7 @@ func _ready():
 	timeline_object_update()
 	timeline_render("all")
 
-func _input(event): # man that precoded slider sucks
+func _input(event):
 	if bar_dragging:
 		if event is InputEventMouse:
 			if event.position.x < $PlaybackControls/TimeSlider/ProgressBar.position.x:
@@ -185,13 +187,13 @@ func _input(event): # man that precoded slider sucks
 								break
 				else:
 					Global.selected_notes = [Global.clicked_notes[0]]
-					
-		# why did it become empty tho
-		for note in $Notes.get_children():
-			if note in Global.selected_notes:
-				note.set_selected(true)
-			else:
-				note.set_selected(false)
+			for note in $Notes.get_children():
+				if note in Global.selected_notes:
+					note.set_selected(true)
+				else:
+					note.set_selected(false)
+			sync_note_details()
+			
 		
 func _process(_delta):
 	for note in $Notes.get_children():
@@ -670,4 +672,57 @@ func _on_button_pressed(): # debug button
 	print("Beat:", time_to_beat(current_time))
 	print(timeline_bar_time)
 
+func sync_note_details():
+	$NoteDetails.visible = true
+	if Global.selected_notes.size() == 1:
+		var note = Global.selected_notes[0]
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = note.note_position.left(-1)
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = note.note_position.right(1)
+		pass
+	else:
+		$NoteDetails.visible = false
+# um
 
+func _on_note_pos_1_text_changed(new_text):
+	var note = Global.selected_notes[0]
+	var added_text_arr: PackedStringArray = new_text.split(note.note_position.left(-1), false)
+	if added_text_arr.size() == 0: # removing alphabets
+		var note_position = $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text
+		if note.type in [Note.type.TOUCH, Note.type.TOUCH_HOLD]:
+			var new_type = Note.type.TAP if note.type == Note.type.TOUCH else Note.type.TAP_HOLD
+			var args: Dictionary = note.get_args()
+			args["note_position"] = note_position
+			var new_note = Note.new_note(new_type, args)
+			new_note.initialize()
+			$Notes.add_child(new_note)
+			Global.selected_notes = [new_note]
+			note.queue_free()
+		else: # not sure why is this needed tbh
+			note.set_note_position(note_position)
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = ""
+	elif added_text_arr[0].to_upper() in ["A", "B", "C", "D", "E"]:
+		var note_position = added_text_arr[0].to_upper() + $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text
+		if note.type in [Note.type.TAP, Note.type.TAP_HOLD]:
+			var new_type = Note.type.TOUCH if note.type == Note.type.TAP else Note.type.TOUCH_HOLD
+			var args: Dictionary = note.get_args()
+			args["note_position"] = note_position
+			var new_note = Note.new_note(new_type, args)
+			new_note.initialize()
+			$Notes.add_child(new_note)
+			Global.selected_notes = [new_note]
+			note.queue_free()
+		else:
+			note.set_note_position(note_position)
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = added_text_arr[0]
+	sync_note_details()
+
+
+func _on_note_pos_2_text_changed(new_text):
+	var note = Global.selected_notes[0]
+	var added_text_arr: PackedStringArray = new_text.split(note.note_position.right(1), false)
+	if added_text_arr.size() > 0:
+		if added_text_arr[0] in ["1", "2", "3", "4", "5", "6", "7", "8"]:
+			var note_position = $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text + added_text_arr[0]
+			note.set_note_position(note_position)
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = added_text_arr[0]
+	sync_note_details()

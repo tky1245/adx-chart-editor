@@ -1,96 +1,94 @@
 extends Node2D
-
-var beat: int
-var bpm: float
+var type = Note.type.TOUCH_HOLD
+var beat: int = 0
+var bpm: float = 0.0
 var duration_arr: Array = [1, 4] # [x, y]: x/y of a bar; if y = 0, use x as seconds
-var duration: float
-var note_property_break: bool
-var note_property_ex: bool
-var note_property_touch: bool
-var note_property_firework: bool
-var note_property_both: bool
-var note_position: String
+var duration: float = 0.0
+var note_property_break: bool = false
+var note_property_ex: bool = false
+var note_property_firework: bool = false
+var note_property_both: bool = false
+var note_position: String = ""
 var sliders: Array = []
 
-var selected: bool
+var selected: bool = false
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
 	slider_render(current_time)
 
 func note_render(current_time: float) -> void:
-	if note_property_touch: # touch hold logic
-		var intro_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time
-		var move_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
-		var judge_start: float = Global.timeline_beats[beat]
-		var judge_end: float = Global.timeline_beats[beat] + duration
-		
-		var intro_progress: float = 0
-		var path_progress: float = 0
-		var hold_progress: float = 0
-		
-		var radius = 6
-		var distance = 27
-		var polygon = petal_polygon(distance, radius)	
+	var intro_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time
+	var move_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
+	var judge_start: float = Global.timeline_beats[beat]
+	var judge_end: float = Global.timeline_beats[beat] + duration
+	
+	var intro_progress: float = 0
+	var path_progress: float = 0
+	var hold_progress: float = 0
+	
+	var radius = 6
+	var distance = 27
+	var polygon = petal_polygon(distance, radius)	
 
-		if current_time < intro_time:
-			$Note.visible = false
-			intro_progress = 0
-			path_progress = 0
-			hold_progress = 0
-		elif current_time < move_time:
-			$Note.visible = true
-			intro_progress = (current_time - intro_time) / (move_time - intro_time)
-			path_progress = 0
-			hold_progress = 0
-		elif current_time < judge_start:
-			$Note.visible = true
-			intro_progress = 1
-			path_progress = (current_time - move_time) / (judge_start - move_time)
-			hold_progress = 0
-		elif current_time < judge_end:
-			$Note.visible = true
-			intro_progress = 1
-			path_progress = 1
-			hold_progress = (current_time - judge_start) / duration
-		else:
-			$Note.visible = false
-			intro_progress = 1
-			path_progress = 1
-			hold_progress = 1
-		
+	if current_time < intro_time:
+		$Note.visible = false
+		intro_progress = 0
+		path_progress = 0
+		hold_progress = 0
+	elif current_time < move_time:
+		$Note.visible = true
+		intro_progress = (current_time - intro_time) / (move_time - intro_time)
+		path_progress = 0
+		hold_progress = 0
+	elif current_time < judge_start:
+		$Note.visible = true
+		intro_progress = 1
+		path_progress = (current_time - move_time) / (judge_start - move_time)
+		hold_progress = 0
+	elif current_time < judge_end:
+		$Note.visible = true
+		intro_progress = 1
+		path_progress = 1
+		hold_progress = (current_time - judge_start) / duration
+	else:
+		$Note.visible = false
+		intro_progress = 1
+		path_progress = 1
+		hold_progress = 1
+	
+	for i in range(4):
+		var note_pathfollow = $Note/Segments.get_child(i).get_child(0).get_child(0)
+		for node in note_pathfollow.get_children():
+			node.self_modulate.a = intro_progress	
+		note_pathfollow.progress_ratio = path_progress
+	for node in $Note/CenterDot.get_children():
+		node.self_modulate.a = intro_progress
+	
+	if hold_progress == 0.0:
+		for node in $Note/ProgressCircle.get_children():
+			node.visible = false
+	else:
 		for i in range(4):
-			var note_pathfollow = $Note/Segments.get_child(i).get_child(0).get_child(0)
-			for node in note_pathfollow.get_children():
-				node.self_modulate.a = intro_progress	
-			note_pathfollow.progress_ratio = path_progress
-		for node in $Note/CenterDot.get_children():
-			node.self_modulate.a = intro_progress
-		
-		if hold_progress == 0.0:
-			for node in $Note/ProgressCircle.get_children():
-				node.visible = false
-		else:
-			for i in range(4):
-				var progress_circle_polygon = $Note/ProgressCircle.get_child(i)
-				var n = int(hold_progress * 4)
-				progress_circle_polygon.self_modulate.a = intro_progress
-				if i < n:
-					progress_circle_polygon.polygon = polygon
-					progress_circle_polygon.visible = true
-				elif i == n:
-					progress_circle_polygon.visible = true
-					var angle = TAU / 4 - (hold_progress * 4 - n) * TAU / 4
-					progress_circle_polygon.polygon = reshape(polygon, angle, )
-				else:
-					progress_circle_polygon.visible = false
-		
-		# Selected Highlight
-		var new_polygon: PackedVector2Array = []
-		for i in range(4):
-			var poly = petal_polygon(39-17*path_progress, 6)
-			new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
-		$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
+			var progress_circle_polygon = $Note/ProgressCircle.get_child(i)
+			var n = int(hold_progress * 4)
+			progress_circle_polygon.self_modulate.a = intro_progress
+			if i < n:
+				progress_circle_polygon.polygon = polygon
+				progress_circle_polygon.visible = true
+			elif i == n:
+				progress_circle_polygon.visible = true
+				var angle = TAU / 4 - (hold_progress * 4 - n) * TAU / 4
+				progress_circle_polygon.polygon = reshape(polygon, angle, )
+			else:
+				progress_circle_polygon.visible = false
+	
+	# Selected Highlight
+	var new_polygon: PackedVector2Array = []
+	for i in range(4):
+		var poly = petal_polygon(39-17*path_progress, 6)
+		new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
+	$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -113,7 +111,8 @@ func set_duration(arr: Array = duration_arr) -> void:
 func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
 	$Note.position = Global.preview_center + Global.touch_positions[note_position]
-
+	for slider in $Sliders.get_children():
+		slider.initialize($Note.position - Global.preview_center)
 
 func touch_hold_draw() -> void:
 	for node in $Note/ProgressCircle.get_children():
@@ -301,3 +300,19 @@ func select_area() -> Array:
 	for slider in $Sliders.get_children():
 		arr.append_array(slider.select_area())
 	return arr
+
+func get_args() -> Dictionary:
+	var new_dict: Dictionary = {
+	"beat": beat,
+	"bpm": bpm,
+	"duration_arr": duration_arr,
+	"duration": duration,
+	"note_property_break": note_property_break,
+	"note_property_ex": note_property_ex,
+	"note_property_firework": note_property_firework,
+	"note_property_both": note_property_both,
+	"note_position": note_position,
+	"sliders": sliders,
+	"selected": selected,
+	}
+	return new_dict
