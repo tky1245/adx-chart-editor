@@ -59,11 +59,7 @@ func slider_render(current_time: float) -> void:
 
 func initialize() -> void:
 	set_note_position()
-	if note_property_star:
-		star_draw()
-	else:
-		tap_draw()
-	
+	note_draw()
 	for node in $Sliders.get_children():
 		node.queue_free()
 	for slider_args in sliders: # make sliders
@@ -72,6 +68,12 @@ func initialize() -> void:
 		create_slider(slider_args)
 	set_selected()
 
+func note_draw() -> void:
+	if note_property_star:
+		star_draw()
+	else:
+		tap_draw()
+	
 func tap_draw() -> void:
 	# Colors
 	var note_color_outer
@@ -95,7 +97,8 @@ func tap_draw() -> void:
 	var note_path = $Note/Path2D
 	var note_pathfollow = $Note/Path2D/PathFollow2D
 	for node in note_pathfollow.get_children():
-		node.queue_free()
+		if node.name != "SelectedHighlight":
+			node.queue_free()
 	if note_property_ex:
 		var note_highlight_ex = circle(note_color_highlight_ex, 17)
 		note_pathfollow.add_child(note_highlight_ex)
@@ -103,9 +106,9 @@ func tap_draw() -> void:
 	note_pathfollow.add_child(note_outline)
 	var note_circle = circle(note_color_inner, 8)
 	note_pathfollow.add_child(note_circle)
-	var selected_highlight = circle(Color.LIME, 3, 30)
-	selected_highlight.name = "SelectedHighlight"
-	note_pathfollow.add_child(selected_highlight)
+	var selected_highlight = $Note/Path2D/PathFollow2D/SelectedHighlight
+	selected_highlight.points = circle(Color.LIME, 3, 30).points
+	selected_highlight.default_color = Color.LIME
 	timeline_object_draw()
 	
 func star_draw() -> void:
@@ -129,7 +132,8 @@ func star_draw() -> void:
 	var note_path = $Note/Path2D
 	var note_pathfollow = $Note/Path2D/PathFollow2D
 	for node in note_pathfollow.get_children():
-		node.queue_free()
+		if node.name != "SelectedHighlight":
+			node.queue_free()
 	# Star tap
 	if note_property_ex:
 		var note_highlight = star(note_color_highlight_ex, 5, 26)
@@ -144,10 +148,9 @@ func star_draw() -> void:
 	note_pathfollow.add_child(note_outline_out)
 	var note_outline_out_2 = star(Color.BLACK, 1, 24)
 	note_pathfollow.add_child(note_outline_out_2)
-	var selected_highlight = star(Color.LIME, 3, 35)
-	selected_highlight.name = "SelectedHighlight"
-	note_pathfollow.add_child(selected_highlight)
-	
+	var selected_highlight = $Note/Path2D/PathFollow2D/SelectedHighlight
+	selected_highlight.points = star(Color.LIME, 3, 35).points
+	selected_highlight.default_color = Color.LIME
 	
 	timeline_object_draw()
 

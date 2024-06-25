@@ -57,17 +57,13 @@ func note_render(current_time: float) -> void:
 			var vec = Vector2(cos(i * TAU/4+TAU/8), sin(i * TAU/4+TAU/8)) * size / cos(TAU/8)
 			line.add_point(vec)
 
-
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 
 func initialize() -> void:
 	set_note_position()
-	if note_property_star:
-		touch_star_draw()
-	else:
-		touch_draw()
+	note_draw()
 	for node in $Sliders.get_children():
 		node.queue_free()
 	for slider_args in sliders: # make sliders
@@ -77,6 +73,12 @@ func initialize() -> void:
 	# Selected highlight
 	$Note/SelectedHighlight.default_color = Color.LIME
 	set_selected()
+
+func note_draw() -> void:
+	if note_property_star:
+		touch_star_draw()
+	else:
+		touch_draw()
 
 func touch_draw() -> void:
 	# Colors

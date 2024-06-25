@@ -67,7 +67,6 @@ func note_render(current_time: float) -> void:
 			line.self_modulate.a = intro_progress
 			line.scale = Vector2(intro_progress, intro_progress)
 
-
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
@@ -79,6 +78,9 @@ func initialize() -> void:
 	for slider in sliders: #soontm
 		pass
 	set_selected()
+
+func note_draw() -> void:
+	tap_hold_draw()
 
 func tap_hold_draw() -> void:
 	# Colors
@@ -101,7 +103,8 @@ func tap_hold_draw() -> void:
 	
 	# Tap hold
 	for node in $Note.get_children():
-		node.queue_free()
+		if node.name != "SelectedHighlight":
+			node.queue_free()
 	if note_property_ex:
 		var note_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0))
 		note_highlight.default_color = note_color_highlight_ex
@@ -116,11 +119,9 @@ func tap_hold_draw() -> void:
 	note_hold.width = 8
 	$Note.add_child(note_hold)
 	
-	var selected_highlight = hexagon_shape(Vector2(0, 0), Vector2(0, 0), 32)
-	selected_highlight.name = "SelectedHighlight"
+	var selected_highlight = $Note/SelectedHighlight
+	selected_highlight.points = hexagon_shape(Vector2(0, 0), Vector2(0, 0), 32).points
 	selected_highlight.default_color = Color.LIME
-	selected_highlight.width = 3
-	$Note.add_child(selected_highlight)
 	
 	timeline_object_draw()
 

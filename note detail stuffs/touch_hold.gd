@@ -97,7 +97,7 @@ func slider_render(current_time: float) -> void:
 func initialize() -> void:
 	set_duration()
 	set_note_position()
-	touch_hold_draw()
+	note_draw()
 	set_selected()
 
 
@@ -113,6 +113,9 @@ func set_note_position(pos: String = note_position) -> void:
 	$Note.position = Global.preview_center + Global.touch_positions[note_position]
 	for slider in $Sliders.get_children():
 		slider.initialize($Note.position - Global.preview_center)
+
+func note_draw() -> void:
+	touch_hold_draw()
 
 func touch_hold_draw() -> void:
 	for node in $Note/ProgressCircle.get_children():

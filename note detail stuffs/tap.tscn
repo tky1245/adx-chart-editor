@@ -16,4 +16,8 @@ curve = SubResource("Curve2D_env6b")
 
 [node name="PathFollow2D" type="PathFollow2D" parent="Note/Path2D"]
 
+[node name="SelectedHighlight" type="Line2D" parent="Note/Path2D/PathFollow2D"]
+closed = true
+width = 3.0
+
 [node name="TimelineIndicator" type="Node2D" parent="."]

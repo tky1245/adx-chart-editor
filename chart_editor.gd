@@ -44,7 +44,7 @@ func _ready():
 		"sliders" = [{
 			"duration_arr" = [1, 1],
 			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "7", 0.0], ["-", "7", 0.0], ["-", "5", 0.0], ["-", "8", 0.0]]
+			"slider_shape_arr" = [["-", "7", 0.0], ["-", "5", 0.0], ["-", "8", 0.0]]
 			#"slider_shape_arr" = [["w", "2", 0.0]],
 		}],
 	}
@@ -672,16 +672,26 @@ func _on_button_pressed(): # debug button
 	print("Beat:", time_to_beat(current_time))
 	print(timeline_bar_time)
 
+
+# Note Properties Edit
 func sync_note_details():
 	$NoteDetails.visible = true
 	if Global.selected_notes.size() == 1:
 		var note = Global.selected_notes[0]
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = note.note_position.left(-1)
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = note.note_position.right(1)
-		pass
+		
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Break.button_pressed = note.note_property_break
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/EX.button_pressed = note.note_property_ex
+		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.visible = false
+		else:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.visible = true
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.button_pressed = note.note_property_star
+		
+			
 	else:
 		$NoteDetails.visible = false
-# um
 
 func _on_note_pos_1_text_changed(new_text):
 	var note = Global.selected_notes[0]
@@ -716,7 +726,6 @@ func _on_note_pos_1_text_changed(new_text):
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = added_text_arr[0]
 	sync_note_details()
 
-
 func _on_note_pos_2_text_changed(new_text):
 	var note = Global.selected_notes[0]
 	var added_text_arr: PackedStringArray = new_text.split(note.note_position.right(1), false)
@@ -726,3 +735,21 @@ func _on_note_pos_2_text_changed(new_text):
 			note.set_note_position(note_position)
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = added_text_arr[0]
 	sync_note_details()
+
+func _on_break_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	note.note_property_break = toggled_on
+	note.note_draw()
+
+
+func _on_ex_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	note.note_property_ex = toggled_on
+	note.note_draw()
+
+
+func _on_star_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	if note.type not in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+		note.note_property_star = toggled_on
+		note.note_draw()

@@ -9,5 +9,9 @@ script = ExtResource("1_yb7pe")
 
 [node name="Note" type="Node2D" parent="."]
 
+[node name="SelectedHighlight" type="Line2D" parent="Note"]
+closed = true
+width = 3.0
+
 [node name="TimelineIndicator" type="Node2D" parent="."]
 clip_children = 1
