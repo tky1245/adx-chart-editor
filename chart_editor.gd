@@ -136,6 +136,57 @@ func _input(event): # man that precoded slider sucks
 			timeline_dragging = false
 	
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var note_clicked = false
+		Global.clicked_notes = []
+		for note in $Notes.get_children():
+			var note_select_area_arr = note.select_area()
+			if note_select_area_arr.size() > 0:
+				for area in note_select_area_arr:
+					if area is PackedVector2Array:
+						if Geometry2D.is_point_in_polygon(event.position, area):
+							Global.clicked_notes.append(note)
+							note_clicked = true
+							break
+					elif area is Array:
+						var area_arr: Array[PackedVector2Array]
+						var area_exclude_arr: Array[PackedVector2Array]
+						for poly in area:
+							if Geometry2D.is_polygon_clockwise(poly):
+								area_exclude_arr.append(poly)
+							else:
+								area_arr.append(poly)
+						if Geometry2D.is_point_in_polygon(event.position, area_arr[0]):
+							var in_excluded_area: bool = false
+							for poly in area_exclude_arr:
+								if Geometry2D.is_point_in_polygon(event.position, poly):
+									in_excluded_area = true
+									break
+							if in_excluded_area == false:
+								Global.clicked_notes.append(note)
+								note_clicked = true
+								break
+		Global.clicked_notes = Note.sort_note_by_index(Global.clicked_notes)
+		if note_clicked:
+			#if ctrl or other keys isnt held down
+			if Global.clicked_notes.size() == 1:
+				if Global.selected_notes == Global.clicked_notes:
+					Global.selected_notes = []
+				else:
+					Global.selected_notes = Global.clicked_notes
+			else: # handle cyclings
+				if Global.selected_notes.size() == 1 and Global.selected_notes[0] in Global.clicked_notes:
+					for i in range(Global.clicked_notes.size()):
+						if Global.clicked_notes[i] == Global.selected_notes[0]:
+							if i != Global.clicked_notes.size()-1:
+								Global.selected_notes[0] = Global.clicked_notes[i+1]
+								break
+							else:
+								Global.selected_notes[0] = Global.clicked_notes[0]
+								break
+				else:
+					Global.selected_notes = [Global.clicked_notes[0]]
+					
+		# why did it become empty tho
 		for note in $Notes.get_children():
 			if note in Global.selected_notes:
 				note.set_selected(true)

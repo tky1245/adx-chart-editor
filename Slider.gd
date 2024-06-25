@@ -13,37 +13,6 @@ var slider_shape_arr: Array # contains matches of [shape, target_position, lengt
 var selected: bool
 var position_offset: Vector2
 
-func _input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if $SliderArrows.visible:
-			var area_arr: Array[PackedVector2Array]
-			var area_exclude_arr: Array[PackedVector2Array]
-			for line in $SelectedHighlight.get_children():
-				var poly = line.points
-				if Geometry2D.is_polygon_clockwise(poly):
-					area_exclude_arr.append(poly)
-				else:
-					area_arr.append(poly)
-			if Geometry2D.is_point_in_polygon(event.position, area_arr[0] * Transform2D(0.0, -$SelectedHighlight.global_position)):
-				var in_excluded_area: bool = false
-				for poly in area_exclude_arr:
-					if Geometry2D.is_point_in_polygon(event.position, poly * Transform2D(0.0, -$SelectedHighlight.global_position)):
-						in_excluded_area = true
-				if in_excluded_area == false:
-					var note = get_parent().get_parent()
-					if Global.selected_notes == [note]:
-						Global.selected_notes.clear()
-					else:
-						Global.selected_notes = [note]
-		if $TimelineIndicator.visible:
-			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
-			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
-				var note = get_parent().get_parent()
-				if Global.selected_notes == [note]:
-					Global.selected_notes.clear()
-				else:
-					Global.selected_notes = [note]
-
 func slider_render(current_time: float) -> void:
 	var slide_intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
 	var slide_head_hit_time = Global.timeline_beats[beat]
@@ -517,3 +486,15 @@ func set_node_images_transparency(node: Node2D, transparency: float) -> void:
 func set_selected(option: bool):
 	selected = option
 	$TimelineIndicator/IndicatorHighlight.visible = selected
+
+func select_area() -> Array:
+	var arr: Array = []
+	if $SliderArrows.visible:
+		var note_selected_highlight_arr: Array[PackedVector2Array] = []
+		for line in $SelectedHighlight.get_children():
+			note_selected_highlight_arr.append(line.points * Transform2D(0.0, -$SelectedHighlight.global_position))
+		arr.append(note_selected_highlight_arr)
+	if $TimelineIndicator.visible:
+		var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+		arr.append(indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position))
+	return arr

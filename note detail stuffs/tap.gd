@@ -1,4 +1,5 @@
 extends Node2D
+
 var beat: int
 var bpm: float
 var note_property_break: bool
@@ -11,23 +12,6 @@ var note_position: String
 var sliders: Array = [] # Consists of dicts
 
 var selected: bool
-
-func _input(event): # Handling note select
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if $Note.visible:
-			var note_selected_highlight = $Note/Path2D/PathFollow2D.get_child($Note/Path2D/PathFollow2D.get_child_count() - 1)
-			if Geometry2D.is_point_in_polygon(event.position, note_selected_highlight.points * Transform2D(-note_selected_highlight.rotation, Vector2(0, 0)) * Transform2D(0.0, -note_selected_highlight.global_position)):
-				if Global.selected_notes == [self]:
-					Global.selected_notes.clear()
-				else:
-					Global.selected_notes = [self]
-		if $TimelineIndicator.visible:
-			var indicator_highlight = $TimelineIndicator/IndicatorHighlight
-			if Geometry2D.is_point_in_polygon(event.position, indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position)):
-				if Global.selected_notes == [self]:
-					Global.selected_notes.clear()
-				else:
-					Global.selected_notes = [self]
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
@@ -277,4 +261,14 @@ func set_selected(option: bool = selected):
 func set_duration():
 	pass
 
-
+func select_area() -> Array:
+	var arr: Array = []
+	if $Note.visible:
+		var note_selected_highlight = $Note/Path2D/PathFollow2D.get_child($Note/Path2D/PathFollow2D.get_child_count() - 1)
+		arr.append(note_selected_highlight.points * Transform2D(-note_selected_highlight.rotation, Vector2(0, 0)) * Transform2D(0.0, -note_selected_highlight.global_position))
+	if $TimelineIndicator.visible:
+		var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+		arr.append(indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position))
+	for slider in $Sliders.get_children():
+		arr.append_array(slider.select_area())
+	return arr

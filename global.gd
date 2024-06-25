@@ -12,6 +12,7 @@ const preview_radius = 200
 var touch_positions: Dictionary
 var initial_note_distance = 50
 var note_speed_in_time = 0.4
+var clicked_notes: Array[Node2D] = []
 var selected_notes: Array[Node2D] = []
 
 

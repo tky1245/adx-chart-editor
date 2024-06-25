@@ -26,3 +26,17 @@ func new_note(note_type: type, args: Dictionary) -> Node:
 
 	return note
 
+func sort_note_by_index(note_arr: Array[Node2D]) -> Array[Node2D]:
+	var temp_arr = note_arr
+	var swapped = false
+	for i in range(len(temp_arr)):
+		swapped = false
+		for j in range(len(temp_arr) - 1):
+			if temp_arr[j].get_index() > temp_arr[j + 1].get_index():
+				var temp = temp_arr[j] # dumb swapping
+				temp_arr[j] = temp_arr[j + 1]
+				temp_arr[j + 1] = temp
+				swapped = true
+		if swapped == false:
+			break
+	return temp_arr
