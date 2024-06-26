@@ -1,8 +1,63 @@
-[gd_scene format=3 uid="uid://cdc3b2ijgjbo8"]
+[gd_scene load_steps=2 format=3 uid="uid://cdc3b2ijgjbo8"]
+
+[sub_resource type="GDScript" id="GDScript_6ld8i"]
+script/source = "extends HBoxContainer
+var segment_index: int
+var shape_arr: Array
+signal shape_syntax_changed
+signal note_position_changed
+signal delete_pressed
+
+func sync_details(arr: Array):
+	shape_arr = arr
+	var shape = shape_arr[0]
+	for i in range($ShapeSyntax.item_count):
+		var txt = $ShapeSyntax.get_item_text(i)
+		if shape == txt:
+			$ShapeSyntax.selected = i
+	var note_position: String = shape_arr[1]
+	$Pos1.text = note_position.left(-1)
+	$Pos2.text = note_position.right(1)
+
+func _on_shape_syntax_item_selected(index):
+	shape_syntax_changed.emit(segment_index, $ShapeSyntax.get_item_text(index))
+
+func _on_pos_1_text_changed(new_text):
+	var added_text_arr: PackedStringArray = new_text.split(shape_arr[1].left(-1), false)
+	if added_text_arr.size() == 0: # removing alphabets
+		var note_position = $Pos2.text
+		_note_position_change(note_position)
+		$Pos1.text = \"\"
+	elif added_text_arr[0].to_upper() in [\"A\", \"B\", \"C\", \"D\", \"E\"]:
+		var note_position = added_text_arr[0].to_upper() + $Pos2.text
+		_note_position_change(note_position)
+		$Pos1.text = added_text_arr[0].to_upper()
+	else:
+		$Pos1.text = \"\"
+
+func _on_pos_2_text_changed(new_text):
+	var added_text_arr: PackedStringArray = new_text.split(shape_arr[1].right(1), false)
+	if added_text_arr.size() > 0:
+		if added_text_arr[0] in [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\"]:
+			var note_position = $Pos1.text + added_text_arr[0]
+			_note_position_change(note_position)
+			$Pos2.text = note_position.right(1)
+		else:
+			$Pos2.text = \"\"
+	else:
+		$Pos2.text = shape_arr[1].right(1)
+
+func _note_position_change(note_position):
+	note_position_changed.emit(segment_index, note_position)
+
+func _on_delete_pressed():
+	delete_pressed.emit(segment_index)
+"
 
 [node name="SliderShapeSegment" type="HBoxContainer"]
 offset_right = 40.0
 offset_bottom = 40.0
+script = SubResource("GDScript_6ld8i")
 
 [node name="Label2" type="Label" parent="."]
 layout_mode = 2
@@ -42,11 +97,18 @@ text = "pos:"
 
 [node name="Pos1" type="LineEdit" parent="."]
 layout_mode = 2
+max_length = 2
 
 [node name="Pos2" type="LineEdit" parent="."]
 layout_mode = 2
 placeholder_text = "1-8"
+max_length = 2
 
 [node name="Delete" type="Button" parent="."]
 layout_mode = 2
 text = "  -  "
+
+[connection signal="item_selected" from="ShapeSyntax" to="." method="_on_shape_syntax_item_selected"]
+[connection signal="text_changed" from="Pos1" to="." method="_on_pos_1_text_changed"]
+[connection signal="text_changed" from="Pos2" to="." method="_on_pos_2_text_changed"]
+[connection signal="pressed" from="Delete" to="." method="_on_delete_pressed"]

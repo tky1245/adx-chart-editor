@@ -60,12 +60,7 @@ func slider_render(current_time: float) -> void:
 func initialize() -> void:
 	set_note_position()
 	note_draw()
-	for node in $Sliders.get_children():
-		node.queue_free()
-	for slider_args in sliders: # make sliders
-		if sliders.size() > 1:
-			slider_args["slider_property_both"] = true
-		create_slider(slider_args)
+	slider_draw()
 	set_selected()
 
 func note_draw() -> void:
@@ -153,6 +148,14 @@ func star_draw() -> void:
 	selected_highlight.default_color = Color.LIME
 	
 	timeline_object_draw()
+
+func slider_draw() -> void:
+	for node in $Sliders.get_children():
+		node.queue_free()
+	for slider_args in sliders: # make sliders
+		if sliders.size() > 1:
+			slider_args["slider_property_both"] = true
+		create_slider(slider_args)
 
 func timeline_object_draw() -> void:
 	if !note_property_star:
@@ -266,7 +269,7 @@ func set_selected(option: bool = selected):
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)
 
-func set_duration():
+func set_duration(arr: Array):
 	pass
 
 func select_area() -> Array:

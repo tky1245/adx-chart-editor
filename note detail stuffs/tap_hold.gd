@@ -75,8 +75,7 @@ func initialize() -> void:
 	set_duration()
 	set_note_position()
 	tap_hold_draw()
-	for slider in sliders: #soontm
-		pass
+	slider_draw()
 	set_selected()
 
 func note_draw() -> void:
@@ -125,6 +124,14 @@ func tap_hold_draw() -> void:
 	
 	timeline_object_draw()
 
+func slider_draw() -> void:
+	for node in $Sliders.get_children():
+		node.queue_free()
+		for slider_args in sliders: # make sliders
+			if sliders.size() > 1:
+				slider_args["slider_property_both"] = true
+			create_slider(slider_args)
+
 func timeline_object_draw() -> void:
 	var note_color_timeline_indicator
 	if note_property_break:
@@ -167,6 +174,7 @@ func set_duration(arr: Array = duration_arr) -> void:
 		duration = duration_arr[0]
 	else:
 		duration = 60.0 * Global.beats_per_bar / bpm * (float(duration_arr[0]) / duration_arr[1])
+	timeline_object_draw()
 
 func timeline_object_render() -> void: #TODO change visible range
 	var time_1 = Global.timeline_beats[beat]
@@ -196,6 +204,9 @@ func hexagon_shape(point_1: Vector2, point_2: Vector2, radius: float = 18, hexag
 		hexagon.set_point_position(4, point_2 + Vector2(radius, 0).rotated(angle))
 		hexagon.set_point_position(5, point_2 + Vector2(radius, 0).rotated(angle + TAU / 6))
 		return hexagon
+
+func create_slider(slider_args: Dictionary) -> void:
+	pass
 
 func set_selected(option: bool = selected):
 	selected = option

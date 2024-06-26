@@ -98,6 +98,7 @@ func initialize() -> void:
 	set_duration()
 	set_note_position()
 	note_draw()
+	slider_draw()
 	set_selected()
 
 
@@ -107,6 +108,7 @@ func set_duration(arr: Array = duration_arr) -> void:
 		duration = duration_arr[0]
 	else:
 		duration = 60.0 * Global.beats_per_bar / bpm * (float(duration_arr[0]) / duration_arr[1])
+	timeline_object_draw()
 
 func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
@@ -180,6 +182,14 @@ func touch_hold_draw() -> void:
 		pass
 	timeline_object_draw()
 	$Note/SelectedHighlight.default_color = Color.LIME
+
+func slider_draw() -> void:
+	for node in $Sliders.get_children():
+		node.queue_free()
+		for slider_args in sliders: # make sliders
+			if sliders.size() > 1:
+				slider_args["slider_property_both"] = true
+			create_slider(slider_args)
 
 func timeline_object_draw() -> void:
 	for node in $TimelineIndicator.get_children():
@@ -291,6 +301,9 @@ func set_selected(option: bool = selected):
 	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)
+
+func create_slider(slider_args: Dictionary) -> void:
+	pass
 
 func select_area() -> Array:
 	var arr: Array = []

@@ -4,7 +4,6 @@ this is a project of adx chart editor
 still in progress tho
 
 todo:
-	- function to select a note and highlight it for further edits
 	- note edit stuffs
 	- automatically seek for note both property when edited/added
 	- function to add notes
@@ -14,10 +13,14 @@ todo:
 	- 
 
 soontm:
+	- handle 0 slide length notations (like 1-1)
+	- fix "<", ">" pathing for positions that are not on the same circumference
 	- finish each note type function(mostly done):
 		(hold slider implementation not done)
 	- finish drawing of each note type + distinguished color storing
 		(tap, hold and touch hold looks ok for now; fuck touch star)
+		(ex star hightlight redo)
+		(there are a bit of hollow within star's lines?)
 	- make sure everything works well
 	- utils like multi select, copy pasta, bulk delete
 	- utils like flip/rotate selected notes

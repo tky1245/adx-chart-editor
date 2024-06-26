@@ -1,22 +1,127 @@
-[gd_scene load_steps=2 format=3 uid="uid://cnfa6jwk4yk48"]
+[gd_scene load_steps=3 format=3 uid="uid://cnfa6jwk4yk48"]
 
 [ext_resource type="PackedScene" uid="uid://cdc3b2ijgjbo8" path="res://note detail stuffs/slider_shape_segment_detail.tscn" id="1_jwm3u"]
 
-[node name="Slider" type="VBoxContainer"]
+[sub_resource type="GDScript" id="GDScript_15ih1"]
+script/source = "extends VBoxContainer
+var note: Node2D
+var slider_index: int
+signal slider_deleted
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+func sync_details():
+	if note:
+		var slider_dict: Dictionary = note.sliders[slider_index]
+		$SliderNum/SliderIndexText.text = \"Slider \" + str(slider_index+1)
+		$HBoxContainer/Break.button_pressed = true if slider_dict.has(\"slider_property_break\") and slider_dict[\"slider_property_break\"] == true else false
+		$Properties/SliderDuration/DurationX.text = str(slider_dict[\"duration_arr\"][0])
+		$Properties/SliderDuration/DurationY.text = str(slider_dict[\"duration_arr\"][1])
+		$Properties/SliderDelay/DelayX.text = str(slider_dict[\"delay_arr\"][0])
+		$Properties/SliderDelay/DelayY.text = str(slider_dict[\"delay_arr\"][1])
+		
+		for node in $Properties/SliderShapeSegments/VBoxContainer.get_children():
+			node.queue_free()
+		
+		for i in range(slider_dict[\"slider_shape_arr\"].size()):
+			var slider_shape_segment_detail = preload(\"res://note detail stuffs/slider_shape_segment_detail.tscn\")
+			var new_node = slider_shape_segment_detail.instantiate()
+			new_node.segment_index = i
+			new_node.sync_details(slider_dict[\"slider_shape_arr\"][i])
+			new_node.connect(\"shape_syntax_changed\", _on_shape_syntax_change, 8)
+			new_node.connect(\"note_position_changed\", _on_note_position_change, 8)
+			new_node.connect(\"delete_pressed\", _on_delete_press, 8)
+			$Properties/SliderShapeSegments/VBoxContainer.add_child(new_node)
+			
+func _on_shape_syntax_change(segment_index, shape_syntax):
+	var slider_shape_arr = note.sliders[slider_index][\"slider_shape_arr\"]
+	slider_shape_arr[segment_index][0] = shape_syntax
+	note.sliders[slider_index][\"slider_shape_arr\"] = slider_shape_arr
+	note.slider_draw()
+	
+func _on_note_position_change(segment_index, note_position):
+	var slider_shape_arr = note.sliders[slider_index][\"slider_shape_arr\"]
+	slider_shape_arr[segment_index][1] = note_position
+	note.sliders[slider_index][\"slider_shape_arr\"] = slider_shape_arr
+	note.slider_draw()
+	
+func _on_delete_press(segment_index):
+	var slider_shape_arr: Array = note.sliders[slider_index][\"slider_shape_arr\"]
+	if slider_shape_arr.size() > 1:
+		slider_shape_arr.pop_at(segment_index)
+		note.sliders[slider_index][\"slider_shape_arr\"] = slider_shape_arr
+		note.slider_draw()
+		sync_details()
+	
+func _on_properties_visible_toggled(toggled_on):
+	$Properties.visible = toggled_on
+
+
+func _on_duration_x_text_changed(new_text):
+	var new_duration_arr = [float(new_text), int($Properties/SliderDuration/DurationY.text)]
+	note.sliders[slider_index][\"duration_arr\"] = new_duration_arr
+	note.slider_draw()
+
+func _on_duration_y_text_changed(new_text):
+	var new_duration_arr = [float($Properties/SliderDuration/DurationX.text), int(new_text)]
+	note.sliders[slider_index][\"duration_arr\"] = new_duration_arr
+	note.slider_draw()
+
+
+func _on_delay_x_text_changed(new_text):
+	var new_delay_arr = [float(new_text), int($Properties/SliderDelay/DelayY.text)]
+	note.sliders[slider_index][\"delay_arr\"] = new_delay_arr
+	note.slider_draw()
+
+
+func _on_delay_y_text_changed(new_text):
+	var new_delay_arr = [float($Properties/SliderDelay/DelayX.text), int(new_text)]
+	note.sliders[slider_index][\"delay_arr\"] = new_delay_arr
+	note.slider_draw()
+
+
+func _on_add_slider_shape_pressed():
+	# temporary set position to avoid zero length
+	var num = int(note.sliders[slider_index][\"slider_shape_arr\"].back()[1].right(1))
+	num = num + 1 if num != 8 else 1
+	note.sliders[slider_index][\"slider_shape_arr\"].append([\"-\", str(num), 0.0])
+	note.slider_draw()
+	sync_details()
+
+
+func _on_delete_slide_pressed():
+	slider_deleted.emit(slider_index)
+
+
+func _on_break_toggled(toggled_on):
+	note.sliders[slider_index][\"slider_property_break\"] = toggled_on
+	note.slider_draw()
+	
+"
+
+[node name="SliderDetail" type="VBoxContainer"]
 offset_right = 40.0
 offset_bottom = 40.0
+script = SubResource("GDScript_15ih1")
 
 [node name="SliderNum" type="HBoxContainer" parent="."]
 layout_mode = 2
 
-[node name="Text" type="Label" parent="SliderNum"]
+[node name="SliderIndexText" type="Label" parent="SliderNum"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.364706, 0.564706, 1, 1)
 theme_override_font_sizes/font_size = 28
 text = "Slider 1"
 
-[node name="CheckButton" type="CheckButton" parent="SliderNum"]
+[node name="PropertiesVisible" type="CheckButton" parent="SliderNum"]
 layout_mode = 2
+button_pressed = true
 
 [node name="Space" type="Label" parent="SliderNum"]
 layout_mode = 2
@@ -28,6 +133,13 @@ text = "       "
 layout_mode = 2
 text = "del slide"
 
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Break" type="CheckButton" parent="HBoxContainer"]
+layout_mode = 2
+text = "Break"
+
 [node name="Properties" type="VBoxContainer" parent="."]
 layout_mode = 2
 
@@ -38,7 +150,7 @@ layout_mode = 2
 layout_mode = 2
 text = "Duration:"
 
-[node name="X" type="LineEdit" parent="Properties/SliderDuration"]
+[node name="DurationX" type="LineEdit" parent="Properties/SliderDuration"]
 layout_mode = 2
 placeholder_text = "1"
 
@@ -46,7 +158,7 @@ placeholder_text = "1"
 layout_mode = 2
 text = "/"
 
-[node name="Y" type="LineEdit" parent="Properties/SliderDuration"]
+[node name="DurationY" type="LineEdit" parent="Properties/SliderDuration"]
 layout_mode = 2
 placeholder_text = "8"
 
@@ -61,7 +173,7 @@ layout_mode = 2
 layout_mode = 2
 text = "Delay:"
 
-[node name="X" type="LineEdit" parent="Properties/SliderDelay"]
+[node name="DelayX" type="LineEdit" parent="Properties/SliderDelay"]
 layout_mode = 2
 placeholder_text = "1"
 
@@ -69,7 +181,7 @@ placeholder_text = "1"
 layout_mode = 2
 text = "/"
 
-[node name="Y" type="LineEdit" parent="Properties/SliderDelay"]
+[node name="DelayY" type="LineEdit" parent="Properties/SliderDelay"]
 layout_mode = 2
 placeholder_text = "4"
 
@@ -80,11 +192,30 @@ text = "Bar"
 [node name="SliderShapeSegments" type="VBoxContainer" parent="Properties"]
 layout_mode = 2
 
-[node name="Text" type="Label" parent="Properties/SliderShapeSegments"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Properties/SliderShapeSegments"]
+layout_mode = 2
+
+[node name="Text" type="Label" parent="Properties/SliderShapeSegments/HBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.721569, 0.815686, 1, 1)
 theme_override_font_sizes/font_size = 24
-text = "Slider Shape"
+text = "Slider Shape   "
 
-[node name="SliderShapeSegment" parent="Properties/SliderShapeSegments" instance=ExtResource("1_jwm3u")]
+[node name="AddSliderShape" type="Button" parent="Properties/SliderShapeSegments/HBoxContainer"]
 layout_mode = 2
+text = " + "
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Properties/SliderShapeSegments"]
+layout_mode = 2
+
+[node name="SliderShapeSegment" parent="Properties/SliderShapeSegments/VBoxContainer" instance=ExtResource("1_jwm3u")]
+layout_mode = 2
+
+[connection signal="toggled" from="SliderNum/PropertiesVisible" to="." method="_on_properties_visible_toggled"]
+[connection signal="pressed" from="SliderNum/DeleteSlide" to="." method="_on_delete_slide_pressed"]
+[connection signal="toggled" from="HBoxContainer/Break" to="." method="_on_break_toggled"]
+[connection signal="text_changed" from="Properties/SliderDuration/DurationX" to="." method="_on_duration_x_text_changed"]
+[connection signal="text_changed" from="Properties/SliderDuration/DurationY" to="." method="_on_duration_y_text_changed"]
+[connection signal="text_changed" from="Properties/SliderDelay/DelayX" to="." method="_on_delay_x_text_changed"]
+[connection signal="text_changed" from="Properties/SliderDelay/DelayY" to="." method="_on_delay_y_text_changed"]
+[connection signal="pressed" from="Properties/SliderShapeSegments/HBoxContainer/AddSliderShape" to="." method="_on_add_slider_shape_pressed"]

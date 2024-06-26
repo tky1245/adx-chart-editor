@@ -78,35 +78,35 @@ func slider_render(current_time: float) -> void:
 	set_node_images_transparency($SliderSegments, transparency_value)
 	$SelectedHighlight.visible = selected and $SliderArrows.visible
 	
-	
-	for arrow_path in $SliderArrows.get_children():
-		for arrow_path_follow in arrow_path.get_children():
-			for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
-				arrow.visible_toggle(slider_progress)
-			var total_distance: float = 0
-			for arr in slider_shape_arr: # Calculate total distance
-				total_distance += arr[2]
-			for i in range(slider_shape_arr.size()): # Move stars along the path
-				var elapsed_path_length: float = 0
-				if i != 0:
-					for j in range(i):
-						elapsed_path_length += slider_shape_arr[j][2]
-				var path_holder = $SliderSegments.get_child(i)
-				var current_path_length = slider_shape_arr[i][2]
-				var path_progress: float
-				if current_path_length > 0:
-					if slider_progress < elapsed_path_length / total_distance:
-						path_holder.visible = false
-						path_progress = 0
-					elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
-						path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
-						for path in path_holder.get_children():
-							var path_follow = path.get_child(0)
-							path_follow.progress_ratio = path_progress
-						path_holder.visible = true
-					else:
-						path_holder.visible = false
-						path_progress = 1
+	if $SliderSegments.get_child_count() >= slider_shape_arr.size():
+		for arrow_path in $SliderArrows.get_children():
+			for arrow_path_follow in arrow_path.get_children():
+				for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
+					arrow.visible_toggle(slider_progress)
+				var total_distance: float = 0
+				for arr in slider_shape_arr: # Calculate total distance
+					total_distance += arr[2]
+				for i in range(slider_shape_arr.size()): # Move stars along the path
+					var elapsed_path_length: float = 0
+					if i != 0:
+						for j in range(i):
+							elapsed_path_length += slider_shape_arr[j][2]
+					var path_holder = $SliderSegments.get_child(i)
+					var current_path_length = slider_shape_arr[i][2]
+					var path_progress: float
+					if current_path_length > 0:
+						if slider_progress < elapsed_path_length / total_distance:
+							path_holder.visible = false
+							path_progress = 0
+						elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
+							path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
+							for path in path_holder.get_children():
+								var path_follow = path.get_child(0)
+								path_follow.progress_ratio = path_progress
+							path_holder.visible = true
+						else:
+							path_holder.visible = false
+							path_progress = 1
 
 func initialize(parent_position: Vector2) -> void: # set up all the shape positions
 	set_position_offset(-parent_position)

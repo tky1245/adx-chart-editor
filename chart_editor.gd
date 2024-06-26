@@ -26,7 +26,8 @@ var note_objects: Array = [] # {"Beat": int, "Node": Node} # to be removed
 var timeline_dragging: bool = false
 
 # note edit
-
+var last_used_hold_duration_arr: Array = [1.0, 4]
+var last_used_slide_duration_arr: Array = [1.0, 4]
 
 func _ready():
 	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location
@@ -689,7 +690,34 @@ func sync_note_details():
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.visible = true
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.button_pressed = note.note_property_star
 		
-			
+		if note.sliders.size() > 0:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = false
+		else:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = true
+		
+		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide.visible = false
+			$NoteDetails/ScrollContainer/Properties/HoldProperties.visible = true
+			$NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX.text = str(note.duration_arr[0])
+			$NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationY.text = str(note.duration_arr[1])
+		else:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide.visible = true
+			$NoteDetails/ScrollContainer/Properties/HoldProperties.visible = false
+		
+		if note.sliders.size() == 0:
+			$NoteDetails/ScrollContainer/Properties/SliderProperties.visible = false
+		else:
+			$NoteDetails/ScrollContainer/Properties/SliderProperties.visible = true
+			for node in $NoteDetails/ScrollContainer/Properties/SliderProperties/VBoxContainer.get_children():
+				node.queue_free()
+			for i in range(note.sliders.size()):
+				var slider_detail = preload("res://note detail stuffs/slider_detail.tscn")
+				var new_node = slider_detail.instantiate()
+				new_node.note = note
+				new_node.slider_index = i
+				new_node.sync_details()
+				new_node.connect("slider_deleted", _on_slider_deleted, 8)
+				$NoteDetails/ScrollContainer/Properties/SliderProperties/VBoxContainer.add_child(new_node)
 	else:
 		$NoteDetails.visible = false
 
@@ -741,15 +769,67 @@ func _on_break_toggled(toggled_on):
 	note.note_property_break = toggled_on
 	note.note_draw()
 
-
 func _on_ex_toggled(toggled_on):
 	var note = Global.selected_notes[0]
 	note.note_property_ex = toggled_on
 	note.note_draw()
-
 
 func _on_star_toggled(toggled_on):
 	var note = Global.selected_notes[0]
 	if note.type not in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
 		note.note_property_star = toggled_on
 		note.note_draw()
+
+func _on_hold_pressed():
+	var note = Global.selected_notes[0]
+	if $NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible:
+		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+			var new_type = Note.type.TAP if note.type == Note.type.TAP_HOLD else Note.type.TOUCH
+			var args: Dictionary = note.get_args()
+			args.erase("duration")
+			args.erase("duration_arr")
+			var new_note = Note.new_note(new_type, args)
+			new_note.initialize()
+			$Notes.add_child(new_note)
+			Global.selected_notes = [new_note]
+			note.queue_free()
+		else:
+			var new_type = Note.type.TAP_HOLD if note.type == Note.type.TAP else Note.type.TOUCH_HOLD
+			var args: Dictionary = note.get_args()
+			args.erase("note_property_star")
+			args["duration_arr"] = last_used_hold_duration_arr
+			var new_note = Note.new_note(new_type, args)
+			new_note.initialize()
+			$Notes.add_child(new_note)
+			Global.selected_notes = [new_note]
+			note.queue_free()
+	sync_note_details()
+
+func _on_hold_duration_x_text_changed(new_text):
+	var note = Global.selected_notes[0]
+	var new_duration_arr = [float(new_text), note.duration_arr[1]]
+	note.set_duration(new_duration_arr)
+
+func _on_hold_duration_y_text_changed(new_text):
+	var note = Global.selected_notes[0]
+	var new_duration_arr = [note.duration_arr[0], int(new_text)]
+	note.set_duration(new_duration_arr)
+
+func _on_slider_deleted(slider_index):
+	var note = Global.selected_notes[0]
+	note.sliders.pop_at(slider_index)
+	note.slider_draw()
+	sync_note_details()
+
+func _on_add_slide_pressed():
+	var note = Global.selected_notes[0]
+	var num = int(note.note_position)
+	num = num + 1 if num != 8 else 1
+	var new_slider_dict: Dictionary = {
+		"duration_arr" = last_used_slide_duration_arr,
+		"delay_arr" = [1, 4],
+		"slider_shape_arr" = [["-", str(num), 0.0]]
+	}
+	note.sliders.append(new_slider_dict)
+	note.slider_draw()
+	sync_note_details()

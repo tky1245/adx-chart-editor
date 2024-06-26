@@ -392,9 +392,9 @@ layout_mode = 2
 
 [node name="Hold" type="Button" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange"]
 layout_mode = 2
-text = "Change to Hold"
+text = "Hold Toggle"
 
-[node name="Slide" type="Button" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange"]
+[node name="AddSlide" type="Button" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange"]
 layout_mode = 2
 text = "Add Slide"
 
@@ -411,10 +411,6 @@ theme_override_colors/font_color = Color(0.364706, 0.564706, 1, 1)
 theme_override_font_sizes/font_size = 32
 text = "Hold Properties"
 
-[node name="Button" type="Button" parent="NoteDetails/ScrollContainer/Properties/HoldProperties/HBoxContainer"]
-layout_mode = 2
-text = "del hold"
-
 [node name="HoldDuration" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/HoldProperties"]
 layout_mode = 2
 
@@ -423,7 +419,7 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Duration:"
 
-[node name="X" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration"]
+[node name="HoldDurationX" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration"]
 layout_mode = 2
 placeholder_text = "1"
 
@@ -431,7 +427,7 @@ placeholder_text = "1"
 layout_mode = 2
 text = "/"
 
-[node name="Y" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration"]
+[node name="HoldDurationY" type="LineEdit" parent="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration"]
 layout_mode = 2
 placeholder_text = "4"
 
@@ -439,19 +435,22 @@ placeholder_text = "4"
 layout_mode = 2
 text = "Bar"
 
-[node name="SlideProperties" type="VBoxContainer" parent="NoteDetails/ScrollContainer/Properties"]
+[node name="SliderProperties" type="VBoxContainer" parent="NoteDetails/ScrollContainer/Properties"]
 layout_mode = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/SlideProperties"]
+[node name="TextContainer" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/SliderProperties"]
 layout_mode = 2
 
-[node name="Text" type="Label" parent="NoteDetails/ScrollContainer/Properties/SlideProperties/HBoxContainer"]
+[node name="Text" type="Label" parent="NoteDetails/ScrollContainer/Properties/SliderProperties/TextContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.364706, 0.564706, 1, 1)
 theme_override_font_sizes/font_size = 32
 text = "Slide Properties"
 
-[node name="Slider1" parent="NoteDetails/ScrollContainer/Properties/SlideProperties" instance=ExtResource("3_johcs")]
+[node name="VBoxContainer" type="VBoxContainer" parent="NoteDetails/ScrollContainer/Properties/SliderProperties"]
+layout_mode = 2
+
+[node name="Slider1" parent="NoteDetails/ScrollContainer/Properties/SliderProperties/VBoxContainer" instance=ExtResource("3_johcs")]
 layout_mode = 2
 
 [node name="FileOptions" type="Node2D" parent="."]
@@ -653,6 +652,10 @@ text = "btn"
 [connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Break" to="." method="_on_break_toggled"]
 [connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/EX" to="." method="_on_ex_toggled"]
 [connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star" to="." method="_on_star_toggled"]
+[connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold" to="." method="_on_hold_pressed"]
+[connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide" to="." method="_on_add_slide_pressed"]
+[connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX" to="." method="_on_hold_duration_x_text_changed"]
+[connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationY" to="." method="_on_hold_duration_y_text_changed"]
 [connection signal="gui_input" from="PlaybackControls/TimeSlider/ProgressBar" to="." method="_on_progress_bar_gui_input"]
 [connection signal="pressed" from="PlaybackControls/PlayPause" to="." method="_on_play_pause_pressed"]
 [connection signal="pressed" from="PlaybackControls/Stop" to="." method="_on_stop_pressed"]
