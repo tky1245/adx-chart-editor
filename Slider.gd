@@ -9,6 +9,7 @@ var delay_arr: Array = [1, 4]
 var delay: float
 var slider_head_position: String
 var slider_shape_arr: Array # contains matches of [shape, target_position, length]
+var slider_length_arr: Array[float] # contains each of the slider shape segment length
 
 var selected: bool
 var position_offset: Vector2
@@ -78,35 +79,38 @@ func slider_render(current_time: float) -> void:
 	set_node_images_transparency($SliderSegments, transparency_value)
 	$SelectedHighlight.visible = selected and $SliderArrows.visible
 	
-	if $SliderSegments.get_child_count() >= slider_shape_arr.size():
-		for arrow_path in $SliderArrows.get_children():
-			for arrow_path_follow in arrow_path.get_children():
-				for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
-					arrow.visible_toggle(slider_progress)
-				var total_distance: float = 0
-				for arr in slider_shape_arr: # Calculate total distance
-					total_distance += arr[2]
-				for i in range(slider_shape_arr.size()): # Move stars along the path
-					var elapsed_path_length: float = 0
-					if i != 0:
-						for j in range(i):
-							elapsed_path_length += slider_shape_arr[j][2]
-					var path_holder = $SliderSegments.get_child(i)
-					var current_path_length = slider_shape_arr[i][2]
-					var path_progress: float
-					if current_path_length > 0:
-						if slider_progress < elapsed_path_length / total_distance:
-							path_holder.visible = false
-							path_progress = 0
-						elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
-							path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
-							for path in path_holder.get_children():
-								var path_follow = path.get_child(0)
-								path_follow.progress_ratio = path_progress
-							path_holder.visible = true
-						else:
-							path_holder.visible = false
-							path_progress = 1
+	for arrow_path in $SliderArrows.get_children():
+		for arrow_path_follow in arrow_path.get_children():
+			for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
+				arrow.visible_toggle(slider_progress)
+			
+	var total_distance: float = 0.0
+	for length in slider_length_arr: # Calculate total distance
+		total_distance += length
+	print(slider_progress)
+	var path_index: int = 0
+	for i in range(slider_shape_arr.size()): # Move stars along the path
+		var elapsed_path_length: float = 0
+		if i != 0:
+			for j in range(i):
+				elapsed_path_length += slider_length_arr[j]
+		var current_path_length = slider_length_arr[i]
+		if current_path_length > 0:
+			var path_holder = $SliderSegments.get_child(path_index)
+			var path_progress: float
+			if slider_progress < elapsed_path_length / total_distance:
+				path_holder.visible = false
+				path_progress = 0
+			elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
+				path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
+				for path in path_holder.get_children():
+					var path_follow = path.get_child(0)
+					path_follow.progress_ratio = path_progress
+				path_holder.visible = true
+			else:
+				path_holder.visible = false
+				path_progress = 1
+			path_index += 1
 
 func initialize(parent_position: Vector2) -> void: # set up all the shape positions
 	set_position_offset(-parent_position)
@@ -117,49 +121,51 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		node.queue_free()
 	# Generate slider segments according to array
 	for i in slider_shape_arr.size():
-		var new_node = Node2D.new()
-		var new_path = Path2D.new()
-		var path_curve
 		
+		var path_curve
 		if i == 0:
 			path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_head_position)
 		else:
 			path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_shape_arr[i-1][1])
-		new_path.curve = path_curve
-		$SliderSegments.add_child(new_node)
-		new_node.add_child(new_path)
-		var path_follow = PathFollow2D.new()
-		new_path.add_child(path_follow)
-		slider_shape_arr[i][2] = path_curve.get_baked_length() # do length calculation beforehand
-		if slider_shape_arr[i][0] == "w": # wifi slider handling, add 2 side star paths
-			var target_pos = Global.touch_positions[slider_shape_arr[i][1]]
-			var initial_pos = Global.touch_positions[slider_shape_arr[i-1][1]] if i != 0 else Global.touch_positions[slider_head_position]
-			var distance = target_pos.distance_to(initial_pos) * cos(TAU/16)
-			var relative_pos = target_pos - initial_pos
-			var relative_bearing = atan2(relative_pos.y, relative_pos.x)
-			var path_left = Path2D.new()
-			var curve_left = Curve2D.new()
-			if i == 0:
-				curve_left.add_point(Global.touch_positions[slider_head_position])
-			else:
-				curve_left.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
-			curve_left.add_point(initial_pos + distance * Vector2(cos(relative_bearing + TAU/16), sin(relative_bearing + TAU/16)))
-			path_left.curve = curve_left
-			new_node.add_child(path_left)
-			var path_follow_left = PathFollow2D.new()
-			path_left.add_child(path_follow_left)
-			
-			var path_right = Path2D.new()
-			var curve_right = Curve2D.new()
-			if i == 0:
-				curve_right.add_point(Global.touch_positions[slider_head_position])
-			else:
-				curve_right.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
-			curve_right.add_point(initial_pos + distance * Vector2(cos(relative_bearing - TAU/16), sin(relative_bearing - TAU/16)))
-			path_right.curve = curve_right
-			new_node.add_child(path_right)
-			var path_follow_right = PathFollow2D.new()
-			path_right.add_child(path_follow_right)
+		
+		slider_length_arr.append(path_curve.get_baked_length()) # do length calculation beforehand
+		if path_curve.get_baked_length() > 0.0: # eliminate zero errors
+			var new_node = Node2D.new()
+			var new_path = Path2D.new()
+			new_path.curve = path_curve
+			$SliderSegments.add_child(new_node)
+			new_node.add_child(new_path)
+			var path_follow = PathFollow2D.new()
+			new_path.add_child(path_follow)
+			if slider_shape_arr[i][0] == "w": # wifi slider handling, add 2 side star paths
+				var target_pos = Global.touch_positions[slider_shape_arr[i][1]]
+				var initial_pos = Global.touch_positions[slider_shape_arr[i-1][1]] if i != 0 else Global.touch_positions[slider_head_position]
+				var distance = target_pos.distance_to(initial_pos) * cos(TAU/16)
+				var relative_pos = target_pos - initial_pos
+				var relative_bearing = atan2(relative_pos.y, relative_pos.x)
+				var path_left = Path2D.new()
+				var curve_left = Curve2D.new()
+				if i == 0:
+					curve_left.add_point(Global.touch_positions[slider_head_position])
+				else:
+					curve_left.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
+				curve_left.add_point(initial_pos + distance * Vector2(cos(relative_bearing + TAU/16), sin(relative_bearing + TAU/16)))
+				path_left.curve = curve_left
+				new_node.add_child(path_left)
+				var path_follow_left = PathFollow2D.new()
+				path_left.add_child(path_follow_left)
+				
+				var path_right = Path2D.new()
+				var curve_right = Curve2D.new()
+				if i == 0:
+					curve_right.add_point(Global.touch_positions[slider_head_position])
+				else:
+					curve_right.add_point(Global.touch_positions[slider_shape_arr[i-1][1]])
+				curve_right.add_point(initial_pos + distance * Vector2(cos(relative_bearing - TAU/16), sin(relative_bearing - TAU/16)))
+				path_right.curve = curve_right
+				new_node.add_child(path_right)
+				var path_follow_right = PathFollow2D.new()
+				path_right.add_child(path_follow_right)
 	# Set color
 	var slider_arrow_color_top
 	var slider_arrow_color_bottom
@@ -189,47 +195,52 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 		node.queue_free()
 	# Generate slider arrows from each segments
 	var total_distance: float = 0
-	for arr in slider_shape_arr: # Calculate total distance
-		total_distance += arr[2]
-	for idx in range(slider_shape_arr.size()): 
-		var i = slider_shape_arr.size() - idx - 1
+	for length in slider_length_arr: # Calculate total distance
+		total_distance += length
+	var path_index: int = $SliderSegments.get_child_count()
+	for n in range(slider_length_arr.size()): 
+		var i = slider_length_arr.size() - n - 1 # reversal
 		var elapsed_distance: float = 0
 		if i != 0:
 			for j in range(i):
-				elapsed_distance += slider_shape_arr[j][2]
-		var new_path = Path2D.new()
-		var path_curve = $SliderSegments.get_child(i).get_child(0).curve
-		new_path.curve = path_curve
-		$SliderArrows.add_child(new_path)
-		if slider_shape_arr[i][0] != "w":
-			var distance: float = 20
-			var temp_distance = 0.0
-			for j in range(int(slider_shape_arr[i][2] / distance)):
-				temp_distance += distance * 0.5
-				var new_path_follow = PathFollow2D.new()
-				new_path.add_child(new_path_follow)
-				new_path_follow.set_progress(temp_distance)
-				var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
-				var new_arrow = slider_arrow.instantiate()
-				var visible_threshold = (temp_distance + elapsed_distance) / total_distance
-				new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold)
-				new_path_follow.add_child(new_arrow)
-				temp_distance += distance * 0.5
-		else:
-			var distance: float = 33.3
-			var temp_distance = 0.0
-			for j in range(int(slider_shape_arr[i][2] / distance)):
-				if j != 0:
+				elapsed_distance += slider_length_arr[j]
+		if slider_length_arr[i] > 0.0:
+			path_index -= 1
+			var new_path = Path2D.new()
+			var path_curve = $SliderSegments.get_child(path_index).get_child(0).curve
+			new_path.curve = path_curve
+			$SliderArrows.add_child(new_path)
+			if slider_shape_arr[i][0] != "w":
+				var distance: float = 20.0
+				var temp_distance = 0.0
+				for j in range(int(slider_length_arr[i] / distance)):
+					temp_distance += distance * 0.5
 					var new_path_follow = PathFollow2D.new()
 					new_path.add_child(new_path_follow)
 					new_path_follow.set_progress(temp_distance)
 					var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
 					var new_arrow = slider_arrow.instantiate()
 					var visible_threshold = (temp_distance + elapsed_distance) / total_distance
-					var temp_length = slider_shape_arr[i][2] * sin(TAU/16) * (j / (slider_shape_arr[i][2] / distance))
-					new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold, true, temp_length)
+					new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold)
 					new_path_follow.add_child(new_arrow)
-				temp_distance += distance
+					temp_distance += distance * 0.5
+			else:
+				var distance: float = 33.3
+				var temp_distance = 0.0
+				for j in range(int(slider_length_arr[i] / distance)):
+					if j != 0:
+						var new_path_follow = PathFollow2D.new()
+						new_path.add_child(new_path_follow)
+						new_path_follow.set_progress(temp_distance)
+						var slider_arrow = preload("res://note detail stuffs/slider_arrow.tscn")
+						var new_arrow = slider_arrow.instantiate()
+						var visible_threshold = (temp_distance + elapsed_distance) / total_distance
+						var temp_length = slider_length_arr[i] * sin(TAU/16) * (j / (slider_length_arr[i] / distance))
+						new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold, true, temp_length)
+						new_path_follow.add_child(new_arrow)
+					temp_distance += distance
+	print(slider_length_arr)
+	print(slider_shape_arr)
 	
 	
 	# Add stars for each path
@@ -250,13 +261,14 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 	# Draw highlight based on existing paths
 	var curve: PackedVector2Array = []
 	for i in range(slider_shape_arr.size()):
-		if i == 0:
-			var path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_head_position).get_baked_points()
-			curve.append_array(path_curve)
-		else:
-			var path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_shape_arr[i-1][1]).get_baked_points()
-			path_curve.remove_at(0)
-			curve.append_array(path_curve)
+		if slider_length_arr[i] > 0:
+			if i == 0:
+				var path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_head_position).get_baked_points()
+				curve.append_array(path_curve)
+			else:
+				var path_curve = slider_path(slider_shape_arr[i][0], slider_shape_arr[i][1], slider_shape_arr[i-1][1]).get_baked_points()
+				path_curve.remove_at(0)
+				curve.append_array(path_curve)
 	for node in $SelectedHighlight.get_children():
 		node.queue_free()
 	
@@ -340,6 +352,8 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 			var total_angle = angle_1 - angle_2
 			while total_angle < 0:
 				total_angle += TAU
+			while total_angle >= 0+TAU:
+				total_angle -= TAU
 			for i in range(total_angle / TAU * frequency):
 				var radius = radius_start + (radius_end - radius_start) * i
 				var point_angle = angle_1 - i * TAU / frequency 
@@ -362,6 +376,8 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 			var total_angle = angle_1 - angle_2
 			while total_angle < 0:
 				total_angle += TAU
+			while total_angle >= 0+TAU:
+				total_angle -= TAU
 			for i in range(total_angle / TAU * frequency):
 				var radius = radius_start + (radius_end - radius_start) * i
 				var point_angle = angle_1 - i * TAU / frequency 

@@ -45,7 +45,7 @@ func _ready():
 		"sliders" = [{
 			"duration_arr" = [1, 1],
 			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "7", 0.0], ["-", "5", 0.0], ["-", "8", 0.0]]
+			"slider_shape_arr" = [["-", "7"], ["-", "5"], ["-", "8"]]
 			#"slider_shape_arr" = [["w", "2", 0.0]],
 		}],
 	}
@@ -55,13 +55,13 @@ func _ready():
 		"beat" = 5,
 		"note_position" = "B2",
 		"note_property_touch" = true,
-		"note_property_star" = true,
-		"sliders" = [{
-			"duration_arr" = [1, 1],
-			"delay_arr" = [1, 4],
+		#"note_property_star" = true,
+		#"sliders" = [{
+			#"duration_arr" = [1, 1],
+			#"delay_arr" = [1, 4],
 			#"slider_shape_arr" = [["<", "C4", 0.0], ["<", "A7", 0.0], ["<", "C6", 0.0], [">", "A3", 0.0]],
-			"slider_shape_arr" = [["<", "B4", 0.0]],
-		}]
+			#"slider_shape_arr" = [["<", "B4", 0.0]],
+		#}]
 	}
 	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
 	
@@ -828,7 +828,7 @@ func _on_add_slide_pressed():
 	var new_slider_dict: Dictionary = {
 		"duration_arr" = last_used_slide_duration_arr,
 		"delay_arr" = [1, 4],
-		"slider_shape_arr" = [["-", str(num), 0.0]]
+		"slider_shape_arr" = [["-", str(num)]]
 	}
 	note.sliders.append(new_slider_dict)
 	note.slider_draw()

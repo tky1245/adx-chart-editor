@@ -87,7 +87,6 @@ const note_colors: Dictionary = {
 	"touch_hold_3" = Color.SEA_GREEN,
 	"touch_hold_4" = Color.ROYAL_BLUE,
 	"touch_hold_center" = Color.CYAN,
-	
 }
 
 # Some settings
@@ -137,6 +136,12 @@ func _ready():
 func note_pos_mod(num: int):
 	return (num - 1) % 8 + 1
 
-
-			
-			
+func touch_position_angle(note_position: String):
+	var txt_left = note_position.left(-1)
+	var txt_right = note_position.right(1)
+	if txt_left in ["", "A", "B", "C"]:
+		var angle = PI / 8 * (1 + (int(txt_right)) * 2)
+		return angle
+	elif txt_right in ["D", "E", ]:
+		var angle = PI / 4 * int(txt_right)
+		return angle

@@ -13,7 +13,6 @@ todo:
 	- 
 
 soontm:
-	- handle 0 slide length notations (like 1-1)
 	- fix "<", ">" pathing for positions that are not on the same circumference
 	- finish each note type function(mostly done):
 		(hold slider implementation not done)
