@@ -153,21 +153,22 @@ func _input(event):
 					elif area is Array:
 						var area_arr: Array[PackedVector2Array]
 						var area_exclude_arr: Array[PackedVector2Array]
-						for poly in area:
-							if Geometry2D.is_polygon_clockwise(poly):
-								area_exclude_arr.append(poly)
-							else:
-								area_arr.append(poly)
-						if Geometry2D.is_point_in_polygon(event.position, area_arr[0]):
-							var in_excluded_area: bool = false
-							for poly in area_exclude_arr:
-								if Geometry2D.is_point_in_polygon(event.position, poly):
-									in_excluded_area = true
+						if area.size() > 0:
+							for poly in area:
+								if Geometry2D.is_polygon_clockwise(poly):
+									area_exclude_arr.append(poly)
+								else:
+									area_arr.append(poly)
+							if Geometry2D.is_point_in_polygon(event.position, area_arr[0]):
+								var in_excluded_area: bool = false
+								for poly in area_exclude_arr:
+									if Geometry2D.is_point_in_polygon(event.position, poly):
+										in_excluded_area = true
+										break
+								if in_excluded_area == false:
+									Global.clicked_notes.append(note)
+									note_clicked = true
 									break
-							if in_excluded_area == false:
-								Global.clicked_notes.append(note)
-								note_clicked = true
-								break
 		Global.clicked_notes = Note.sort_note_by_index(Global.clicked_notes)
 		if note_clicked:
 			#if ctrl or other keys isnt held down

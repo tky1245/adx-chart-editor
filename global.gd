@@ -139,9 +139,11 @@ func note_pos_mod(num: int):
 func touch_position_angle(note_position: String):
 	var txt_left = note_position.left(-1)
 	var txt_right = note_position.right(1)
+	var angle: float
 	if txt_left in ["", "A", "B", "C"]:
-		var angle = PI / 8 * (1 + (int(txt_right)) * 2)
-		return angle
-	elif txt_right in ["D", "E", ]:
-		var angle = PI / 4 * int(txt_right)
-		return angle
+		angle = PI / 8 * (1 + (int(txt_right)) * 2) - 3*TAU/8
+	elif txt_left in ["D", "E"]:
+		angle = PI / 4 * int(txt_right) - 3*TAU/8
+	while angle < 0:
+		angle += TAU
+	return angle

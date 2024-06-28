@@ -87,9 +87,8 @@ func slider_render(current_time: float) -> void:
 	var total_distance: float = 0.0
 	for length in slider_length_arr: # Calculate total distance
 		total_distance += length
-	print(slider_progress)
 	var path_index: int = 0
-	for i in range(slider_shape_arr.size()): # Move stars along the path
+	for i in range(slider_length_arr.size()): # Move stars along the path
 		var elapsed_path_length: float = 0
 		if i != 0:
 			for j in range(i):
@@ -345,8 +344,8 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 	elif shape == "<":
 		var radius_start = Vector2(initial_position).distance_to(Vector2(0, 0))
 		var radius_end = Vector2(target_position).distance_to(Vector2(0, 0))
-		var angle_1 = atan2(initial_position.y, initial_position.x)
-		var angle_2 = atan2(target_position.y, target_position.x)
+		var angle_1: float = Global.touch_position_angle(initial_note_position)
+		var angle_2: float = Global.touch_position_angle(target_note_position)
 		var frequency: int = 360
 		if int(initial_note_position) in [1, 2, 7, 8]: # ccw
 			var total_angle = angle_1 - angle_2
@@ -355,22 +354,24 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 			while total_angle >= 0+TAU:
 				total_angle -= TAU
 			for i in range(total_angle / TAU * frequency):
-				var radius = radius_start + (radius_end - radius_start) * i
+				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
 				var point_angle = angle_1 - i * TAU / frequency 
-				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
+				curve.add_point(radius * Vector2(1, 0) * Transform2D(-point_angle, Vector2(0, 0)))
 		elif int(initial_note_position) in [3, 4, 5, 6]: # cw
 			var total_angle = angle_2 - angle_1
-			if total_angle < 0:
+			while total_angle < 0:
 				total_angle += TAU
+			while total_angle >= 0+TAU:
+				total_angle -= TAU
 			for i in range(total_angle / TAU * frequency):
-				var radius = radius_start + (radius_end - radius_start) * i
+				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
 				var point_angle = angle_1 + i * TAU / frequency 
-				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
+				curve.add_point(radius * Vector2(1, 0) * Transform2D(-point_angle, Vector2(0, 0)))
 	elif shape == ">": # we do a bit of copy pasta
-		var radius_start = Vector2(initial_position).distance_to(Vector2(0, 0))
-		var radius_end = Vector2(target_position).distance_to(Vector2(0, 0))
-		var angle_1 = atan2(initial_position.y, initial_position.x)
-		var angle_2 = atan2(target_position.y, target_position.x)
+		var radius_start: float = Vector2(initial_position).distance_to(Vector2(0, 0))
+		var radius_end: float = Vector2(target_position).distance_to(Vector2(0, 0))
+		var angle_1: float = Global.touch_position_angle(initial_note_position)
+		var angle_2: float = Global.touch_position_angle(target_note_position)
 		var frequency: int = 360
 		if int(initial_note_position) in [3, 4, 5, 6]: # ccw
 			var total_angle = angle_1 - angle_2
@@ -378,18 +379,20 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 				total_angle += TAU
 			while total_angle >= 0+TAU:
 				total_angle -= TAU
-			for i in range(total_angle / TAU * frequency):
-				var radius = radius_start + (radius_end - radius_start) * i
+			for i in range(int(total_angle / TAU * frequency)):
+				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
 				var point_angle = angle_1 - i * TAU / frequency 
-				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
+				curve.add_point(radius * Vector2(1, 0) * Transform2D(-point_angle, Vector2(0, 0)))
 		elif int(initial_note_position) in [1, 2, 7, 8]: # cw
 			var total_angle = angle_2 - angle_1
-			if total_angle < 0:
+			while total_angle < 0:
 				total_angle += TAU
-			for i in range(total_angle / TAU * 360):
-				var radius = radius_start + (radius_end - radius_start) * i
+			while total_angle >= 0+TAU:
+				total_angle -= TAU
+			for i in range(int(total_angle / TAU * frequency)):
+				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
 				var point_angle = angle_1 + i * TAU / frequency 
-				curve.add_point(radius * Vector2(cos(point_angle), sin(point_angle)))
+				curve.add_point(radius * Vector2(1, 0) * Transform2D(-point_angle, Vector2(0, 0)))
 	elif shape == "v": 
 		curve.add_point(Vector2(0, 0))
 		curve.add_point(Vector2(target_position))
