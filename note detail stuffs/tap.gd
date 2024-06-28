@@ -9,6 +9,7 @@ var note_property_both: bool = false
 var note_property_star: bool = false
 var note_position: String = ""
 var sliders: Array = [] # Consists of dicts
+var delay_ticks: int = 0 # 128ths per tick
 
 var selected: bool = false
 

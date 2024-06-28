@@ -1,0 +1,62 @@
+[gd_scene load_steps=2 format=3 uid="uid://bodw6vmqh82bf"]
+
+[sub_resource type="GDScript" id="GDScript_ph523"]
+script/source = "extends Node2D
+signal area_clicked
+
+func _ready():
+	for i in range(8): # A1-A8
+		var touch_area = preload(\"res://note detail stuffs/touch_area.tscn\")
+		var new_node = touch_area.instantiate()
+		new_node.set(\"note_position\", (\"A\" + str(i+1)))
+		var poly: PackedVector2Array = [Vector2(29, -197), Vector2(22, -145), Vector2(35, -131), Vector2(66, -118), Vector2(86, -118), Vector2(118, -161), Vector2(77, -186)] 
+		new_node.get_child(0).polygon = poly * Transform2D(-i * TAU / 8, Vector2(0, 0))
+		new_node.sync_shapes()
+		new_node.connect(\"area_clicked\", _area_click, 8)
+		add_child(new_node)
+	for i in range(8): # B1-B8
+		var touch_area = preload(\"res://note detail stuffs/touch_area.tscn\")
+		var new_node = touch_area.instantiate()
+		new_node.set(\"note_position\", (\"B\" + str(i+1)))
+		var poly: PackedVector2Array = [Vector2(24, -118), Vector2(65, -101), Vector2(65, -69), Vector2(53, -57), Vector2(23, -57), Vector2(1, -80), Vector2(1, -95)] 
+		new_node.get_child(0).polygon = poly * Transform2D(-i * TAU / 8, Vector2(0, 0))
+		new_node.sync_shapes()
+		new_node.connect(\"area_clicked\", _area_click, 8)
+		add_child(new_node)
+	# C
+	if true: # trolley
+		var poly: PackedVector2Array
+		for i in range(8):
+			poly.append(Vector2(22, 53.113) * Transform2D(-i * TAU/8, Vector2(0, 0)))
+		var touch_area = preload(\"res://note detail stuffs/touch_area.tscn\")
+		var new_node = touch_area.instantiate()
+		new_node.set(\"note_position\", \"C\")
+		new_node.get_child(0).polygon = poly
+		new_node.sync_shapes()
+		new_node.connect(\"area_clicked\", _area_click, 8)
+		add_child(new_node)
+	for i in range(8): # D1-D8
+		var touch_area = preload(\"res://note detail stuffs/touch_area.tscn\")
+		var new_node = touch_area.instantiate()
+		new_node.set(\"note_position\", (\"D\" + str(i+1)))
+		var poly: PackedVector2Array = [Vector2(-25, -198), Vector2(-19, -148), Vector2(0, -167), Vector2(19, -148), Vector2(25, -198), Vector2(0, -200)] 
+		new_node.get_child(0).polygon = poly * Transform2D(-i * TAU / 8, Vector2(0, 0))
+		new_node.sync_shapes()
+		new_node.connect(\"area_clicked\", _area_click, 8)
+		add_child(new_node)
+	for i in range(8): # E1-E8
+		var touch_area = preload(\"res://note detail stuffs/touch_area.tscn\")
+		var new_node = touch_area.instantiate()
+		new_node.set(\"note_position\", (\"E\" + str(i+1)))
+		var poly: PackedVector2Array = [Vector2(0, -161), Vector2(31, -130), Vector2(0, -99), Vector2(-31, -130)] 
+		new_node.get_child(0).polygon = poly * Transform2D(-i * TAU / 8, Vector2(0, 0))
+		new_node.sync_shapes()
+		new_node.connect(\"area_clicked\", _area_click, 8)
+		add_child(new_node)
+		
+func _area_click(note_position: String):
+	area_clicked.emit(note_position)
+"
+
+[node name="ChartPreviewArea" type="Node2D"]
+script = SubResource("GDScript_ph523")

@@ -28,6 +28,7 @@ var timeline_dragging: bool = false
 # note edit
 var last_used_hold_duration_arr: Array = [1.0, 4]
 var last_used_slide_duration_arr: Array = [1.0, 4]
+signal touch_area_triggered
 
 func _ready():
 	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location
@@ -105,6 +106,9 @@ func _ready():
 			newLine.width = 2
 			newLine.closed = true
 			region.add_child(newLine)
+	
+	$ChartPreview/ChartPreviewArea.connect("area_clicked", _touch_area_clicked)
+	
 	timeline_object_update()
 	timeline_render("all")
 
@@ -268,7 +272,7 @@ func _on_ex_toggle_toggled(toggled_on):
 	toggle_ex = toggled_on
 
 func _on_touch_toggle_toggled(toggled_on):
-	toggle_ex = toggled_on
+	toggle_touch = toggled_on
 
 func _on_firework_toggle_toggled(toggled_on):
 	toggle_firework = toggled_on
@@ -542,6 +546,26 @@ func time_to_beat(time: float) -> int:
 
 	return Global.timeline_beats.back()
 
+func beat_to_bpm(beat: int, arr: Array = []) -> float:
+	var bpm_array: Array = []
+	if arr.size() > 0:
+		bpm_array = arr
+	else:
+		if $BPMChanges.get_child_count() == 0: # No BPM?
+			bpm_array.append({"Beat": 0, "Value": 160.0})
+		else:
+			for bpm_node in $BPMChanges.get_children(): # read them all
+				bpm_array.append({"Beat": bpm_node.beat, "Value": bpm_node.bpm})
+	var bpm
+	for idx in range(bpm_array.size()):
+			if idx != bpm_array.size() - 1:
+				if beat >= bpm_array[idx]["Beat"] and beat < bpm_array[idx + 1]["Beat"]:
+					bpm = bpm_array[idx]["Value"]
+					break
+			else:
+				bpm = bpm_array[idx]["Value"]
+	return bpm
+
 # Handles BPM/BD change window/button
 func _on_add_bpm_node_pressed():
 	if	!$TimeLineControls/BPMWindow.visible:
@@ -581,6 +605,7 @@ func _on_beat_divisor_field_text_submitted(new_text):
 				new_node.beat_divisor = beat_divisor
 				new_node.beat = beat
 				new_node.connect("bd_button_clicked", _on_bd_node_clicked, 8)
+				new_node.button_update()
 				$BeatDivisorChanges.add_child(new_node)
 			else:
 				var node = Global.beat_change_cursor
@@ -613,6 +638,7 @@ func _on_bpm_field_text_submitted(new_text):
 				print(current_time)
 				print(new_node.beat)
 				new_node.connect("bpm_button_clicked", _on_bpm_node_clicked, 8)
+				new_node.button_update()
 				$BPMChanges.add_child(new_node)
 			else:
 				var node = Global.beat_change_cursor
@@ -819,6 +845,8 @@ func _on_hold_duration_y_text_changed(new_text):
 func _on_slider_deleted(slider_index):
 	var note = Global.selected_notes[0]
 	note.sliders.pop_at(slider_index)
+	if note.type in [Note.type.TAP, Note.type.TOUCH]:
+		note.note_property_star = false
 	note.slider_draw()
 	sync_note_details()
 
@@ -831,6 +859,129 @@ func _on_add_slide_pressed():
 		"delay_arr" = [1, 4],
 		"slider_shape_arr" = [["-", str(num)]]
 	}
+	if note.type in [Note.type.TAP, Note.type.TOUCH]:
+		note.note_property_star = true
 	note.sliders.append(new_slider_dict)
 	note.slider_draw()
 	sync_note_details()
+
+func _on_delete_note_pressed():
+	var note = Global.selected_notes[0]
+	Global.selected_notes = []
+	note.queue_free()
+	note_both_update()
+	sync_note_details()
+
+func _touch_area_clicked(touch_position: String):
+	print("clicked ", touch_position)
+	var note_position: String
+	if toggle_touch:
+		note_position = touch_position
+	else:
+		if !touch_position.begins_with("A"):
+			print("quitting")
+			return
+		note_position = touch_position.right(1)
+	if Global.selected_notes.size() == 1 and placement_selected == "Slider": # append straight slider directly
+		var note = Global.selected_notes[0]
+		if note.sliders.size() == 0: # no sliders?
+			var new_slider_dict: Dictionary = {
+				"duration_arr" = last_used_slide_duration_arr,
+				"delay_arr" = [1, 4],
+				"slider_shape_arr" = [["-", note_position]],
+				"note_property_break" = toggle_break
+			}
+			if note.type in [Note.type.TAP, Note.type.TOUCH]:
+				note.note_property_star = true
+			note.sliders.append(new_slider_dict)
+			note.slider_draw()
+			sync_note_details()
+		else:
+			var slider_dict = note.sliders[0]
+			slider_dict["slider_shape_arr"].append(["-", note_position])
+			note.slider_draw()
+			sync_note_details()
+		
+		if toggle_multiplacing:
+			return
+		else:
+			placement_selected = "None"
+			placement_tools_highlight_update()
+		
+	elif placement_selected == "Hold": # add a hold
+		var args = {
+			"duration_arr" = last_used_hold_duration_arr,
+			"note_position" = note_position,
+			"beat" = time_to_beat(current_time),
+			"bpm" = beat_to_bpm(time_to_beat(current_time)),
+			"note_property_break" = toggle_break,
+			"note_property_ex" = toggle_ex,
+			"note_property_firework" = toggle_firework,
+		}
+		if toggle_touch: # touch hold
+			var new_note = add_note(Note.type.TOUCH_HOLD, args)
+			note_both_update()
+			if toggle_multiplacing:
+				return
+			else:
+				Global.selected_notes = [new_note]
+				placement_selected = "None"
+				placement_tools_highlight_update()
+		else: # tap hold
+			var new_note = add_note(Note.type.TAP_HOLD, args)
+			note_both_update()
+			if toggle_multiplacing:
+				return
+			else:
+				Global.selected_notes = [new_note]
+				placement_selected = "None"
+				placement_tools_highlight_update()
+		
+	elif placement_selected == "Slider" or placement_selected == "Tap": # add a tap
+		print("Placing tap")
+		var args = {
+			"note_position" = note_position,
+			"beat" = time_to_beat(current_time),
+			"bpm" = beat_to_bpm(time_to_beat(current_time)),
+			"note_property_break" = toggle_break,
+			"note_property_ex" = toggle_ex,
+			"note_property_firework" = toggle_firework,
+		}
+		if toggle_touch: # touch
+			print("touch")
+			var new_note = add_note(Note.type.TOUCH, args)
+			note_both_update()
+			if toggle_multiplacing:
+				return
+			else:
+				Global.selected_notes = [new_note]
+				placement_selected = "None"
+				placement_tools_highlight_update()
+		else: # tap
+			var new_note = add_note(Note.type.TAP, args)
+			note_both_update()
+			if toggle_multiplacing:
+				return
+			else:
+				Global.selected_notes = [new_note]
+				placement_selected = "None"
+				placement_tools_highlight_update()
+
+func add_note(note_type: Note.type, args: Dictionary) -> Node:
+	var new_note = Note.new_note(note_type, args)
+	new_note.initialize()
+	$Notes.add_child(new_note)
+	return new_note
+
+func note_both_update() -> void:
+	for i in Global.timeline_beats.size():
+		var notes_at_current_beat: Array = []
+		for note in $Notes.get_children():
+			if note.beat == i:
+				notes_at_current_beat.append(note)
+		if notes_at_current_beat.size() == 1:
+			for note in notes_at_current_beat:
+				note.note_property_both = false
+		elif notes_at_current_beat.size() > 1:
+			for note in notes_at_current_beat:
+				note.note_property_both = true
