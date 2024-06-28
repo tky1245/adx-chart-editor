@@ -119,6 +119,7 @@ func set_note_position(pos: String = note_position) -> void:
 
 func note_draw() -> void:
 	touch_hold_draw()
+	set_selected()
 
 func touch_hold_draw() -> void:
 	for node in $Note/ProgressCircle.get_children():

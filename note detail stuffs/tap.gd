@@ -69,6 +69,7 @@ func note_draw() -> void:
 		star_draw()
 	else:
 		tap_draw()
+	set_selected()
 	
 func tap_draw() -> void:
 	# Colors

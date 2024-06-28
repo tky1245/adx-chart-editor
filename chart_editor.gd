@@ -868,7 +868,7 @@ func _on_add_slide_pressed():
 func _on_delete_note_pressed():
 	var note = Global.selected_notes[0]
 	Global.selected_notes = []
-	note.queue_free()
+	note.free()
 	note_both_update()
 	sync_note_details()
 
@@ -879,9 +879,10 @@ func _touch_area_clicked(touch_position: String):
 		note_position = touch_position
 	else:
 		if !touch_position.begins_with("A"):
-			print("quitting")
 			return
 		note_position = touch_position.right(1)
+	note_position = "C1" if note_position == "C" else note_position
+	
 	if Global.selected_notes.size() == 1 and placement_selected == "Slider": # append straight slider directly
 		var note = Global.selected_notes[0]
 		if note.sliders.size() == 0: # no sliders?
@@ -938,7 +939,6 @@ func _touch_area_clicked(touch_position: String):
 				placement_tools_highlight_update()
 		
 	elif placement_selected == "Slider" or placement_selected == "Tap": # add a tap
-		print("Placing tap")
 		var args = {
 			"note_position" = note_position,
 			"beat" = time_to_beat(current_time),
@@ -948,7 +948,6 @@ func _touch_area_clicked(touch_position: String):
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch: # touch
-			print("touch")
 			var new_note = add_note(Note.type.TOUCH, args)
 			note_both_update()
 			if toggle_multiplacing:
@@ -974,14 +973,22 @@ func add_note(note_type: Note.type, args: Dictionary) -> Node:
 	return new_note
 
 func note_both_update() -> void:
+	print("both updating")
 	for i in Global.timeline_beats.size():
 		var notes_at_current_beat: Array = []
 		for note in $Notes.get_children():
 			if note.beat == i:
 				notes_at_current_beat.append(note)
 		if notes_at_current_beat.size() == 1:
+			print("beat ", str(i))
+			print("unyellow")
 			for note in notes_at_current_beat:
 				note.note_property_both = false
+				note.note_draw()
 		elif notes_at_current_beat.size() > 1:
+			print("beat ", str(i))
+			print("yellow")
 			for note in notes_at_current_beat:
 				note.note_property_both = true
+				note.note_draw()
+				

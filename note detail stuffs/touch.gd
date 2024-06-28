@@ -75,6 +75,7 @@ func note_draw() -> void:
 		touch_star_draw()
 	else:
 		touch_draw()
+	set_selected()
 
 func touch_draw() -> void:
 	# Colors

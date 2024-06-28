@@ -81,6 +81,7 @@ func initialize() -> void:
 
 func note_draw() -> void:
 	tap_hold_draw()
+	set_selected()
 
 func tap_hold_draw() -> void:
 	# Colors
