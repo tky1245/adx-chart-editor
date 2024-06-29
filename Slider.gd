@@ -10,15 +10,18 @@ var delay: float
 var slider_head_position: String
 var slider_shape_arr: Array # contains matches of [shape, target_position, length]
 var slider_length_arr: Array[float] # contains each of the slider shape segment length
+var delay_ticks: int
 
 var selected: bool
 var position_offset: Vector2
 
 func slider_render(current_time: float) -> void:
-	var slide_intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
-	var slide_head_hit_time = Global.timeline_beats[beat]
-	var slide_start_time = Global.timeline_beats[beat] + delay
-	var slide_end_time = Global.timeline_beats[beat] + delay + duration
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
+	
+	var slide_intro_time = Global.timeline_beats[beat] + delay_tick_time- Global.note_speed_in_time
+	var slide_head_hit_time = Global.timeline_beats[beat] + delay_tick_time
+	var slide_start_time = Global.timeline_beats[beat] + delay_tick_time + delay
+	var slide_end_time = Global.timeline_beats[beat] + delay_tick_time + delay + duration
 	var slider_progress: float
 	
 	var initial_transparency = 0.5
@@ -326,7 +329,7 @@ func set_position_offset(offset = position_offset):
 	position = position_offset
 
 func timeline_object_render() -> void:
-	var time_1 = Global.timeline_beats[beat] + delay
+	var time_1 = Global.timeline_beats[beat] + delay + (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var time_2 = time_1 + duration
 	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true

@@ -19,10 +19,12 @@ func preview_render(current_time: float) -> void:
 	slider_render(current_time)
 
 func note_render(current_time: float) -> void:
-	var intro_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time
-	var move_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
-	var judge_start: float = Global.timeline_beats[beat]
-	var judge_end: float = Global.timeline_beats[beat] + duration
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
+	
+	var intro_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time
+	var move_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time * 0.7
+	var judge_start: float = Global.timeline_beats[beat] + delay_tick_time
+	var judge_end: float = Global.timeline_beats[beat] + delay_tick_time + duration
 	
 	var intro_progress: float = 0
 	var path_progress: float = 0
@@ -220,7 +222,7 @@ func timeline_object_draw() -> void:
 		slider.timeline_object_draw()
 
 func timeline_object_render() -> void: #TODO change visible range
-	var time_1 = Global.timeline_beats[beat]
+	var time_1 = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var time_2 = time_1 + duration
 	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true

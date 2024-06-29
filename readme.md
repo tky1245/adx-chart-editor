@@ -4,14 +4,13 @@ this is a project of adx chart editor
 still in progress tho
 
 todo:
-	- backticks
-	- automatically seek for note both property when edited/added(ongoing)
-	- function to save the chart data; save formatting
 	- variables to handle extra simai arguments like difficulty name and setDesigner
+	- function to save the chart data; save formatting
 	- maidata import/export
 	- 
 
 soontm:
+	- control to add backticks (+ check if both property works correctly on it)
 	- note edit(move notes on timeline directly)
 	- handle console spitting out zero length interval when things like 1-1 is declared
 	- finish each note type function(mostly done):

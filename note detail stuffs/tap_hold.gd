@@ -19,13 +19,14 @@ func preview_render(current_time: float) -> void:
 	slider_render(current_time)
 
 func note_render(current_time: float) -> void:
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var angle = (int(note_position) * 2 - 1) * TAU / 16
 	
-	var intro_time = Global.timeline_beats[beat] - Global.note_speed_in_time
-	var move_time_start_point = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
-	var judge_time_start_point = Global.timeline_beats[beat]
-	var move_time_end_point = Global.timeline_beats[beat] + duration - Global.note_speed_in_time * 0.7
-	var judge_time_end_point = Global.timeline_beats[beat] + duration
+	var intro_time = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time
+	var move_time_start_point = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time * 0.7
+	var judge_time_start_point = Global.timeline_beats[beat] + delay_tick_time
+	var move_time_end_point = Global.timeline_beats[beat] + delay_tick_time + duration - Global.note_speed_in_time * 0.7
+	var judge_time_end_point = Global.timeline_beats[beat] + delay_tick_time + duration
 	
 	var intro_progress: float
 	var start_progress: float
@@ -179,7 +180,7 @@ func set_duration(arr: Array = duration_arr) -> void:
 	timeline_object_draw()
 
 func timeline_object_render() -> void: #TODO change visible range
-	var time_1 = Global.timeline_beats[beat]
+	var time_1 = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var time_2 = time_1 + duration
 	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true

@@ -18,9 +18,10 @@ func preview_render(current_time: float) -> void:
 	slider_render(current_time)
 
 func note_render(current_time: float) -> void:
-	var intro_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time
-	var move_time: float = Global.timeline_beats[beat] - Global.note_speed_in_time * 0.7
-	var judge_time: float = Global.timeline_beats[beat]
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
+	var intro_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time
+	var move_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time * 0.7
+	var judge_time: float = Global.timeline_beats[beat] + delay_tick_time
 	var scale_progress: float
 	var path_progress: float
 	
@@ -234,7 +235,7 @@ func delete_slider(slider_index: int) -> void:
 	sliders.pop_at(slider_index)
 
 func timeline_object_render() -> void:
-	var time = Global.timeline_beats[beat]
+	var time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
 		$TimelineIndicator.visible = true
 		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)

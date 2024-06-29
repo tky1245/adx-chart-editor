@@ -980,8 +980,6 @@ func note_both_update() -> void:
 			if note.beat == i:
 				notes_at_current_beat.append(note)
 		if notes_at_current_beat.size() == 1:
-			print("beat ", str(i))
-			print("unyellow")
 			for note in notes_at_current_beat:
 				note.note_property_both = false
 				note.note_draw()
@@ -989,6 +987,12 @@ func note_both_update() -> void:
 			print("beat ", str(i))
 			print("yellow")
 			for note in notes_at_current_beat:
-				note.note_property_both = true
+				note.note_property_both = false
+			for j in range(notes_at_current_beat.size()):
+				for k in range(notes_at_current_beat.size()):
+					if j != k and notes_at_current_beat[j].delay_ticks == notes_at_current_beat[k].delay_ticks:
+						notes_at_current_beat[j].note_property_both = true
+						notes_at_current_beat[k].note_property_both = true
+			for note in notes_at_current_beat:
 				note.note_draw()
 				
