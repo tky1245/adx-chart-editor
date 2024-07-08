@@ -7,8 +7,11 @@ var note_property_ex: bool = false
 var note_property_firework: bool = false
 var note_property_both: bool = false
 var note_property_star: bool = false
+var note_property_mine: bool = false 
+var note_star_spinning: bool = false
 var note_position: String = ""
 var sliders: Array = [] # Consists of dicts
+var slider_tapless: bool = false
 var delay_ticks: int = 0 # 128ths per tick
 
 var selected: bool = false
@@ -25,35 +28,40 @@ func note_render(current_time: float) -> void:
 	var scale_progress: float
 	var path_progress: float
 	
-	if current_time < intro_time:
+	if slider_tapless and sliders.size() > 0:
 		$Note.visible = false
-		scale_progress = 0
-		path_progress = 0
-	elif current_time < move_time:
-		$Note.visible = true
-		scale_progress = (current_time - intro_time) / (move_time - intro_time)
-		path_progress = 0
-	elif current_time < judge_time:
-		$Note.visible = true
-		scale_progress = 1
-		path_progress = (current_time - move_time) / (judge_time - move_time)
 	else:
-		$Note.visible = false
-		scale_progress = 1
-		path_progress = 1
-	
-	var note_pathfollow = $Note/Path2D/PathFollow2D
-	
-	for node in note_pathfollow.get_children():
-		node.scale = Vector2(scale_progress, scale_progress)
-		node.self_modulate.a = scale_progress
+		if current_time < intro_time:
+			$Note.visible = false
+			scale_progress = 0
+			path_progress = 0
+		elif current_time < move_time:
+			$Note.visible = true
+			scale_progress = (current_time - intro_time) / (move_time - intro_time)
+			path_progress = 0
+		elif current_time < judge_time:
+			$Note.visible = true
+			scale_progress = 1
+			path_progress = (current_time - move_time) / (judge_time - move_time)
+		else:
+			$Note.visible = false
+			scale_progress = 1
+			path_progress = 1
 		
-	note_pathfollow.progress_ratio = path_progress
-	
-	#TODO: spin the note
-	if note_property_star:
+		var note_pathfollow = $Note/Path2D/PathFollow2D
+		
 		for node in note_pathfollow.get_children():
-			node.rotation = current_time * TAU * 4
+			node.scale = Vector2(scale_progress, scale_progress)
+			node.self_modulate.a = scale_progress
+			
+		note_pathfollow.progress_ratio = path_progress
+		
+		if note_property_star and note_star_spinning:
+			for node in note_pathfollow.get_children():
+				node.rotation = current_time * TAU * 4 #TODO probably need to set a correct speed
+		else:
+			for node in note_pathfollow.get_children():
+				node.rotation = 0
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -235,12 +243,15 @@ func delete_slider(slider_index: int) -> void:
 	sliders.pop_at(slider_index)
 
 func timeline_object_render() -> void:
-	var time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
-	if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
-		$TimelineIndicator.visible = true
-		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)
-	else:
+	if slider_tapless and sliders.size() > 0:
 		$TimelineIndicator.visible = false
+	else:
+		var time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
+		if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
+			$TimelineIndicator.visible = true
+			$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)
+		else:
+			$TimelineIndicator.visible = false
 	for slider in $Sliders.get_children():
 		slider.timeline_object_render()
 
@@ -289,6 +300,7 @@ func select_area() -> Array:
 
 func get_args() -> Dictionary:
 	var new_dict: Dictionary = {
+	"type": type,
 	"beat": beat,
 	"bpm": bpm,
 	"note_property_break": note_property_break,
@@ -296,8 +308,8 @@ func get_args() -> Dictionary:
 	"note_property_firework": note_property_firework,
 	"note_property_both": note_property_both,
 	"note_property_star": note_property_star,
+	"note_property_mine": note_property_mine,
 	"note_position": note_position,
 	"sliders": sliders,
-	"selected": selected,
 	}
 	return new_dict

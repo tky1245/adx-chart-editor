@@ -4,12 +4,15 @@ this is a project of adx chart editor
 still in progress tho
 
 todo:
-	- variables to handle extra simai arguments like difficulty name and setDesigner
-	- function to save the chart data; save formatting
+	- chart jacket upload/show jacket in the preview
+	- fix "<" ">" unable to 360
+	- add sounds + note effects
 	- maidata import/export
-	- 
+	- make firework function
 
 soontm:
+	- optimization (its a bit laggy rn)
+	- sound control
 	- control to add backticks (+ check if both property works correctly on it)
 	- note edit(move notes on timeline directly)
 	- handle console spitting out zero length interval when things like 1-1 is declared

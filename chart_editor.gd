@@ -1,6 +1,9 @@
 extends Node2D
 var previous_mouse_position: Vector2
-
+# Metadata
+var current_difficulty: int = 1
+var difficulty_value: String = ""
+var current_offset: float
 
 # Placement Tools
 var placement_selected: String = "None"
@@ -31,81 +34,43 @@ var last_used_slide_duration_arr: Array = [1.0, 4]
 signal touch_area_triggered
 
 func _ready():
-	var file = FileAccess.open(Global.CURRENT_CHART_PATH, FileAccess.WRITE_READ) # Save file location
-	load_external_song(Global.CURRENT_SONG_PATH)
+	var chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"
+	Savefile.load_chart() # load from save file to global var
+	$MetadataOptions/Window.visible = false
+	
+	load_external_song(chart_dir)
 	song_length = $AudioPlayers/TrackPlayer.stream.get_length() #um
 	$PlaybackControls/TimeSlider/ProgressBar.max_value = song_length
 	get_node("FileOptions/MenuButton").get_popup().connect("index_pressed", _on_option_pressed)
-	
-	# tap test
-	# slider test
-	var note1_args: Dictionary = {
-		"beat" = 4,
-		"note_position" = "1",
-		"note_property_star" = true,
-		"sliders" = [{
-			"duration_arr" = [1, 1],
-			"delay_arr" = [1, 4],
-			"slider_shape_arr" = [["-", "7"], ["-", "5"], ["-", "8"]]
-			#"slider_shape_arr" = [["w", "2", 0.0]],
-		}],
-	}
-	$Notes.add_child(Note.new_note(Note.type.TAP, note1_args))
-	# touch test
-	var note2_args: Dictionary = {
-		"beat" = 5,
-		"note_position" = "B2",
-		"note_property_touch" = true,
-		#"note_property_star" = true,
-		#"sliders" = [{
-			#"duration_arr" = [1, 1],
-			#"delay_arr" = [1, 4],
-			#"slider_shape_arr" = [["<", "C4", 0.0], ["<", "A7", 0.0], ["<", "C6", 0.0], [">", "A3", 0.0]],
-			#"slider_shape_arr" = [["<", "B4", 0.0]],
-		#}]
-	}
-	$Notes.add_child(Note.new_note(Note.type.TOUCH, note2_args))
-	
-	# tap hold test
-	var note3_args: Dictionary = {
-		"beat" = 6,
-		"note_position" = "5",
-		"duration_arr" = [1, 4],
-		"bpm" = 240,
-		"note_property_break" = true,
-		"note_property_ex" = true,
-	}
-	$Notes.add_child(Note.new_note(Note.type.TAP_HOLD, note3_args))
-	
-	# touch hold test
-	var note4_args: Dictionary = {
-		"beat" = 8,
-		"note_position" = "C8",
-		"duration_arr" = [1, 2],
-		"bpm" = 240,
-		"note_property_touch" = true,
-	}
-	$Notes.add_child(Note.new_note(Note.type.TOUCH_HOLD, note4_args))
-	
+	# open up a difficulty
+	for i in range(7):
+		if Global.current_chart_data.get(str("inote_" + str(i+1))):
+			current_difficulty = i+1
+			break
+	load_difficulty(current_difficulty)
+	$MetadataOptions/DifficultySelect.selected = current_difficulty-1
+	$MetadataOptions/ChartConstant.text = str(Global.current_chart_data.get(str("lv_" + str(current_difficulty))))
+	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get(str("first_" + str(current_difficulty))))
 	# Draw a circle
 	var density = 180
 	for k in range(density):
 		var dotx = Global.preview_radius * sin(2 * PI * k / density) + Global.preview_center.x
 		var doty = Global.preview_radius * cos(2 * PI * k / density) + Global.preview_center.y
 		$ChartPreview/Circle.add_point(Vector2(dotx, doty))
+	
 	# Draw polygons
-	for region in $ChartPreview/TouchArea.get_children():
-		if region.is_in_group("touchpos_A") or region.is_in_group("touchpos_B") or region.is_in_group("touchpos_E"):
-			var newPolygon = Polygon2D.new()
-			newPolygon.name = "PolygonFill"
-			newPolygon.polygon = region.find_child("CollisionPolygon2D").polygon
-			newPolygon.color = Color(1, 1, 1, 0.5)
-			region.add_child(newPolygon)
-			var newLine = Line2D.new()
-			newLine.points = region.find_child("CollisionPolygon2D").polygon
-			newLine.width = 2
-			newLine.closed = true
-			region.add_child(newLine)
+	#for region in $ChartPreview/TouchArea.get_children():
+		#if region.is_in_group("touchpos_A") or region.is_in_group("touchpos_B") or region.is_in_group("touchpos_E"):
+			#var newPolygon = Polygon2D.new()
+			#newPolygon.name = "PolygonFill"
+			#newPolygon.polygon = region.find_child("CollisionPolygon2D").polygon
+			#newPolygon.color = Color(1, 1, 1, 0.5)
+			#region.add_child(newPolygon)
+			#var newLine = Line2D.new()
+			#newLine.points = region.find_child("CollisionPolygon2D").polygon
+			#newLine.width = 2
+			#newLine.closed = true
+			#region.add_child(newLine)
 	
 	$ChartPreview/ChartPreviewArea.connect("area_clicked", _touch_area_clicked)
 	
@@ -199,8 +164,7 @@ func _input(event):
 				else:
 					note.set_selected(false)
 			sync_note_details()
-			
-		
+
 func _process(_delta):
 	for note in $Notes.get_children():
 		note.preview_render(current_time)
@@ -209,14 +173,6 @@ func _process(_delta):
 	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
 	$PlaybackControls/ElapsedTime.text = time_format(current_time)
 	timeline_render("all")
-
-func _on_option_pressed(index):
-	if index == 0: #Save
-		pass
-	if index == 1: #Export to maidata
-		pass
-	if index == 2: #Return to menu
-		get_tree().change_scene_to_file("res://main_menu.tscn")
 
 # Placement Tool Toggles
 func _on_tap_toggle_pressed():
@@ -337,17 +293,23 @@ func time_format(time_num: float): # Seconds to Time String
 	
 	return str(time_string)
 
-func load_external_song(path): # Load a song
-	var file = FileAccess.open(path, FileAccess.READ)
-	if path.ends_with("track.mp3"):
+func load_external_song(chart_dir): # Load a song
+	
+	var file_mp3 = FileAccess.open(chart_dir + "track.mp3", FileAccess.READ)
+	if file_mp3:
 		var mp3 = AudioStreamMP3.new()
-		mp3.data = file.get_buffer(file.get_length())
+		mp3.data = file_mp3.get_buffer(file_mp3.get_length())
 		$AudioPlayers/TrackPlayer.stream = mp3
-	elif path.ends_with("track.ogg"):
-		var ogg = AudioStreamOggVorbis.load_from_buffer(file.get_buffer(file.get_length()))
+		print("loaded mp3")
+		return
+	var file_ogg = FileAccess.open(chart_dir + "track.ogg", FileAccess.READ)
+	if file_ogg:
+		var ogg = AudioStreamOggVorbis.load_from_buffer(file_ogg.get_buffer(file_ogg.get_length()))
 		$AudioPlayers/TrackPlayer.stream = ogg
-	else:
-		print("song not loaded")
+		print("loaded ogg")
+		return
+	
+	print("song not loaded")
 
 # Bar and Timeline
 
@@ -402,8 +364,7 @@ func timeline_object_update():
 	# Ensure BPMDivisorArray is sorted by Beat
 	bpm_array = arrange_by_beat(bpm_array)
 	bd_array = arrange_by_beat(bd_array)
-	print("bpm_array: ", bpm_array)
-	print("bd_array: ", bd_array)
+
 	
 	# Reading bpm/bd and generate new beat arrays
 	Global.timeline_beats.clear()
@@ -475,9 +436,9 @@ func arrange_by_beat(arr): # Bubble sort
 		swapped = false
 		for j in range(len(temp_arr) - 1):
 			if temp_arr[j]["Beat"] > temp_arr[j + 1]["Beat"]:
-				var temp = temp_arr[j]["Beat"] # dumb swapping
-				temp_arr[j]["Beat"] = temp_arr[j + 1]["Beat"]
-				temp_arr[j + 1]["Beat"] = temp
+				var temp = temp_arr[j] # dumb swapping
+				temp_arr[j] = temp_arr[j + 1]
+				temp_arr[j + 1] = temp
 				swapped = true
 		if swapped == false:
 			break
@@ -515,6 +476,7 @@ func timeline_render(type: String): # Render objects on timeline
 	elif type == "note":
 		for note in $Notes.get_children():
 			note.timeline_object_render()
+			note.set_selected()
 	elif type == "all": # Default, render everything 
 		timeline_visible_range_update()
 		timeline_render("bar")
@@ -635,8 +597,6 @@ func _on_bpm_field_text_submitted(new_text):
 				var new_node = bpm_node.instantiate()
 				new_node.bpm = bpm
 				new_node.beat = beat
-				print(current_time)
-				print(new_node.beat)
 				new_node.connect("bpm_button_clicked", _on_bpm_node_clicked, 8)
 				new_node.button_update()
 				$BPMChanges.add_child(new_node)
@@ -685,20 +645,20 @@ func _on_zoom_up_pressed():
 		Global.timeline_zoom *= 2
 	for note in $Notes.get_children():
 		note.timeline_object_draw()
+		note.set_selected()
 		
 func _on_zoom_down_pressed():
 	if Global.timeline_zoom > 0.125:
 		Global.timeline_zoom *= 0.5
 	for note in $Notes.get_children():
 		note.timeline_object_draw()
+		note.set_selected()
 
 func _on_button_pressed(): # debug button
-	#print(Global.timeline_beats) # whys there a 0 in the end
-	#print(timeline_bar_time) # error'd
-	print($BPMChanges.get_children().size())
-	print("Current time:",current_time)
-	print("Beat:", time_to_beat(current_time))
-	print(timeline_bar_time)
+	var dir = DirAccess.open("C:/stuffs/test")
+	#dir.make_dir("seg")
+	#dir.copy("C:/stuffs/test/segs.txt", "C:/stuffs/test/New folder/segs2.txt") this works
+	dir.copy("segs.txt", "New folder/segs2.txt")
 
 
 # Note Properties Edit
@@ -716,8 +676,19 @@ func sync_note_details():
 		else:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.visible = true
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.button_pressed = note.note_property_star
-		
+		if note.type in [Note.type.TAP] and note.note_property_star:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate.visible = true
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate.button_pressed = note.note_star_spinning
+		else:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate.visible = false
 		if note.sliders.size() > 0:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless.visible = true
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless.button_pressed = note.slider_tapless
+		else:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless.visible = false
+		
+		
+		if note.sliders.size() > 0: # toggle hold fix TODO
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = false
 		else:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = true
@@ -806,6 +777,19 @@ func _on_star_toggled(toggled_on):
 	if note.type not in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
 		note.note_property_star = toggled_on
 		note.note_draw()
+	sync_note_details()
+
+func _on_rotate_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	if note.type in [Note.type.TAP] and note.note_property_star:
+		note.note_star_spinning = toggled_on
+		note.note_draw()
+
+func _on_tapless_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	if note.sliders.size() > 0:
+		note.slider_tapless = toggled_on
+		note.note_draw()
 
 func _on_hold_pressed():
 	var note = Global.selected_notes[0]
@@ -845,8 +829,11 @@ func _on_hold_duration_y_text_changed(new_text):
 func _on_slider_deleted(slider_index):
 	var note = Global.selected_notes[0]
 	note.sliders.pop_at(slider_index)
+	note.slider_tapless = false
 	if note.type in [Note.type.TAP, Note.type.TOUCH]:
 		note.note_property_star = false
+	if note.type in [Note.type.TAP]:
+		note.note_star_spinning = false
 	note.slider_draw()
 	sync_note_details()
 
@@ -861,6 +848,8 @@ func _on_add_slide_pressed():
 	}
 	if note.type in [Note.type.TAP, Note.type.TOUCH]:
 		note.note_property_star = true
+	if note.type in [Note.type.TAP]:
+		note.note_star_spinning = true
 	note.sliders.append(new_slider_dict)
 	note.slider_draw()
 	sync_note_details()
@@ -872,7 +861,7 @@ func _on_delete_note_pressed():
 	note_both_update()
 	sync_note_details()
 
-func _touch_area_clicked(touch_position: String):
+func _touch_area_clicked(touch_position: String): # handle note adding
 	print("clicked ", touch_position)
 	var note_position: String
 	if toggle_touch:
@@ -922,19 +911,19 @@ func _touch_area_clicked(touch_position: String):
 		if toggle_touch: # touch hold
 			var new_note = add_note(Note.type.TOUCH_HOLD, args)
 			note_both_update()
+			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
 				return
 			else:
-				Global.selected_notes = [new_note]
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap hold
 			var new_note = add_note(Note.type.TAP_HOLD, args)
 			note_both_update()
+			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
 				return
 			else:
-				Global.selected_notes = [new_note]
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		
@@ -950,19 +939,19 @@ func _touch_area_clicked(touch_position: String):
 		if toggle_touch: # touch
 			var new_note = add_note(Note.type.TOUCH, args)
 			note_both_update()
-			if toggle_multiplacing:
+			Global.selected_notes = [new_note]
+			if toggle_multiplacing or placement_selected == "Slider":
 				return
 			else:
-				Global.selected_notes = [new_note]
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap
 			var new_note = add_note(Note.type.TAP, args)
 			note_both_update()
+			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
 				return
 			else:
-				Global.selected_notes = [new_note]
 				placement_selected = "None"
 				placement_tools_highlight_update()
 
@@ -984,8 +973,6 @@ func note_both_update() -> void:
 				note.note_property_both = false
 				note.note_draw()
 		elif notes_at_current_beat.size() > 1:
-			print("beat ", str(i))
-			print("yellow")
 			for note in notes_at_current_beat:
 				note.note_property_both = false
 			for j in range(notes_at_current_beat.size()):
@@ -996,3 +983,146 @@ func note_both_update() -> void:
 			for note in notes_at_current_beat:
 				note.note_draw()
 				
+func get_chart_dict(difficulty: int) -> Dictionary:
+	var bpm_change_arr: Array = [] 
+	for bpm_node in $BPMChanges.get_children():
+		bpm_change_arr.append({
+			"bpm": bpm_node.bpm,
+			"beat": bpm_node.beat
+		})
+	var bd_change_arr: Array = []
+	for bd_node in $BeatDivisorChanges.get_children():
+		bd_change_arr.append({
+			"beat_divisor": bd_node.beat_divisor,
+			"beat": bd_node.beat
+		})
+	var note_arr: Array = []
+	for note in $Notes.get_children():
+		note_arr.append(note.get_args())
+	var new_dict: Dictionary = {
+		"bpm_changes": bpm_change_arr,
+		"bd_changes": bd_change_arr,
+		"notes": note_arr
+	}
+	return new_dict
+
+func save_difficulty(difficulty: int) -> void:
+	var data = get_chart_dict(difficulty)
+	var data_name = "inote_" + str(difficulty)
+	var chart_data: String = Savefile.chart_to_maidata(data)
+	Global.current_chart_data[data_name] = chart_data
+	print("Difficulty saved!")
+	
+func load_difficulty(difficulty: int) -> void: # uh
+	var data_name = "inote_" + str(difficulty)
+	var data = Global.current_chart_data.get(data_name)
+	clear_chart()
+	if data:
+		var chart_dict = Savefile.maidata_to_chart(data)
+		for bpm_change_dict in chart_dict.get("bpm_changes"):
+			var bpm_node = preload("res://note detail stuffs/bpm_node.tscn")
+			var new_node = bpm_node.instantiate()
+			new_node.bpm = bpm_change_dict["bpm"]
+			new_node.beat = bpm_change_dict["beat"]
+			new_node.connect("bpm_button_clicked", _on_bpm_node_clicked, 8)
+			new_node.button_update()
+			$BPMChanges.add_child(new_node)
+		
+		for bd_change_dict in chart_dict.get("bd_changes"):
+			var beat_divisor_node = preload("res://note detail stuffs/beat_divisor_node.tscn")
+			var new_node = beat_divisor_node.instantiate()
+			new_node.beat_divisor = bd_change_dict["beat_divisor"]
+			new_node.beat = bd_change_dict["beat"]
+			new_node.connect("bd_button_clicked", _on_bd_node_clicked, 8)
+			new_node.button_update()
+			$BeatDivisorChanges.add_child(new_node)
+		
+		for note_args in chart_dict.get("notes"):
+			$Notes.add_child(Note.new_note(note_args["type"], note_args))
+	note_both_update()
+	timeline_object_update()
+	timeline_render("all")
+	
+func clear_chart() -> void:
+	Global.selected_notes = []
+	for node in $BPMChanges.get_children():
+		node.free()
+	for node in $BeatDivisorChanges.get_children():
+		node.free()
+	for node in $Notes.get_children():
+		node.free()
+
+func _on_option_pressed(index):
+	if index == 0: #Save
+		save_difficulty(current_difficulty)
+		Savefile.save_chart()
+	if index == 1: #Export to maidata
+		pass
+	if index == 2: #Return to menu
+		save_difficulty(current_difficulty)
+		Savefile.save_chart()
+		get_tree().change_scene_to_file("res://main_menu.tscn")
+
+func metadata_update():
+	other_metadata_read()
+	$MetadataOptions/DifficultySelect.selected = current_difficulty - 1
+	$MetadataOptions/ChartConstant.text = Global.current_chart_data.get("lv_" + str(current_difficulty)) if Global.current_chart_data.get("lv_" + str(current_difficulty)) else ""
+	$MetadataOptions/MusicOffset.text = Global.current_chart_data.get("first_" + str(current_difficulty)) if Global.current_chart_data.get("first_" + str(current_difficulty)) else ""
+	current_offset = float($MetadataOptions/MusicOffset.text)
+
+func _on_difficulty_select_item_selected(index):
+	var new_difficulty = index + 1
+	save_difficulty(current_difficulty)
+	current_difficulty = new_difficulty
+	load_difficulty(new_difficulty)
+	metadata_update()
+
+
+func _on_chart_constant_text_submitted(new_text):
+	Global.current_chart_data[str("lv_" + str(current_difficulty))] = new_text
+
+
+func _on_music_offset_text_submitted(new_text):
+	var new_offset = float(new_text)
+	Global.current_chart_data[str("first_" + str(current_difficulty))] = new_offset
+	$MetadataOptions/MusicOffset.text = str(new_offset)
+	current_offset = new_offset
+
+func other_metadata_read():
+	var common_keys = ["title", "artist"]
+	var text: String
+	for i in range(7):
+		var difficulty = str(i+1)
+		common_keys.append("des_" + difficulty)
+		common_keys.append("first_" + difficulty)
+		common_keys.append("lv_" + difficulty)
+		common_keys.append("inote_" + difficulty)
+	for key in Global.current_chart_data:
+		if key not in common_keys:
+			text += ("&" + key + "=" + Global.current_chart_data.get(key) + "\n")
+	$MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text = text
+
+func _on_other_metadata_text_set():
+	var text = $MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text
+	var raw_data = text.split("&")
+	for line in raw_data:
+		var key = line.split("=")[0]
+		var value = line.right(-(len(key)+1)).left(-2)
+		Global.current_chart_data[key] = value
+
+
+func _on_artist_field_text_submitted(new_text):
+	Global.current_chart_data["artist"] = new_text
+
+
+func _on_designer_field_text_submitted(new_text):
+	Global.current_chart_data["des_" + str(current_difficulty)] = new_text
+
+
+func _on_window_close_requested():
+	$MetadataOptions/Window.visible = false
+
+
+func _on_other_metadata_pressed():
+	$MetadataOptions/Window.visible = true
+

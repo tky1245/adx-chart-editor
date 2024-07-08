@@ -8,8 +8,11 @@ var note_property_break: bool = false
 var note_property_ex: bool = false
 var note_property_firework: bool = false
 var note_property_both: bool = false
+var note_property_star: bool = false
+var note_property_mine: bool = false
 var note_position: String = ""
 var sliders: Array = []
+var slider_tapless: bool = false
 var delay_ticks: int = 0
 
 var selected: bool = false
@@ -33,65 +36,68 @@ func note_render(current_time: float) -> void:
 	var radius = 6
 	var distance = 27
 	var polygon = petal_polygon(distance, radius)	
-
-	if current_time < intro_time:
-		$Note.visible = false
-		intro_progress = 0
-		path_progress = 0
-		hold_progress = 0
-	elif current_time < move_time:
-		$Note.visible = true
-		intro_progress = (current_time - intro_time) / (move_time - intro_time)
-		path_progress = 0
-		hold_progress = 0
-	elif current_time < judge_start:
-		$Note.visible = true
-		intro_progress = 1
-		path_progress = (current_time - move_time) / (judge_start - move_time)
-		hold_progress = 0
-	elif current_time < judge_end:
-		$Note.visible = true
-		intro_progress = 1
-		path_progress = 1
-		hold_progress = (current_time - judge_start) / duration
-	else:
-		$Note.visible = false
-		intro_progress = 1
-		path_progress = 1
-		hold_progress = 1
 	
-	for i in range(4):
-		var note_pathfollow = $Note/Segments.get_child(i).get_child(0).get_child(0)
-		for node in note_pathfollow.get_children():
-			node.self_modulate.a = intro_progress	
-		note_pathfollow.progress_ratio = path_progress
-	for node in $Note/CenterDot.get_children():
-		node.self_modulate.a = intro_progress
-	
-	if hold_progress == 0.0:
-		for node in $Note/ProgressCircle.get_children():
-			node.visible = false
+	if slider_tapless and sliders.size() > 0:
+		$Note.visible = false
 	else:
+		if current_time < intro_time:
+			$Note.visible = false
+			intro_progress = 0
+			path_progress = 0
+			hold_progress = 0
+		elif current_time < move_time:
+			$Note.visible = true
+			intro_progress = (current_time - intro_time) / (move_time - intro_time)
+			path_progress = 0
+			hold_progress = 0
+		elif current_time < judge_start:
+			$Note.visible = true
+			intro_progress = 1
+			path_progress = (current_time - move_time) / (judge_start - move_time)
+			hold_progress = 0
+		elif current_time < judge_end:
+			$Note.visible = true
+			intro_progress = 1
+			path_progress = 1
+			hold_progress = (current_time - judge_start) / duration
+		else:
+			$Note.visible = false
+			intro_progress = 1
+			path_progress = 1
+			hold_progress = 1
+		
 		for i in range(4):
-			var progress_circle_polygon = $Note/ProgressCircle.get_child(i)
-			var n = int(hold_progress * 4)
-			progress_circle_polygon.self_modulate.a = intro_progress
-			if i < n:
-				progress_circle_polygon.polygon = polygon
-				progress_circle_polygon.visible = true
-			elif i == n:
-				progress_circle_polygon.visible = true
-				var angle = TAU / 4 - (hold_progress * 4 - n) * TAU / 4
-				progress_circle_polygon.polygon = reshape(polygon, angle, )
-			else:
-				progress_circle_polygon.visible = false
-	
-	# Selected Highlight
-	var new_polygon: PackedVector2Array = []
-	for i in range(4):
-		var poly = petal_polygon(39-17*path_progress, 6)
-		new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
-	$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
+			var note_pathfollow = $Note/Segments.get_child(i).get_child(0).get_child(0)
+			for node in note_pathfollow.get_children():
+				node.self_modulate.a = intro_progress	
+			note_pathfollow.progress_ratio = path_progress
+		for node in $Note/CenterDot.get_children():
+			node.self_modulate.a = intro_progress
+		
+		if hold_progress == 0.0:
+			for node in $Note/ProgressCircle.get_children():
+				node.visible = false
+		else:
+			for i in range(4):
+				var progress_circle_polygon = $Note/ProgressCircle.get_child(i)
+				var n = int(hold_progress * 4)
+				progress_circle_polygon.self_modulate.a = intro_progress
+				if i < n:
+					progress_circle_polygon.polygon = polygon
+					progress_circle_polygon.visible = true
+				elif i == n:
+					progress_circle_polygon.visible = true
+					var angle = TAU / 4 - (hold_progress * 4 - n) * TAU / 4
+					progress_circle_polygon.polygon = reshape(polygon, angle, )
+				else:
+					progress_circle_polygon.visible = false
+		
+		# Selected Highlight
+		var new_polygon: PackedVector2Array = []
+		for i in range(4):
+			var poly = petal_polygon(39-17*path_progress, 6)
+			new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
+		$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -222,13 +228,16 @@ func timeline_object_draw() -> void:
 		slider.timeline_object_draw()
 
 func timeline_object_render() -> void: #TODO change visible range
-	var time_1 = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
-	var time_2 = time_1 + duration
-	if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
-		$TimelineIndicator.visible = true
-		$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time_1)
-	else:
+	if slider_tapless and sliders.size() > 0:
 		$TimelineIndicator.visible = false
+	else:
+		var time_1 = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
+		var time_2 = time_1 + duration
+		if time_2 > Global.timeline_visible_time_range["Start"] and time_1 < Global.timeline_visible_time_range["End"]:
+			$TimelineIndicator.visible = true
+			$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time_1)
+		else:
+			$TimelineIndicator.visible = false
 
 func petal_polygon(distance: float, radius: float) -> PackedVector2Array:
 	var frequency = 30
@@ -323,16 +332,16 @@ func select_area() -> Array:
 
 func get_args() -> Dictionary:
 	var new_dict: Dictionary = {
+	"type": type,
 	"beat": beat,
 	"bpm": bpm,
 	"duration_arr": duration_arr,
-	"duration": duration,
 	"note_property_break": note_property_break,
 	"note_property_ex": note_property_ex,
 	"note_property_firework": note_property_firework,
 	"note_property_both": note_property_both,
+	"note_property_mine": note_property_mine,
 	"note_position": note_position,
 	"sliders": sliders,
-	"selected": selected,
 	}
 	return new_dict

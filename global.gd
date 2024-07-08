@@ -1,4 +1,8 @@
 extends Node
+const CHART_STORAGE_PATH: String = "user://Charts/"
+var current_chart_name: String # song name usually
+var current_chart_data: Dictionary
+
 var CURRENT_SONG_PATH: String
 var CURRENT_CHART_PATH: String
 var current_difficulty: int

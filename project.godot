@@ -19,6 +19,7 @@ config/icon="res://note detail stuffs/slider.png"
 
 Global="*res://global.gd"
 Note="*res://note detail stuffs/note.gd"
+Savefile="*res://savefile.gd"
 
 [dotnet]
 

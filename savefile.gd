@@ -54,7 +54,7 @@ func maidata_to_chart(data: String) -> Dictionary:
 		const decorators_2_digits = ["$$"]
 		const decorators_1_digits = ["b", "x", "h", "f", "$", "?", "@"]
 		const slider_shape_2_digits = ["pp", "qq"]
-		const slider_shape_1_digits = ["-", "<", ">", "v", "w", "p", "q", "^", "V"]
+		const slider_shape_1_digits = ["-", "<", ">", "v", "w", "p", "q", "^", "V", "s", "z"]
 		
 		var remaining_string: String = data
 		var bpm_changes: Array = []
@@ -105,7 +105,7 @@ func maidata_to_chart(data: String) -> Dictionary:
 					if current_beat_divisor:
 						bd_changes.append({
 							"beat": beat,
-							"bd": current_beat_divisor
+							"beat_divisor": current_beat_divisor
 						})
 					
 					var note_args: Dictionary
@@ -173,8 +173,8 @@ func maidata_to_chart(data: String) -> Dictionary:
 								var abs_duration = float(duration_string.right(-1))
 								note_args["duration_arr"] = [abs_duration, 0]
 							else:
-								var duration_x = float(duration_string.left(duration_string.find(":")))
-								var duration_y = int(duration_string.right(-(duration_string.find(":")+1)))
+								var duration_y = float(duration_string.left(duration_string.find(":")))
+								var duration_x = int(duration_string.right(-(duration_string.find(":")+1)))
 								note_args["duration_arr"] = [duration_x, duration_y]
 						else:
 							note_args["duration_arr"] = [0.0, 1]
@@ -191,7 +191,11 @@ func maidata_to_chart(data: String) -> Dictionary:
 							slider_args["slider_shape_arr"] = []
 							while slider_string.left(2) in slider_shape_2_digits or slider_string.left(1) in slider_shape_1_digits:
 								var segment_shape: String
-								if slider_string.left(2) in slider_shape_2_digits:
+								if slider_string.left(1) == "V": # special case
+									segment_shape = "-"
+									slider_args["slider_shape_arr"].append(["-", slider_string.left(2).right(1)])
+									slider_string = slider_string.right(-2)
+								elif slider_string.left(2) in slider_shape_2_digits:
 									segment_shape = slider_string.left(2)
 									slider_string = slider_string.right(-2)
 									
@@ -233,8 +237,8 @@ func maidata_to_chart(data: String) -> Dictionary:
 									slider_args["duration_arr"] = [float(arr[1]), 0]
 								elif slider_duration_string.contains("#") and slider_duration_string.contains(":"): # custom bpm, beat divisor duration
 									var custom_bpm = float(slider_duration_string.split("#")[0])
-									var duration_x = float(slider_duration_string.split("#")[1].split(":")[0])
-									var duration_y = int(slider_duration_string.split("#")[1].split(":")[1])
+									var duration_x = float(slider_duration_string.split("#")[1].split(":")[1])
+									var duration_y = int(slider_duration_string.split("#")[1].split(":")[0])
 									var bpm_ratio = float_to_fraction(ongoing_bpm/custom_bpm)
 									slider_args["delay_arr"] = [float(bpm_ratio[0]), int(4 * bpm_ratio[1])]
 									slider_args["duration_arr"] = [duration_x, duration_y]
@@ -245,8 +249,8 @@ func maidata_to_chart(data: String) -> Dictionary:
 									slider_args["delay_arr"] = [float(bpm_ratio[0]), int(4 * bpm_ratio[1])]
 									slider_args["duration_arr"] = [abs_duration, 0]
 								elif not slider_duration_string.contains("#") and slider_duration_string.contains(":"): # default
-									var duration_x = float(slider_duration_string.split(":")[0])
-									var duration_y = int(slider_duration_string.split(":")[1])
+									var duration_x = float(slider_duration_string.split(":")[1])
+									var duration_y = int(slider_duration_string.split(":")[0])
 									slider_args["delay_arr"] = [1.0, 4]
 									slider_args["duration_arr"] = [duration_x, duration_y]
 								else:
@@ -310,7 +314,7 @@ func chart_to_maidata(data: Dictionary) -> String:
 			var current_beat_divisor: int
 			for i in range(bd_changes.size()):
 				if bd_changes.front().get("beat") == beat_counter:
-					current_beat_divisor = bd_changes.pop_front().get("bd")
+					current_beat_divisor = bd_changes.pop_front().get("beat_divisor")
 				elif bd_changes.front().get("beat") > beat_counter:
 					break
 			if current_beat_divisor:
@@ -353,7 +357,7 @@ func chart_to_maidata(data: Dictionary) -> String:
 						if note.get("duration_arr")[1] == 0: # uses [0] as absolute time
 							note_string += "h[#" + str(note.get("duration_arr")[0]) + "]"
 						else:
-							note_string += "h[" + str(note.get("duration_arr")[0]) + ":" + str(note.get("duration_arr")[1]) + "]"
+							note_string += "h[" + str(note.get("duration_arr")[1]) + ":" + str(note.get("duration_arr")[0]) + "]"
 					
 					# slider handling
 					if note.get("sliders") and note.get("sliders").size() > 0:
@@ -371,9 +375,9 @@ func chart_to_maidata(data: Dictionary) -> String:
 								note_string += "b"
 							# duration bracket
 							if slider.get("delay_arr") == [1.0, 4] and slider.get("duration_arr")[1] != 0: # default
-								note_string += "[" + str(slider.get("duration_arr")[0]) + ":" + str(slider.get("duration_arr")[1]) + "]"
+								note_string += "[" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr") != [1.0, 4] and slider.get("duration_arr")[1] != 0: # fake bpm change
-								note_string += "[" + str(note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1]) / 0.25) + "#" + str(slider.get("duration_arr")[0]) + ":" + str(slider.get("duration_arr")[1]) + "]"
+								note_string += "[" + str(note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1]) / 0.25) + "#" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr")[1] != 0 and slider.get("duration_arr")[1] == 0: # custom bpm + abs duration
 								note_string += "["+ str(note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1]) / 0.25) + "#" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr")[1] == 0 and slider.get("duration_arr")[1] == 0: # abs delay abs duration

@@ -397,6 +397,17 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Star"
 
+[node name="Rotate" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Spinning"
+
+[node name="Tapless" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+visible = false
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Tapless"
+
 [node name="HoldSlideChange" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
 layout_mode = 2
 
@@ -407,6 +418,9 @@ text = "Hold Toggle"
 [node name="AddSlide" type="Button" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange"]
 layout_mode = 2
 text = "Add Slide"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
+layout_mode = 2
 
 [node name="HoldProperties" type="VBoxContainer" parent="NoteDetails/ScrollContainer/Properties"]
 visible = false
@@ -479,6 +493,125 @@ popup/item_1/text = "Export to maidata"
 popup/item_1/id = 1
 popup/item_2/text = "Return to menu"
 popup/item_2/id = 2
+
+[node name="MetadataOptions" type="Node2D" parent="."]
+
+[node name="Label" type="Label" parent="MetadataOptions"]
+offset_left = 19.0
+offset_top = 88.0
+offset_right = 94.0
+offset_bottom = 111.0
+text = "Difficulty:"
+
+[node name="DifficultySelect" type="OptionButton" parent="MetadataOptions"]
+offset_left = 17.0
+offset_top = 117.0
+offset_right = 141.0
+offset_bottom = 152.0
+item_count = 7
+selected = 0
+popup/item_0/text = "Easy"
+popup/item_0/id = 0
+popup/item_1/text = "Basic"
+popup/item_1/id = 1
+popup/item_2/text = "Advanced"
+popup/item_2/id = 2
+popup/item_3/text = "Expert"
+popup/item_3/id = 3
+popup/item_4/text = "Master"
+popup/item_4/id = 4
+popup/item_5/text = "Re:Master"
+popup/item_5/id = 5
+popup/item_6/text = "Original"
+popup/item_6/id = 6
+
+[node name="Label2" type="Label" parent="MetadataOptions"]
+offset_left = 19.0
+offset_top = 163.0
+offset_right = 64.0
+offset_bottom = 186.0
+text = "Level:"
+
+[node name="ChartConstant" type="LineEdit" parent="MetadataOptions"]
+offset_left = 19.0
+offset_top = 194.0
+offset_right = 86.0625
+offset_bottom = 225.0
+text = "15"
+
+[node name="Label3" type="Label" parent="MetadataOptions"]
+offset_left = 20.0
+offset_top = 234.0
+offset_right = 114.0
+offset_bottom = 257.0
+text = "Music Offset:"
+
+[node name="MusicOffset" type="LineEdit" parent="MetadataOptions"]
+offset_left = 19.0
+offset_top = 266.0
+offset_right = 86.0625
+offset_bottom = 297.0
+text = "0.00"
+
+[node name="OtherMetadata" type="Button" parent="MetadataOptions"]
+offset_left = 18.0
+offset_top = 307.0
+offset_right = 115.0
+offset_bottom = 343.0
+text = "Other infos"
+
+[node name="Window" type="Window" parent="MetadataOptions"]
+initial_position = 2
+size = Vector2i(400, 200)
+visible = false
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MetadataOptions/Window"]
+offset_right = 390.0
+offset_bottom = 40.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MetadataOptions/Window/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MetadataOptions/Window/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Artist" type="Label" parent="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Artist:"
+
+[node name="ArtistField" type="LineEdit" parent="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MetadataOptions/Window/VBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Designer" type="Label" parent="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+text = "Chart Designer:"
+
+[node name="DesignerField" type="LineEdit" parent="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MetadataOptions/Window/VBoxContainer"]
+layout_mode = 2
+
+[node name="BoxContainer2" type="BoxContainer" parent="MetadataOptions/Window/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+
+[node name="Label" type="Label" parent="MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer2"]
+layout_mode = 2
+text = "Others:"
+
+[node name="BoxContainer" type="BoxContainer" parent="MetadataOptions/Window/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(330, 120)
+layout_mode = 2
+
+[node name="OtherMetadata" type="TextEdit" parent="MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="PlaybackControls" type="Node2D" parent="."]
 
@@ -663,10 +796,20 @@ text = "btn"
 [connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Break" to="." method="_on_break_toggled"]
 [connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/EX" to="." method="_on_ex_toggled"]
 [connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star" to="." method="_on_star_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate" to="." method="_on_rotate_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless" to="." method="_on_tapless_toggled"]
 [connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold" to="." method="_on_hold_pressed"]
 [connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide" to="." method="_on_add_slide_pressed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX" to="." method="_on_hold_duration_x_text_changed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationY" to="." method="_on_hold_duration_y_text_changed"]
+[connection signal="item_selected" from="MetadataOptions/DifficultySelect" to="." method="_on_difficulty_select_item_selected"]
+[connection signal="text_submitted" from="MetadataOptions/ChartConstant" to="." method="_on_chart_constant_text_submitted"]
+[connection signal="text_submitted" from="MetadataOptions/MusicOffset" to="." method="_on_music_offset_text_submitted"]
+[connection signal="pressed" from="MetadataOptions/OtherMetadata" to="." method="_on_other_metadata_pressed"]
+[connection signal="close_requested" from="MetadataOptions/Window" to="." method="_on_window_close_requested"]
+[connection signal="text_submitted" from="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer/ArtistField" to="." method="_on_artist_field_text_submitted"]
+[connection signal="text_submitted" from="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer2/DesignerField" to="." method="_on_designer_field_text_submitted"]
+[connection signal="text_set" from="MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata" to="." method="_on_other_metadata_text_set"]
 [connection signal="gui_input" from="PlaybackControls/TimeSlider/ProgressBar" to="." method="_on_progress_bar_gui_input"]
 [connection signal="pressed" from="PlaybackControls/PlayPause" to="." method="_on_play_pause_pressed"]
 [connection signal="pressed" from="PlaybackControls/Stop" to="." method="_on_stop_pressed"]

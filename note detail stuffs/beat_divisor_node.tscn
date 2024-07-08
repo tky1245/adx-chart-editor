@@ -13,6 +13,8 @@ func button_update():
 	$TimelineIndicator/Button.text = \"{\" + str(beat_divisor) + \"}\"
 
 func render():
+	if beat > Global.timeline_beats.size() - 1:
+		return
 	var time = Global.timeline_beats[beat]
 	if time > Global.timeline_visible_time_range[\"Start\"] and time < Global.timeline_visible_time_range[\"End\"]:
 		$TimelineIndicator.visible = true

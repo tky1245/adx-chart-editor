@@ -1,0 +1,163 @@
+[gd_scene load_steps=4 format=3 uid="uid://cehby3hycgse7"]
+
+[ext_resource type="Texture2D" uid="uid://vu4cq3u0ib2i" path="res://bg_not_found.png" id="1_opy6i"]
+
+[sub_resource type="GDScript" id="GDScript_v1oa6"]
+script/source = "extends BoxContainer
+signal chart_clicked
+var index: int
+var title: String
+var bpm: String
+var artist: String
+func initialize(chart_name: String, song_artist: String, chart_bpm: String, available_difficulties: Array, texture):
+	$Control/HBoxContainer2/VBoxContainer/BoxContainer2/Name.text = chart_name
+	title = chart_name
+	artist = song_artist if song_artist else \"\"
+	bpm = chart_bpm if chart_bpm else \"\"
+	$Control/HBoxContainer2/VBoxContainer/BoxContainer3/TextureRect.texture = texture
+	for i in range($Control/HBoxContainer2/VBoxContainer2/Difficulties.get_child_count()):
+		$Control/HBoxContainer2/VBoxContainer2/Difficulties.get_child(i).visible = true if i+1 in available_difficulties else false
+
+func _input(event):
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		if Geometry2D.is_point_in_polygon(event.position, $Control/ClickDetection/CollisionPolygon2D.polygon * Transform2D(0.0, -global_position)):
+			chart_clicked.emit(self)
+
+func selected_toggle(option: bool):
+	$Control/ColorRect.color = Color(\"#272727\") if !option else Color(\"#7d7d7d\")
+"
+
+[sub_resource type="Theme" id="Theme_vjqcv"]
+Label/font_sizes/font_size = 24
+
+[node name="ChartSelect" type="BoxContainer"]
+custom_minimum_size = Vector2(250, 250)
+offset_right = 250.0
+offset_bottom = 250.0
+script = SubResource("GDScript_v1oa6")
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 2
+mouse_filter = 1
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+custom_minimum_size = Vector2(0, 40)
+layout_direction = 3
+layout_mode = 2
+offset_left = -224.0
+offset_bottom = 224.0
+mouse_filter = 2
+color = Color(0.152941, 0.152941, 0.152941, 1)
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="Control"]
+layout_mode = 0
+offset_right = 224.0
+offset_bottom = 224.0
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control/HBoxContainer2"]
+custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
+mouse_filter = 2
+theme = SubResource("Theme_vjqcv")
+
+[node name="BoxContainer" type="HBoxContainer" parent="Control/HBoxContainer2/VBoxContainer"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+mouse_filter = 2
+
+[node name="BoxContainer3" type="BoxContainer" parent="Control/HBoxContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+alignment = 1
+
+[node name="TextureRect" type="TextureRect" parent="Control/HBoxContainer2/VBoxContainer/BoxContainer3"]
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+size_flags_horizontal = 6
+size_flags_vertical = 4
+mouse_filter = 2
+texture = ExtResource("1_opy6i")
+expand_mode = 1
+
+[node name="BoxContainer2" type="BoxContainer" parent="Control/HBoxContainer2/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="Control/HBoxContainer2/VBoxContainer/BoxContainer2"]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+
+[node name="Name" type="Label" parent="Control/HBoxContainer2/VBoxContainer/BoxContainer2"]
+custom_minimum_size = Vector2(140, 34)
+layout_mode = 2
+text = "name"
+autowrap_mode = 3
+text_overrun_behavior = 4
+
+[node name="Label2" type="Label" parent="Control/HBoxContainer2/VBoxContainer/BoxContainer2"]
+custom_minimum_size = Vector2(16, 0)
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="Control/HBoxContainer2"]
+custom_minimum_size = Vector2(0, 224)
+layout_mode = 2
+size_flags_horizontal = 2
+size_flags_vertical = 0
+
+[node name="Difficulties" type="VBoxContainer" parent="Control/HBoxContainer2/VBoxContainer2"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 6
+
+[node name="ColorRect" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(0.00784314, 1, 1, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(0.439216, 0.831373, 0.235294, 1)
+
+[node name="ColorRect3" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(0.972549, 0.737255, 0.0156863, 1)
+
+[node name="ColorRect4" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(1, 0.517647, 0.54902, 1)
+
+[node name="ColorRect5" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(0.627451, 0.329412, 0.862745, 1)
+
+[node name="ColorRect6" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(0.878431, 0.67451, 0.988235, 1)
+
+[node name="ColorRect7" type="ColorRect" parent="Control/HBoxContainer2/VBoxContainer2/Difficulties"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 6
+color = Color(1, 0.423529, 0.988235, 1)
+
+[node name="ClickDetection" type="Area2D" parent="Control"]
+disable_mode = 2
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Control/ClickDetection"]
+polygon = PackedVector2Array(0, 0, 224, 0, 224, 224, 0, 224)

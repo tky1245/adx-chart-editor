@@ -8,7 +8,7 @@ var duration: float
 var delay_arr: Array = [1, 4]
 var delay: float
 var slider_head_position: String
-var slider_shape_arr: Array # contains matches of [shape, target_position, length]
+var slider_shape_arr: Array # contains matches of [shape, target_position]
 var slider_length_arr: Array[float] # contains each of the slider shape segment length
 var delay_ticks: int
 
@@ -241,8 +241,6 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 						new_arrow.set_slider_arrow(slider_arrow_color_top, slider_arrow_color_bottom, visible_threshold, true, temp_length)
 						new_path_follow.add_child(new_arrow)
 					temp_distance += distance
-	print(slider_length_arr)
-	print(slider_shape_arr)
 	
 	
 	# Add stars for each path
