@@ -4,10 +4,8 @@ this is a project of adx chart editor
 still in progress tho
 
 todo:
-	- chart jacket upload/show jacket in the preview
 	- fix "<" ">" unable to 360
 	- add sounds + note effects
-	- maidata import/export
 	- make firework function
 
 soontm:

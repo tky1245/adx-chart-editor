@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://cmbnm81hqjj7w"]
+[gd_scene load_steps=14 format=3 uid="uid://cmbnm81hqjj7w"]
 
 [ext_resource type="Script" path="res://chart_editor.gd" id="1_0e0hw"]
 [ext_resource type="Texture2D" uid="uid://bt5o0b8qyb3wd" path="res://note detail stuffs/tap.png" id="2_3jjh2"]
@@ -9,7 +9,6 @@
 [ext_resource type="Texture2D" uid="uid://d0c2d5yiag0qj" path="res://note detail stuffs/frame_yellow.png" id="4_l8ibe"]
 [ext_resource type="Texture2D" uid="uid://dtp6uksbnuglt" path="res://note detail stuffs/hold.png" id="5_0yoip"]
 [ext_resource type="Texture2D" uid="uid://bv7e1bkhhnyua" path="res://note detail stuffs/slider.png" id="6_tnwyh"]
-[ext_resource type="Texture2D" uid="uid://b1d7prqmuqyxq" path="res://note detail stuffs/image.png" id="9_sepyj"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_dhqh1"]
 animations = [{
@@ -47,180 +46,6 @@ script = ExtResource("1_0e0hw")
 
 [node name="ChartPreview" type="Node2D" parent="."]
 
-[node name="TouchArea" type="Node2D" parent="ChartPreview"]
-visible = false
-
-[node name="Image" type="Sprite2D" parent="ChartPreview/TouchArea"]
-visible = false
-position = Vector2(425, 250)
-scale = Vector2(0.75, 0.75)
-texture = ExtResource("9_sepyj")
-
-[node name="A1" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A1"]
-polygon = PackedVector2Array(454, 53, 447, 105, 460, 119, 491, 132, 511, 132, 543, 89, 502, 64)
-
-[node name="A2" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A2"]
-polygon = PackedVector2Array(584, 131, 542, 163, 542, 185, 552, 210, 569, 227, 621, 219, 610, 172)
-
-[node name="A3" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A3"]
-polygon = PackedVector2Array(621, 278, 569, 271, 554, 285, 542, 313, 542, 335, 585, 367, 610, 325)
-
-[node name="A4" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A4"]
-polygon = PackedVector2Array(543, 409, 511, 366, 491, 366, 461, 379, 447, 392, 455, 446, 501, 434)
-
-[node name="A5" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A5"]
-polygon = PackedVector2Array(395, 445, 402, 393, 388, 377, 359, 366, 340, 365, 306, 408, 348, 434)
-
-[node name="A6" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A6"]
-polygon = PackedVector2Array(265, 367, 308, 334, 308, 316, 294, 284, 281, 271, 228, 279, 239, 326)
-
-[node name="A7" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A7"]
-polygon = PackedVector2Array(229, 220, 281, 227, 295, 213, 307, 186, 307, 163, 265, 131, 239, 173)
-
-[node name="A8" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_A"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/A8"]
-polygon = PackedVector2Array(307, 90, 339, 132, 358, 132, 387, 120, 403, 105, 395, 53, 348, 64)
-
-[node name="B1" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B1"]
-polygon = PackedVector2Array(449, 132, 490, 149, 490, 181, 478, 193, 448, 193, 426, 170, 426, 155)
-
-[node name="B2" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B2"]
-polygon = PackedVector2Array(481, 225, 481, 195, 493, 183, 525, 183, 542, 224, 519, 247, 502, 247)
-
-[node name="B3" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B3"]
-polygon = PackedVector2Array(481, 273, 503, 251, 519, 251, 542, 274, 525, 314, 493, 314, 481, 302)
-
-[node name="B4" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B4"]
-polygon = PackedVector2Array(448, 306, 479, 306, 490, 318, 490, 349, 449, 366, 427, 344, 427, 327)
-
-[node name="B5" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B5"]
-polygon = PackedVector2Array(371, 306, 400, 306, 422, 327, 422, 343, 400, 366, 360, 350, 360, 317)
-
-[node name="B6" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B6"]
-polygon = PackedVector2Array(331, 251, 346, 251, 367, 273, 367, 303, 355, 314, 324, 314, 308, 274)
-
-[node name="B7" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B7"]
-polygon = PackedVector2Array(324, 184, 356, 184, 368, 196, 368, 225, 347, 246, 330, 246, 308, 224)
-
-[node name="B8" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_B"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/B8"]
-polygon = PackedVector2Array(360, 148, 400, 132, 422, 155, 422, 171, 401, 192, 370, 192, 360, 181)
-
-[node name="C" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_C"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/C"]
-polygon = PackedVector2Array(402, 194, 446, 194, 480, 228, 480, 270, 446, 303, 402, 303, 369, 271, 369, 226)
-
-[node name="D1" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D1"]
-polygon = PackedVector2Array(399, 53, 406, 102, 425, 83, 444, 102, 450, 52, 426, 50)
-
-[node name="D2" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D2"]
-polygon = PackedVector2Array(546, 91, 516, 132, 542, 132, 542, 158, 582, 128, 567, 109)
-
-[node name="D3" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D3"]
-polygon = PackedVector2Array(622, 224, 573, 231, 590, 248, 572, 267, 622, 273, 624, 248)
-
-[node name="D4" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D4"]
-polygon = PackedVector2Array(582, 370, 542, 340, 542, 366, 516, 366, 546, 406, 567, 389)
-
-[node name="D5" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D5"]
-polygon = PackedVector2Array(450, 446, 443, 396, 424, 414, 406, 398, 400, 446, 425, 449)
-
-[node name="D6" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D6"]
-polygon = PackedVector2Array(301, 405, 334, 366, 308, 366, 308, 340, 268, 371, 283, 389)
-
-[node name="D7" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D7"]
-polygon = PackedVector2Array(228, 274, 276, 267, 258, 249, 276, 231, 228, 225, 225, 249)
-
-[node name="D8" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_D"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/D8"]
-polygon = PackedVector2Array(268, 128, 306, 157, 306, 132, 333, 132, 303, 93, 284, 108)
-
-[node name="E1" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E1"]
-polygon = PackedVector2Array(425, 89, 456, 120, 425, 151, 394, 120)
-
-[node name="E2" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E2"]
-polygon = PackedVector2Array(494, 136, 538, 136, 538, 180, 494, 180)
-
-[node name="E3" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E3"]
-polygon = PackedVector2Array(553, 218, 584, 249, 553, 280, 522, 249)
-
-[node name="E4" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E4"]
-polygon = PackedVector2Array(494, 318, 538, 318, 538, 362, 494, 362)
-
-[node name="E5" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E5"]
-polygon = PackedVector2Array(424, 347, 455, 378, 424, 409, 393, 378)
-
-[node name="E6" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E6"]
-polygon = PackedVector2Array(312, 318, 355, 318, 355, 362, 312, 362)
-
-[node name="E7" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E7"]
-polygon = PackedVector2Array(296, 218, 327, 249, 296, 280, 265, 249)
-
-[node name="E8" type="Area2D" parent="ChartPreview/TouchArea" groups=["touchpos_E"]]
-
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="ChartPreview/TouchArea/E8"]
-polygon = PackedVector2Array(311, 136, 355, 136, 355, 180, 311, 180)
-
 [node name="Circle" type="Line2D" parent="ChartPreview"]
 closed = true
 width = 2.0
@@ -230,11 +55,6 @@ closed = true
 width = 2.0
 
 [node name="Jacket" type="Polygon2D" parent="ChartPreview"]
-
-[node name="TextureRect" type="TextureRect" parent="ChartPreview/Jacket"]
-visible = false
-offset_right = 40.0
-offset_bottom = 40.0
 
 [node name="SelectedHighlight" type="Node2D" parent="ChartPreview"]
 
