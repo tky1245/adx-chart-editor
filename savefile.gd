@@ -1,5 +1,7 @@
 extends Node
-var img_extensions: Array = [".jpg", ".png", ".jpeg"]
+const img_extensions: Array = [".jpg", ".png", ".jpeg"]
+const track_extensions: Array = [".mp3", ".ogg"]
+
 func _ready():
 	var dir_path = Global.CHART_STORAGE_PATH.left(len("Charts/"))
 	var dir = DirAccess.open(dir_path)

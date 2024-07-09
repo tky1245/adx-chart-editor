@@ -54,28 +54,23 @@ func _ready():
 	# Draw a circle
 	var density = 180
 	for k in range(density):
-		var dotx = Global.preview_radius * sin(2 * PI * k / density) + Global.preview_center.x
-		var doty = Global.preview_radius * cos(2 * PI * k / density) + Global.preview_center.y
+		var dotx = Global.preview_radius * sin(2 * PI * k / density)
+		var doty = Global.preview_radius * cos(2 * PI * k / density)
 		$ChartPreview/Circle.add_point(Vector2(dotx, doty))
+	# Another circle
+	for k in range(density):
+		var dotx = Global.preview_outcircle_radius * sin(2 * PI * k / density)
+		var doty = Global.preview_outcircle_radius * cos(2 * PI * k / density)
+		$ChartPreview/Circle2.add_point(Vector2(dotx, doty))
+	$ChartPreview/Circle.position = Global.preview_center
+	$ChartPreview/Circle2.position = Global.preview_center
 	
-	# Draw polygons
-	#for region in $ChartPreview/TouchArea.get_children():
-		#if region.is_in_group("touchpos_A") or region.is_in_group("touchpos_B") or region.is_in_group("touchpos_E"):
-			#var newPolygon = Polygon2D.new()
-			#newPolygon.name = "PolygonFill"
-			#newPolygon.polygon = region.find_child("CollisionPolygon2D").polygon
-			#newPolygon.color = Color(1, 1, 1, 0.5)
-			#region.add_child(newPolygon)
-			#var newLine = Line2D.new()
-			#newLine.points = region.find_child("CollisionPolygon2D").polygon
-			#newLine.width = 2
-			#newLine.closed = true
-			#region.add_child(newLine)
 	
 	$ChartPreview/ChartPreviewArea.connect("area_clicked", _touch_area_clicked)
 	
 	timeline_object_update()
 	timeline_render("all")
+	jacket_load()
 
 func _input(event):
 	if bar_dragging:
@@ -1126,3 +1121,34 @@ func _on_window_close_requested():
 func _on_other_metadata_pressed():
 	$MetadataOptions/Window.visible = true
 
+func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"):
+	var file_name: String
+	var dir = DirAccess.open(jacket_dir)
+	for extension in Savefile.img_extensions:
+		for file in dir.get_files():
+			if file == "bg" + extension:
+				file_name = "bg" + extension
+				break
+		if file_name:
+			break
+	var jacket
+	if file_name:
+		var img = Image.load_from_file(jacket_dir + file_name)
+		var jacket_scale = (Global.preview_outcircle_radius * 2) / (min(img.data.get("height"), img.data.get("width")))
+		img.resize(int(img.data.get("width") * jacket_scale), int(img.data.get("height") * jacket_scale))
+		#img.resize(int(Global.preview_outcircle_radius * 2), int(Global.preview_outcircle_radius * 2))
+		jacket = ImageTexture.create_from_image(img)
+	else:
+		var img = Image.load_from_file("res://bg_not_found.png")
+		img.resize(int(Global.preview_outcircle_radius * 2), int(Global.preview_outcircle_radius * 2))
+		jacket = ImageTexture.create_from_image(img)
+	$ChartPreview/Jacket.texture = jacket
+	
+	if $ChartPreview/Jacket.polygon.size() == 0:
+		var poly: PackedVector2Array = []
+		for k in range(180):
+			var dotx = Global.preview_outcircle_radius * (sin(2 * PI * k / 180) + 1)
+			var doty = Global.preview_outcircle_radius * (cos(2 * PI * k / 180) + 1)
+			poly.append(Vector2(dotx, doty))
+		$ChartPreview/Jacket.polygon = poly
+	$ChartPreview/Jacket.position = Global.preview_center - 1 * Vector2(Global.preview_outcircle_radius, Global.preview_outcircle_radius)

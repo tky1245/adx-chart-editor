@@ -22,9 +22,9 @@ polygon = PackedVector2Array(50, -29, 23, 49, -61, 50, -60, -38)
 
 [node name="Line2D" type="Line2D" parent="."]
 closed = true
-width = 2.0
+width = 1.0
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
-color = Color(1, 1, 1, 0.498039)
+color = Color(1, 1, 1, 0.196078)
 
 [connection signal="input_event" from="." to="." method="_on_input_event"]

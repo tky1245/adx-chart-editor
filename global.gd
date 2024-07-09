@@ -12,9 +12,10 @@ var key_pressing: Array = [] # For combined keys later
 
 # Some chart preview variables
 const preview_center = Vector2(425, 250)
-const preview_radius = 200
+const preview_radius: float = 200
+const preview_outcircle_radius: float = 225
 var touch_positions: Dictionary
-var initial_note_distance = 50
+var initial_note_distance: float = 50
 var note_speed_in_time = 0.4
 var clicked_notes: Array[Node2D] = []
 var selected_notes: Array[Node2D] = []

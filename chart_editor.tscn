@@ -223,7 +223,18 @@ polygon = PackedVector2Array(311, 136, 355, 136, 355, 180, 311, 180)
 
 [node name="Circle" type="Line2D" parent="ChartPreview"]
 closed = true
-width = 4.0
+width = 2.0
+
+[node name="Circle2" type="Line2D" parent="ChartPreview"]
+closed = true
+width = 2.0
+
+[node name="Jacket" type="Polygon2D" parent="ChartPreview"]
+
+[node name="TextureRect" type="TextureRect" parent="ChartPreview/Jacket"]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
 
 [node name="SelectedHighlight" type="Node2D" parent="ChartPreview"]
 
