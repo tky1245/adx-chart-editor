@@ -33,6 +33,7 @@ var last_used_hold_duration_arr: Array = [1.0, 4]
 var last_used_slide_duration_arr: Array = [1.0, 4]
 signal touch_area_triggered
 
+
 func _ready():
 	var chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"
 	Savefile.load_chart() # load from save file to global var
@@ -67,7 +68,7 @@ func _ready():
 	
 	
 	$ChartPreview/ChartPreviewArea.connect("area_clicked", _touch_area_clicked)
-	
+	note_both_update()
 	timeline_object_update()
 	timeline_render("all")
 	jacket_load()
@@ -1034,10 +1035,10 @@ func load_difficulty(difficulty: int) -> void: # uh
 		
 		for note_args in chart_dict.get("notes"):
 			$Notes.add_child(Note.new_note(note_args["type"], note_args))
-	note_both_update()
+	
 	timeline_object_update()
 	timeline_render("all")
-	
+	note_both_update()
 func clear_chart() -> void:
 	Global.selected_notes = []
 	for node in $BPMChanges.get_children():
@@ -1137,11 +1138,12 @@ func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current
 		var img = Image.load_from_file(jacket_dir + file_name)
 		var jacket_scale = (Global.preview_outcircle_radius * 2) / (min(img.data.get("height"), img.data.get("width")))
 		img.resize(int(img.data.get("width") * jacket_scale), int(img.data.get("height") * jacket_scale))
-		#img.resize(int(Global.preview_outcircle_radius * 2), int(Global.preview_outcircle_radius * 2))
+		img.adjust_bcs(1-Global.background_dim, 1, 1)
 		jacket = ImageTexture.create_from_image(img)
 	else:
 		var img = Image.load_from_file("res://bg_not_found.png")
 		img.resize(int(Global.preview_outcircle_radius * 2), int(Global.preview_outcircle_radius * 2))
+		img.adjust_bcs(1-Global.background_dim, 1, 1)
 		jacket = ImageTexture.create_from_image(img)
 	$ChartPreview/Jacket.texture = jacket
 	

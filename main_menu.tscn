@@ -36,7 +36,7 @@ size = Vector2i(1050, 550)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
-filters = PackedStringArray("track.mp3", "track.ogg")
+filters = PackedStringArray("*.mp3", "*.ogg")
 
 [node name="NewChartSongName" type="Window" parent="."]
 initial_position = 2
@@ -121,8 +121,17 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 48
 text = "Select"
 
+[node name="SelectMaidata" type="FileDialog" parent="."]
+title = "Open a File"
+size = Vector2i(1050, 550)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("maidata.txt")
+
 [connection signal="pressed" from="Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="pressed" from="Buttons/OpenChart" to="." method="_on_open_chart_pressed"]
+[connection signal="pressed" from="Buttons/ImportFromMaidata" to="." method="_on_import_from_maidata_pressed"]
 [connection signal="file_selected" from="SelectSong" to="." method="_on_select_song_file_selected"]
 [connection signal="close_requested" from="NewChartSongName" to="." method="_on_new_chart_song_name_close_requested"]
 [connection signal="text_submitted" from="NewChartSongName/VBoxContainer/SongNameField" to="." method="_on_song_name_field_text_submitted"]
@@ -130,3 +139,4 @@ text = "Select"
 [connection signal="pressed" from="OpenChartSelection/VBoxContainer/Options/BoxContainer3/RenameButton" to="." method="_on_rename_button_pressed"]
 [connection signal="pressed" from="OpenChartSelection/VBoxContainer/Options/BoxContainer/DeleteButton" to="." method="_on_delete_button_pressed"]
 [connection signal="pressed" from="OpenChartSelection/VBoxContainer/Options/BoxContainer2/SelectButton" to="." method="_on_select_button_pressed"]
+[connection signal="file_selected" from="SelectMaidata" to="." method="_on_select_maidata_file_selected"]

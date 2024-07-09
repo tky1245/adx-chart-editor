@@ -31,8 +31,6 @@ func _on_song_name_field_text_submitted(new_text):
 	$NewChartSongName.visible = false
 	$NewChartSongName/VBoxContainer/SongNameField.text = ""
 	
-
-
 func _on_new_chart_song_name_close_requested():
 	$NewChartSongName.visible = false
 
@@ -127,3 +125,13 @@ func _on_delete_button_pressed():
 
 func _on_rename_button_pressed():
 	pass # Replace with function body.
+
+
+func _on_select_maidata_file_selected(path):
+	var dir = path.left(-len("maidata.txt"))
+	Savefile.import_maidata(dir)
+	get_tree().change_scene_to_file("res://chart_editor.tscn")
+
+
+func _on_import_from_maidata_pressed():
+	$SelectMaidata.visible = true

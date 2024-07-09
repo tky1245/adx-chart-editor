@@ -432,7 +432,7 @@ func import_maidata(chart_dir: String) -> void:
 					chart_storage.make_dir(chart_name)
 					break
 			
-		chart_save["data_name"] = data_value
+		chart_save[data_name] = data_value
 	if !chart_name:
 		print("maidata &title property not found.")
 		return
@@ -505,13 +505,11 @@ func export_maidata(export_path: String, chart_dir = Global.CHART_STORAGE_PATH +
 	for track_extension in track_extensions:
 		if chart_storage.file_exists(chart_dir + "track" + track_extension):
 			chart_storage.copy(chart_dir + "track" + track_extension, export_path + Global.current_chart_name + "/track" + track_extension)
-			print("track copied")
 			break
 	
 	for img_extension in img_extensions:
 		if chart_storage.file_exists(chart_dir + "bg" + img_extension):
 			chart_storage.copy(chart_dir + "bg" + img_extension, export_path + Global.current_chart_name + "/bg" + img_extension)
-			print("img copied")
 			break
 	
 # Utils
