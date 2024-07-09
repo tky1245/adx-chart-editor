@@ -20,7 +20,7 @@ var initial_note_distance: float = 50
 var note_speed_in_time = 0.4
 var clicked_notes: Array[Node2D] = []
 var selected_notes: Array[Node2D] = []
-
+var current_offset: float
 
 # for mathing and rendering
 const timeline_pointer_x = 240

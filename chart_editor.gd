@@ -3,7 +3,6 @@ var previous_mouse_position: Vector2
 # Metadata
 var current_difficulty: int = 1
 var difficulty_value: String = ""
-var current_offset: float
 
 # Placement Tools
 var placement_selected: String = "None"
@@ -17,13 +16,14 @@ var toggle_firework: bool = false
 var song_length: float
 var current_time: float
 
+
 # Playback
 var bar_dragging: bool = false
 var mouse_holding_bar:bool = false
 var previous_song_time: float
 
 # Timeline
-
+var extra_time: float = 1
 var timeline_bar_time:Array = []
 var note_objects: Array = [] # {"Beat": int, "Node": Node} # to be removed
 var timeline_dragging: bool = false
@@ -77,28 +77,29 @@ func _ready():
 	jacket_load()
 
 func _input(event):
-	if bar_dragging:
+	# Time skips
+	if bar_dragging: # Progress bar dragging
 		if event is InputEventMouse:
 			if event.position.x < $PlaybackControls/TimeSlider/ProgressBar.position.x:
-				current_time = 0
+				current_time = 0 - extra_time
 			elif event.position.x > $PlaybackControls/TimeSlider/ProgressBar.position.x + $PlaybackControls/TimeSlider/ProgressBar.size.x:
-				current_time = song_length
+				current_time = song_length + extra_time
 			else:
-				current_time = song_length * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
+				current_time = -extra_time + (song_length + 2 * extra_time) * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
 		#TODO: Rerender everything 
 		timeline_render("all")
 	if event is InputEventMouseButton and !event.pressed:
 		bar_dragging = false
 	
-	if timeline_dragging:
+	if timeline_dragging: # Timeline dragging
 		if event is InputEventMouseMotion:
 			var position_delta = event.position - previous_mouse_position if previous_mouse_position != Vector2(-1, -1) else Vector2(0, 0)
 			var time_delta = position_delta.x / Global.timeline_pixels_to_second / Global.timeline_zoom
 			previous_mouse_position = event.position
-			if current_time - time_delta < 0:
-				current_time = 0
-			elif current_time - time_delta > song_length:
-				current_time = song_length
+			if current_time - time_delta < -extra_time:
+				current_time = -extra_time
+			elif current_time - time_delta > song_length + extra_time:
+				current_time = song_length + extra_time
 			else:
 				current_time = current_time - time_delta
 			#TODO: render
@@ -169,7 +170,9 @@ func _process(_delta):
 	for note in $Notes.get_children():
 		note.preview_render(current_time)
 	if !$Timeline/SongTimer.is_stopped():
-		current_time = song_length - $Timeline/SongTimer.time_left
+		current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset
+	elif !$Timeline/StartCountdown.is_stopped():
+		current_time = - $Timeline/StartCountdown.time_left - Global.current_offset
 	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
 	$PlaybackControls/ElapsedTime.text = time_format(current_time)
 	timeline_render("all")
@@ -236,15 +239,23 @@ func _on_firework_toggle_toggled(toggled_on):
 # Song Player
 func _on_play_pause_pressed(): # Play/Pause Button
 	if $Timeline/SongTimer.is_stopped():
-		if current_time != song_length:
+		if current_time < 0 - Global.current_offset: # set a timer before starting the track
 			$PlaybackControls/PlayPause.text = "❚❚"
-			$Timeline/SongTimer.start(song_length - current_time)
-			$AudioPlayers/TrackPlayer.play(current_time)
+			$Timeline/StartCountdown.start(-Global.current_offset - current_time)
+		
+		elif current_time < song_length - Global.current_offset:
+			$PlaybackControls/PlayPause.text = "❚❚"
+			$Timeline/SongTimer.start(song_length - current_time - Global.current_offset)
+			$AudioPlayers/TrackPlayer.play(current_time - Global.current_offset)
 	else:
 		$PlaybackControls/PlayPause.text = "▶"
 		current_time = song_length - $Timeline/SongTimer.time_left # Move time cursor to where it stopped
 		$Timeline/SongTimer.stop()
 		$AudioPlayers/TrackPlayer.stop()
+
+func _on_start_countdown_timeout(): # start the track from beginning
+	$Timeline/SongTimer.start(song_length)
+	$AudioPlayers/TrackPlayer.play(0)
 
 func _on_stop_pressed():# Stop Button
 	if !$Timeline/SongTimer.is_stopped():
@@ -984,7 +995,21 @@ func note_both_update() -> void:
 						notes_at_current_beat[k].note_property_both = true
 			for note in notes_at_current_beat:
 				note.note_draw()
-				
+
+# Menu and Save
+func _on_option_pressed(index):
+	if index == 0: #Save
+		save_difficulty(current_difficulty)
+		Savefile.save_chart()
+		$FileOptions/NoticeWindow.visible = true
+		$FileOptions/NoticeWindow/Context.text = "Chart saved"
+	if index == 1: #Export to maidata
+		$FileOptions/MaidataExport.visible = true
+	if index == 2: #Return to menu
+		save_difficulty(current_difficulty)
+		Savefile.save_chart()
+		get_tree().change_scene_to_file("res://main_menu.tscn")
+
 func get_chart_dict(difficulty: int) -> Dictionary:
 	var bpm_change_arr: Array = [] 
 	for bpm_node in $BPMChanges.get_children():
@@ -1014,7 +1039,7 @@ func save_difficulty(difficulty: int) -> void:
 	var chart_data: String = Savefile.chart_to_maidata(data)
 	Global.current_chart_data[data_name] = chart_data
 	print("Difficulty saved!")
-	
+
 func load_difficulty(difficulty: int) -> void: # uh
 	var data_name = "inote_" + str(difficulty)
 	var data = Global.current_chart_data.get(data_name)
@@ -1045,6 +1070,7 @@ func load_difficulty(difficulty: int) -> void: # uh
 	timeline_object_update()
 	timeline_render("all")
 	note_both_update()
+
 func clear_chart() -> void:
 	Global.selected_notes = []
 	for node in $BPMChanges.get_children():
@@ -1054,25 +1080,27 @@ func clear_chart() -> void:
 	for node in $Notes.get_children():
 		node.free()
 
-func _on_option_pressed(index):
-	if index == 0: #Save
-		save_difficulty(current_difficulty)
-		Savefile.save_chart()
-		$FileOptions/NoticeWindow.visible = true
-		$FileOptions/NoticeWindow/Context.text = "Chart saved"
-	if index == 1: #Export to maidata
-		$FileOptions/MaidataExport.visible = true
-	if index == 2: #Return to menu
-		save_difficulty(current_difficulty)
-		Savefile.save_chart()
-		get_tree().change_scene_to_file("res://main_menu.tscn")
+func _on_maidata_export_close_requested():
+	$FileOptions/MaidataExport.visible = false
 
+func _on_maidata_export_dir_selected(dir):
+	Savefile.export_maidata(dir + "/")
+	$FileOptions/NoticeWindow.visible = true
+	$FileOptions/NoticeWindow/Context.text = "Chart exported"
+
+func _on_notice_window_confirmed():
+	$FileOptions/NoticeWindow.visible = false
+
+func _on_notice_window_canceled():
+	$FileOptions/NoticeWindow.visible = false
+
+# Metadata
 func metadata_update():
 	other_metadata_read()
 	$MetadataOptions/DifficultySelect.selected = current_difficulty - 1
 	$MetadataOptions/ChartConstant.text = Global.current_chart_data.get("lv_" + str(current_difficulty)) if Global.current_chart_data.get("lv_" + str(current_difficulty)) else ""
 	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get("first_" + str(current_difficulty))) if Global.current_chart_data.get("first_" + str(current_difficulty)) else "0"
-	current_offset = float($MetadataOptions/MusicOffset.text)
+	Global.current_offset = float($MetadataOptions/MusicOffset.text)
 
 func _on_difficulty_select_item_selected(index):
 	var new_difficulty = index + 1
@@ -1094,7 +1122,7 @@ func music_offset_update():
 	var new_offset = float($MetadataOptions/MusicOffset.text)
 	Global.current_chart_data[str("first_" + str(current_difficulty))] = new_offset
 	$MetadataOptions/MusicOffset.text = str(new_offset)
-	current_offset = new_offset
+	Global.current_offset = new_offset
 
 func _on_music_offset_focus_exited():
 	music_offset_update()
@@ -1134,23 +1162,13 @@ func other_metadata_save():
 func _on_other_metadata_focus_exited():
 	other_metadata_save()
 
-func _on_artist_field_text_submitted(new_text):
-	pass
-
-
-func _on_designer_field_text_submitted(new_text):
-	pass
-
-
 func _on_window_close_requested():
 	$MetadataOptions/Window.visible = false
 	other_metadata_save()
 
-
 func _on_other_metadata_pressed():
 	other_metadata_read()
 	$MetadataOptions/Window.visible = true
-	
 
 func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"):
 	var file_name: String
@@ -1192,10 +1210,8 @@ func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current
 func _on_update_bg_pressed():
 	$MetadataOptions/PickBG.visible = true
 
-
 func _on_pick_bg_close_requested():
 	$MetadataOptions/PickBG.visible = false
-
 
 func _on_pick_bg_file_selected(path: String):
 	# current jacket removal
@@ -1211,27 +1227,6 @@ func _on_pick_bg_file_selected(path: String):
 	dir.copy(path, Global.CHART_STORAGE_PATH + Global.current_chart_name + "/bg" + extension)
 	jacket_load()
 	$MetadataOptions/PickBG.visible = false
-	
-
-func _on_maidata_export_close_requested():
-	$FileOptions/MaidataExport.visible = false
-
-
-func _on_maidata_export_dir_selected(dir):
-	Savefile.export_maidata(dir + "/")
-	$FileOptions/NoticeWindow.visible = true
-	$FileOptions/NoticeWindow/Context.text = "Chart exported"
-
-
-func _on_notice_window_confirmed():
-	$FileOptions/NoticeWindow.visible = false
-
-
-func _on_notice_window_canceled():
-	$FileOptions/NoticeWindow.visible = false
-
-
-
 
 
 

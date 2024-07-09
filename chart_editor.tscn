@@ -77,6 +77,9 @@ color = Color(0, 0.137255, 0.25098, 1)
 [node name="SongTimer" type="Timer" parent="Timeline"]
 one_shot = true
 
+[node name="StartCountdown" type="Timer" parent="Timeline"]
+one_shot = true
+
 [node name="PlacementTools" type="Node2D" parent="."]
 
 [node name="Tap" type="Node2D" parent="PlacementTools"]
@@ -654,6 +657,7 @@ text = "btn"
 
 [connection signal="gui_input" from="Timeline/NoteTimeline" to="." method="_on_note_timeline_gui_input"]
 [connection signal="timeout" from="Timeline/SongTimer" to="." method="_on_song_timer_timeout"]
+[connection signal="timeout" from="Timeline/StartCountdown" to="." method="_on_start_countdown_timeout"]
 [connection signal="pressed" from="PlacementTools/Tap/TapToggle" to="." method="_on_tap_toggle_pressed"]
 [connection signal="pressed" from="PlacementTools/Hold/HoldToggle" to="." method="_on_hold_toggle_pressed"]
 [connection signal="pressed" from="PlacementTools/Slider/SliderToggle" to="." method="_on_slider_toggle_pressed"]

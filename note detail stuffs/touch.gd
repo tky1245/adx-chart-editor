@@ -8,6 +8,7 @@ var note_property_firework: bool = false
 var note_property_both: bool = false
 var note_property_star: bool = false
 var note_property_mine: bool = false
+var note_star_spinning: bool = false
 var note_position: String = ""
 var sliders: Array = []
 var slider_tapless: bool = false

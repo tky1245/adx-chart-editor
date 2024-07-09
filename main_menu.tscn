@@ -30,7 +30,7 @@ text = "import from maidata
 "
 
 [node name="SelectSong" type="FileDialog" parent="."]
-title = "Select a music file"
+title = "Open a File"
 initial_position = 1
 size = Vector2i(1050, 550)
 ok_button_text = "Open"
