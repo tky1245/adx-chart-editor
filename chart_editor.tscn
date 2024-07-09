@@ -571,6 +571,22 @@ offset_right = 115.0
 offset_bottom = 343.0
 text = "Other infos"
 
+[node name="UpdateBG" type="Button" parent="MetadataOptions"]
+offset_left = 17.0
+offset_top = 356.0
+offset_right = 114.0
+offset_bottom = 392.0
+text = "Change bg"
+
+[node name="PickBG" type="FileDialog" parent="MetadataOptions"]
+title = "Select an image"
+initial_position = 1
+size = Vector2i(1050, 550)
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.jpg", "*.png", "*.jpeg")
+
 [node name="Window" type="Window" parent="MetadataOptions"]
 initial_position = 2
 size = Vector2i(400, 200)
@@ -817,6 +833,9 @@ text = "btn"
 [connection signal="text_submitted" from="MetadataOptions/ChartConstant" to="." method="_on_chart_constant_text_submitted"]
 [connection signal="text_submitted" from="MetadataOptions/MusicOffset" to="." method="_on_music_offset_text_submitted"]
 [connection signal="pressed" from="MetadataOptions/OtherMetadata" to="." method="_on_other_metadata_pressed"]
+[connection signal="pressed" from="MetadataOptions/UpdateBG" to="." method="_on_update_bg_pressed"]
+[connection signal="close_requested" from="MetadataOptions/PickBG" to="." method="_on_pick_bg_close_requested"]
+[connection signal="file_selected" from="MetadataOptions/PickBG" to="." method="_on_pick_bg_file_selected"]
 [connection signal="close_requested" from="MetadataOptions/Window" to="." method="_on_window_close_requested"]
 [connection signal="text_submitted" from="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer/ArtistField" to="." method="_on_artist_field_text_submitted"]
 [connection signal="text_submitted" from="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer2/DesignerField" to="." method="_on_designer_field_text_submitted"]

@@ -1152,3 +1152,28 @@ func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current
 			poly.append(Vector2(dotx, doty))
 		$ChartPreview/Jacket.polygon = poly
 	$ChartPreview/Jacket.position = Global.preview_center - 1 * Vector2(Global.preview_outcircle_radius, Global.preview_outcircle_radius)
+
+
+func _on_update_bg_pressed():
+	$MetadataOptions/PickBG.visible = true
+
+
+func _on_pick_bg_close_requested():
+	$MetadataOptions/PickBG.visible = false
+
+
+func _on_pick_bg_file_selected(path: String):
+	# current jacket removal
+	var dir = DirAccess.open(Global.CHART_STORAGE_PATH + Global.current_chart_name + "/")
+	for extension in Savefile.img_extensions:
+		for file in dir.get_files():
+			if file == "bg" + extension:
+				dir.remove(Global.CHART_STORAGE_PATH + Global.current_chart_name + "/" + file)
+			
+	var extension = "." + path.split(".")[path.split(".").size() - 1]
+	print(path)
+	print(extension)
+	dir.copy(path, Global.CHART_STORAGE_PATH + Global.current_chart_name + "/bg" + extension)
+	jacket_load()
+	$MetadataOptions/PickBG.visible = false
+	
