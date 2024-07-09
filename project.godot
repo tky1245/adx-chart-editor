@@ -33,3 +33,4 @@ version_control/autoload_on_startup=true
 [rendering]
 
 renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true

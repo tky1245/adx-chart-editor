@@ -35,6 +35,9 @@ signal touch_area_triggered
 
 
 func _ready():
+	if Global.root_folder:
+		$FileOptions/MaidataExport.root_subfolder = Global.root_folder
+		$MetadataOptions/PickBG.root_subfolder = Global.root_folder
 	var chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"
 	Savefile.load_chart() # load from save file to global var
 	$MetadataOptions/Window.visible = false
@@ -385,7 +388,6 @@ func timeline_object_update():
 		temp_beat += 1
 		
 	# print("Global.timeline_beats: ", Global.timeline_beats)    -too long tbh
-	print("Global.timeline_beats size: ", Global.timeline_beats.size())
 	
 	# bar array starts here
 	
@@ -959,7 +961,6 @@ func add_note(note_type: Note.type, args: Dictionary) -> Node:
 	return new_note
 
 func note_both_update() -> void:
-	print("both updating")
 	for i in Global.timeline_beats.size():
 		var notes_at_current_beat: Array = []
 		for note in $Notes.get_children():

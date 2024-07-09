@@ -2,6 +2,7 @@ extends Node
 const CHART_STORAGE_PATH: String = "user://Charts/"
 var current_chart_name: String # song name usually
 var current_chart_data: Dictionary
+var root_folder: String
 
 var CURRENT_SONG_PATH: String
 var CURRENT_CHART_PATH: String
@@ -138,6 +139,8 @@ func _ready():
 		var angle = PI / 8 * (1 + i * 2)
 		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
+	if OS.has_feature("android"):
+		root_folder = "/storage/emulated/0"
 
 func note_pos_mod(num: int):
 	return (num - 1) % 8 + 1

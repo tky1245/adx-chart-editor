@@ -30,13 +30,15 @@ text = "import from maidata
 "
 
 [node name="SelectSong" type="FileDialog" parent="."]
-title = "Open a File"
-position = Vector2i(50, 50)
+title = "Select a music file"
+initial_position = 1
 size = Vector2i(1050, 550)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.mp3", "*.ogg")
+show_hidden_files = true
+use_native_dialog = true
 
 [node name="NewChartSongName" type="Window" parent="."]
 initial_position = 2
@@ -123,11 +125,14 @@ text = "Select"
 
 [node name="SelectMaidata" type="FileDialog" parent="."]
 title = "Open a File"
+initial_position = 1
 size = Vector2i(1050, 550)
 ok_button_text = "Open"
 file_mode = 0
 access = 2
 filters = PackedStringArray("maidata.txt")
+show_hidden_files = true
+use_native_dialog = true
 
 [connection signal="pressed" from="Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="pressed" from="Buttons/OpenChart" to="." method="_on_open_chart_pressed"]

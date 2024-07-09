@@ -331,6 +331,8 @@ size = Vector2i(1050, 550)
 ok_button_text = "Select Current Folder"
 file_mode = 2
 access = 2
+show_hidden_files = true
+use_native_dialog = true
 
 [node name="NoticeWindow" type="AcceptDialog" parent="FileOptions"]
 title = "Notice"
@@ -425,6 +427,8 @@ ok_button_text = "Open"
 file_mode = 0
 access = 2
 filters = PackedStringArray("*.jpg", "*.png", "*.jpeg")
+show_hidden_files = true
+use_native_dialog = true
 
 [node name="Window" type="Window" parent="MetadataOptions"]
 initial_position = 2
@@ -642,6 +646,7 @@ offset_bottom = 492.0
 text = "delete node"
 
 [node name="Button" type="Button" parent="."]
+visible = false
 offset_left = 119.0
 offset_right = 271.0
 offset_bottom = 67.0

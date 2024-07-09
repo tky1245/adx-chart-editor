@@ -4,7 +4,9 @@ var selected_song_path
 var open_chart_selected_chart: int = -1
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	pass
+	if Global.root_folder:
+		$SelectSong.root_subfolder = Global.root_folder
+		$SelectMaidata.root_subfolder = Global.root_folder
 
 func _on_new_chart_pressed():
 	if !$SelectSong.visible:
