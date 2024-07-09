@@ -883,7 +883,9 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			if note.type in [Note.type.TAP, Note.type.TOUCH]:
 				note.note_property_star = true
 			note.sliders.append(new_slider_dict)
-			note.slider_draw()
+			note.note_draw()
+			note.initialize()
+			note.set_selected()
 			sync_note_details()
 		else:
 			var slider_dict = note.sliders[0]
@@ -939,8 +941,10 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			var new_note = add_note(Note.type.TOUCH, args)
 			note_both_update()
 			Global.selected_notes = [new_note]
-			if toggle_multiplacing or placement_selected == "Slider":
+			if toggle_multiplacing:
 				return
+			elif placement_selected == "Slider":
+				Global.selected_notes = [new_note]
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
@@ -1159,11 +1163,15 @@ func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current
 		if file_name:
 			break
 	var jacket
+	var jacket_offset: Vector2 = Vector2(0, 0)
+	
 	if file_name:
 		var img = Image.load_from_file(jacket_dir + file_name)
 		var jacket_scale = (Global.preview_outcircle_radius * 2) / (min(img.data.get("height"), img.data.get("width")))
 		img.resize(int(img.data.get("width") * jacket_scale), int(img.data.get("height") * jacket_scale))
 		img.adjust_bcs(1-Global.background_dim, 1, 1)
+		jacket_offset.x = (img.data.get("width") - Global.preview_outcircle_radius * 2) / 2
+		jacket_offset.y = (img.data.get("height") - Global.preview_outcircle_radius * 2) / 2
 		jacket = ImageTexture.create_from_image(img)
 	else:
 		var img = Image.load_from_file("res://bg_not_found.png")
@@ -1177,9 +1185,9 @@ func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current
 		for k in range(180):
 			var dotx = Global.preview_outcircle_radius * (sin(2 * PI * k / 180) + 1)
 			var doty = Global.preview_outcircle_radius * (cos(2 * PI * k / 180) + 1)
-			poly.append(Vector2(dotx, doty))
+			poly.append(Vector2(dotx, doty) + jacket_offset)
 		$ChartPreview/Jacket.polygon = poly
-	$ChartPreview/Jacket.position = Global.preview_center - 1 * Vector2(Global.preview_outcircle_radius, Global.preview_outcircle_radius)
+	$ChartPreview/Jacket.position = Global.preview_center - 1 * Vector2(Global.preview_outcircle_radius, Global.preview_outcircle_radius) - jacket_offset
 
 func _on_update_bg_pressed():
 	$MetadataOptions/PickBG.visible = true
