@@ -1051,8 +1051,10 @@ func _on_option_pressed(index):
 	if index == 0: #Save
 		save_difficulty(current_difficulty)
 		Savefile.save_chart()
+		$FileOptions/NoticeWindow.visible = true
+		$FileOptions/NoticeWindow/Context.text = "Chart saved"
 	if index == 1: #Export to maidata
-		pass
+		$FileOptions/MaidataExport.visible = true
 	if index == 2: #Return to menu
 		save_difficulty(current_difficulty)
 		Savefile.save_chart()
@@ -1062,7 +1064,7 @@ func metadata_update():
 	other_metadata_read()
 	$MetadataOptions/DifficultySelect.selected = current_difficulty - 1
 	$MetadataOptions/ChartConstant.text = Global.current_chart_data.get("lv_" + str(current_difficulty)) if Global.current_chart_data.get("lv_" + str(current_difficulty)) else ""
-	$MetadataOptions/MusicOffset.text = Global.current_chart_data.get("first_" + str(current_difficulty)) if Global.current_chart_data.get("first_" + str(current_difficulty)) else ""
+	$MetadataOptions/MusicOffset.text = Global.current_chart_data.get("first_" + str(current_difficulty)) if Global.current_chart_data.get("first_" + str(current_difficulty)) else "0"
 	current_offset = float($MetadataOptions/MusicOffset.text)
 
 func _on_difficulty_select_item_selected(index):
@@ -1097,14 +1099,13 @@ func other_metadata_read():
 			text += ("&" + key + "=" + Global.current_chart_data.get(key) + "\n")
 	$MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text = text
 
-func _on_other_metadata_text_set():
+func _on_other_metadata_focus_exited():
 	var text = $MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text
 	var raw_data = text.split("&")
 	for line in raw_data:
 		var key = line.split("=")[0]
 		var value = line.right(-(len(key)+1)).left(-2)
 		Global.current_chart_data[key] = value
-
 
 func _on_artist_field_text_submitted(new_text):
 	Global.current_chart_data["artist"] = new_text
@@ -1153,7 +1154,6 @@ func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current
 		$ChartPreview/Jacket.polygon = poly
 	$ChartPreview/Jacket.position = Global.preview_center - 1 * Vector2(Global.preview_outcircle_radius, Global.preview_outcircle_radius)
 
-
 func _on_update_bg_pressed():
 	$MetadataOptions/PickBG.visible = true
 
@@ -1177,3 +1177,20 @@ func _on_pick_bg_file_selected(path: String):
 	jacket_load()
 	$MetadataOptions/PickBG.visible = false
 	
+
+func _on_maidata_export_close_requested():
+	$FileOptions/MaidataExport.visible = false
+
+
+func _on_maidata_export_dir_selected(dir):
+	Savefile.export_maidata(dir + "/")
+	$FileOptions/NoticeWindow.visible = true
+	$FileOptions/NoticeWindow/Context.text = "Chart exported"
+
+
+func _on_notice_window_confirmed():
+	$FileOptions/NoticeWindow.visible = false
+
+
+func _on_notice_window_canceled():
+	$FileOptions/NoticeWindow.visible = false

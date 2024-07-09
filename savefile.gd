@@ -7,14 +7,23 @@ func _ready():
 	var dir = DirAccess.open(dir_path)
 	dir.make_dir("Charts")
 	
-func create_chart(chart_name: String, track_path: String):
+func create_chart(chart_name: String, track_path: String) -> void:
 	var chart_storage = DirAccess.open(Global.CHART_STORAGE_PATH)
-	chart_storage.make_dir(chart_name)
+	var new_chart_name = chart_name
+	var i = 1
+	while true:
+		if chart_storage.dir_exists(new_chart_name):
+			new_chart_name = chart_name + "_" + str(i)
+			i += 1
+		else:
+			chart_storage.make_dir(new_chart_name)
+			break
+	
 
 	var track_format = "." + track_path.get_slice(".", track_path.count("."))
-	chart_storage.copy(track_path, Global.CHART_STORAGE_PATH + chart_name + "/track" + track_format)
-	Global.current_chart_name = chart_name
-	Global.current_chart_data = new_chart_save(chart_name)
+	chart_storage.copy(track_path, Global.CHART_STORAGE_PATH + new_chart_name + "/track" + track_format)
+	Global.current_chart_name = new_chart_name
+	Global.current_chart_data = new_chart_save(new_chart_name)
 	save_chart()
 
 func load_chart(chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"):
@@ -401,7 +410,111 @@ func chart_to_maidata(data: Dictionary) -> String:
 				bar_counter -= int(bar_counter)
 				chart_string += "\n"
 	return chart_string
-		
+
+func import_maidata(chart_dir: String) -> void:
+	var dir = DirAccess.open(chart_dir)
+	var chart_storage = DirAccess.open(Global.CHART_STORAGE_PATH)
+	var chart_name: String
+	var chart_save: Dictionary
+	var maidata = FileAccess.open(chart_dir + "maidata.txt", FileAccess.READ)
+	var maidata_text = maidata.get_as_text()
+	for data in maidata_text.split("&"):
+		var data_name = data.split("=")[0]
+		var data_value = "\n".join(data.right(-(data.find("=")+1)).split("\n", false))
+		if data_name == "title":
+			chart_name = data_value
+			var i = 1
+			while true: # create new folder
+				if chart_storage.dir_exists(chart_name):
+					chart_name = data_value + "_" + str(i)
+					i += 1
+				else:
+					chart_storage.make_dir(chart_name)
+					break
+			
+		chart_save["data_name"] = data_value
+	if !chart_name:
+		print("maidata &title property not found.")
+		return
+	
+	var track_exists: bool = false
+	for track_extension in track_extensions: # copy track over
+		if dir.file_exists(chart_dir + "track" + track_extension):
+			dir.copy(chart_dir + "track" + track_extension, Global.CHART_STORAGE_PATH + chart_name + "/track" + track_extension)
+			track_exists = true
+			break
+	if !track_exists:
+		print("Track doesnt exist")
+		return
+	
+	
+	for img_extension in img_extensions: # copy a jacket over
+		if dir.file_exists(chart_dir + "bg" + img_extension):
+			dir.copy(chart_dir + "bg" + img_extension, Global.CHART_STORAGE_PATH + chart_name + "/bg" + img_extension)
+			break
+	
+	Global.current_chart_name = chart_name
+	Global.current_chart_data = chart_save
+	save_chart()
+
+func export_maidata(export_path: String, chart_dir = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/", chart_data = Global.current_chart_data):
+	var dir = DirAccess.open(export_path)
+	var chart_storage = DirAccess.open(chart_dir)
+	dir.make_dir(Global.current_chart_name)
+	
+	var maidata_string: String = ""
+	
+	if chart_data.get("title"):
+		maidata_string += "&title=" + chart_data.get("title") + "\n"
+	
+	if chart_data.get("artist"):
+		maidata_string += "&artist=" + chart_data.get("artist") + "\n"
+
+	for key in chart_data:
+		if !key.begins_with("des_") and !key.begins_with("first_") and !key.begins_with("lv_") and !key.begins_with("inote_") and !(key in ["title", "artist", ""]):
+			maidata_string += "&" + key +"=" + chart_data.get(key) + "\n"
+	
+	maidata_string += "\n"
+	
+	for i in range(7):
+		if chart_data.get("des_" + str(i+1)):
+			maidata_string += "&des_" + str(i+1) + "=" + chart_data.get("des_" + str(i+1)) + "\n"
+	
+	maidata_string += "\n"
+	
+	for i in range(7):
+		if chart_data.get("first_" + str(i+1)):
+			maidata_string += "&first_" + str(i+1) + "=" + chart_data.get("first_" + str(i+1)) + "\n"
+	
+	maidata_string += "\n"
+	
+	for i in range(7):
+		if chart_data.get("lv_" + str(i+1)):
+			maidata_string += "&lv_" + str(i+1) + "=" + chart_data.get("lv_" + str(i+1)) + "\n"
+	
+	maidata_string += "\n"
+	
+	for i in range(7):
+		if chart_data.get("inote_" + str(i+1)):
+			maidata_string += "&inote_" + str(i+1) + "=" + chart_data.get("inote_" + str(i+1)) + "\n"
+	
+	var maidata = FileAccess.open(export_path + Global.current_chart_name + "/maidata.txt", FileAccess.WRITE)
+	maidata.store_string(maidata_string)
+	maidata.close()
+	
+	for track_extension in track_extensions:
+		if chart_storage.file_exists(chart_dir + "track" + track_extension):
+			chart_storage.copy(chart_dir + "track" + track_extension, export_path + Global.current_chart_name + "/track" + track_extension)
+			print("track copied")
+			break
+	
+	for img_extension in img_extensions:
+		if chart_storage.file_exists(chart_dir + "bg" + img_extension):
+			chart_storage.copy(chart_dir + "bg" + img_extension, export_path + Global.current_chart_name + "/bg" + img_extension)
+			print("img copied")
+			break
+	
+# Utils
 func arrange_by_arg(arr: Array, arg: String): # Bubble sort
 	var temp_arr: Array = arr
 	var swapped = false

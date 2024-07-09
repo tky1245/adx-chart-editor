@@ -505,6 +505,25 @@ popup/item_1/id = 1
 popup/item_2/text = "Return to menu"
 popup/item_2/id = 2
 
+[node name="MaidataExport" type="FileDialog" parent="FileOptions"]
+title = "Open a Directory"
+size = Vector2i(1050, 550)
+ok_button_text = "Select Current Folder"
+file_mode = 2
+access = 2
+
+[node name="NoticeWindow" type="AcceptDialog" parent="FileOptions"]
+title = "Notice"
+initial_position = 1
+
+[node name="Context" type="Label" parent="FileOptions/NoticeWindow"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 92.0
+offset_bottom = 51.0
+text = "segs"
+horizontal_alignment = 1
+
 [node name="MetadataOptions" type="Node2D" parent="."]
 
 [node name="Label" type="Label" parent="MetadataOptions"]
@@ -579,7 +598,7 @@ offset_bottom = 392.0
 text = "Change bg"
 
 [node name="PickBG" type="FileDialog" parent="MetadataOptions"]
-title = "Select an image"
+title = "Open a File"
 initial_position = 1
 size = Vector2i(1050, 550)
 ok_button_text = "Open"
@@ -829,6 +848,10 @@ text = "btn"
 [connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide" to="." method="_on_add_slide_pressed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX" to="." method="_on_hold_duration_x_text_changed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationY" to="." method="_on_hold_duration_y_text_changed"]
+[connection signal="close_requested" from="FileOptions/MaidataExport" to="." method="_on_maidata_export_close_requested"]
+[connection signal="dir_selected" from="FileOptions/MaidataExport" to="." method="_on_maidata_export_dir_selected"]
+[connection signal="canceled" from="FileOptions/NoticeWindow" to="." method="_on_notice_window_canceled"]
+[connection signal="confirmed" from="FileOptions/NoticeWindow" to="." method="_on_notice_window_confirmed"]
 [connection signal="item_selected" from="MetadataOptions/DifficultySelect" to="." method="_on_difficulty_select_item_selected"]
 [connection signal="text_submitted" from="MetadataOptions/ChartConstant" to="." method="_on_chart_constant_text_submitted"]
 [connection signal="text_submitted" from="MetadataOptions/MusicOffset" to="." method="_on_music_offset_text_submitted"]
@@ -839,7 +862,7 @@ text = "btn"
 [connection signal="close_requested" from="MetadataOptions/Window" to="." method="_on_window_close_requested"]
 [connection signal="text_submitted" from="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer/ArtistField" to="." method="_on_artist_field_text_submitted"]
 [connection signal="text_submitted" from="MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer2/DesignerField" to="." method="_on_designer_field_text_submitted"]
-[connection signal="text_set" from="MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata" to="." method="_on_other_metadata_text_set"]
+[connection signal="focus_exited" from="MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata" to="." method="_on_other_metadata_focus_exited"]
 [connection signal="gui_input" from="PlaybackControls/TimeSlider/ProgressBar" to="." method="_on_progress_bar_gui_input"]
 [connection signal="pressed" from="PlaybackControls/PlayPause" to="." method="_on_play_pause_pressed"]
 [connection signal="pressed" from="PlaybackControls/Stop" to="." method="_on_stop_pressed"]
