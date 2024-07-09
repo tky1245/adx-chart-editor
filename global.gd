@@ -139,8 +139,7 @@ func _ready():
 		var angle = PI / 8 * (1 + i * 2)
 		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
-	if OS.has_feature("android"):
-		root_folder = "/storage/emulated/0"
+		root_folder = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
 
 func note_pos_mod(num: int):
 	return (num - 1) % 8 + 1

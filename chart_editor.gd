@@ -1067,7 +1067,7 @@ func metadata_update():
 	other_metadata_read()
 	$MetadataOptions/DifficultySelect.selected = current_difficulty - 1
 	$MetadataOptions/ChartConstant.text = Global.current_chart_data.get("lv_" + str(current_difficulty)) if Global.current_chart_data.get("lv_" + str(current_difficulty)) else ""
-	$MetadataOptions/MusicOffset.text = Global.current_chart_data.get("first_" + str(current_difficulty)) if Global.current_chart_data.get("first_" + str(current_difficulty)) else "0"
+	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get("first_" + str(current_difficulty))) if Global.current_chart_data.get("first_" + str(current_difficulty)) else "0"
 	current_offset = float($MetadataOptions/MusicOffset.text)
 
 func _on_difficulty_select_item_selected(index):
@@ -1077,16 +1077,26 @@ func _on_difficulty_select_item_selected(index):
 	load_difficulty(new_difficulty)
 	metadata_update()
 
+func chart_constant_update():
+	Global.current_chart_data[str("lv_" + str(current_difficulty))] = $MetadataOptions/ChartConstant.text
+
+func _on_chart_constant_focus_exited():
+	chart_constant_update()
 
 func _on_chart_constant_text_submitted(new_text):
-	Global.current_chart_data[str("lv_" + str(current_difficulty))] = new_text
+	chart_constant_update()
 
-
-func _on_music_offset_text_submitted(new_text):
-	var new_offset = float(new_text)
+func music_offset_update():
+	var new_offset = float($MetadataOptions/MusicOffset.text)
 	Global.current_chart_data[str("first_" + str(current_difficulty))] = new_offset
 	$MetadataOptions/MusicOffset.text = str(new_offset)
 	current_offset = new_offset
+
+func _on_music_offset_focus_exited():
+	music_offset_update()
+
+func _on_music_offset_text_submitted(new_text):
+	music_offset_update()
 
 func other_metadata_read():
 	var common_keys = ["title", "artist"]
@@ -1102,28 +1112,41 @@ func other_metadata_read():
 			text += ("&" + key + "=" + Global.current_chart_data.get(key) + "\n")
 	$MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text = text
 
-func _on_other_metadata_focus_exited():
+func other_metadata_save():
 	var text = $MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text
-	var raw_data = text.split("&")
+	var raw_data = text.split("&", false)
+	for key in Global.current_chart_data:
+		if !key.begins_with("des_") and !key.begins_with("first_") and !key.begins_with("lv_") and !key.begins_with("inote_") and !(key in ["title", "artist"]):
+			Global.current_chart_data.erase(key)
 	for line in raw_data:
 		var key = line.split("=")[0]
-		var value = line.right(-(len(key)+1)).left(-2)
+		var value = "\n".join(line.right(-(line.find("=")+1)).split("\n", false))
+		print("set ", key, " to ", value)
 		Global.current_chart_data[key] = value
+	
+	Global.current_chart_data["artist"] = $MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer/ArtistField.text
+	Global.current_chart_data["des_" + str(current_difficulty)] = $MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer2/DesignerField.text
+
+func _on_other_metadata_focus_exited():
+	other_metadata_save()
 
 func _on_artist_field_text_submitted(new_text):
-	Global.current_chart_data["artist"] = new_text
+	pass
 
 
 func _on_designer_field_text_submitted(new_text):
-	Global.current_chart_data["des_" + str(current_difficulty)] = new_text
+	pass
 
 
 func _on_window_close_requested():
 	$MetadataOptions/Window.visible = false
+	other_metadata_save()
 
 
 func _on_other_metadata_pressed():
+	other_metadata_read()
 	$MetadataOptions/Window.visible = true
+	
 
 func jacket_load(jacket_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"):
 	var file_name: String
@@ -1198,3 +1221,9 @@ func _on_notice_window_confirmed():
 
 func _on_notice_window_canceled():
 	$FileOptions/NoticeWindow.visible = false
+
+
+
+
+
+
