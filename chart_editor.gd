@@ -242,14 +242,15 @@ func _on_play_pause_pressed(): # Play/Pause Button
 		if current_time < 0 - Global.current_offset: # set a timer before starting the track
 			$PlaybackControls/PlayPause.text = "❚❚"
 			$Timeline/StartCountdown.start(-Global.current_offset - current_time)
-		
+			print("prepare to start, ", -Global.current_offset - current_time)
 		elif current_time < song_length - Global.current_offset:
 			$PlaybackControls/PlayPause.text = "❚❚"
 			$Timeline/SongTimer.start(song_length - current_time - Global.current_offset)
-			$AudioPlayers/TrackPlayer.play(current_time - Global.current_offset)
+			$AudioPlayers/TrackPlayer.play(current_time + Global.current_offset)
+			print("starting at , ", current_time + Global.current_offset)
 	else:
 		$PlaybackControls/PlayPause.text = "▶"
-		current_time = song_length - $Timeline/SongTimer.time_left # Move time cursor to where it stopped
+		current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset # Move time cursor to where it stopped
 		$Timeline/SongTimer.stop()
 		$AudioPlayers/TrackPlayer.stop()
 
