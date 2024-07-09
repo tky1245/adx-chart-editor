@@ -324,12 +324,12 @@ func _on_note_timeline_gui_input(event): # Timeline Dragged
 			$Timeline/SongTimer.stop()
 			$AudioPlayers/TrackPlayer.stop()
 			previous_mouse_position = Vector2(-1, -1)
-		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) <  Global.timeline_beats.size() - 1:
 				current_time = Global.timeline_beats[time_to_beat(current_time) + 1]
 			else:
 				current_time =  Global.timeline_beats[time_to_beat(current_time)]
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) > 0:
 				current_time = Global.timeline_beats[time_to_beat(current_time) - 1]
 			else:
