@@ -4,7 +4,6 @@ this is a project of adx chart editor
 still in progress tho
 
 todo:
-	- fix "<" ">" unable to 360
 	- add sounds + note effects
 	- make firework function
 

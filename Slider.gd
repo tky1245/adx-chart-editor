@@ -350,9 +350,9 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		var frequency: int = 360
 		if int(initial_note_position) in [1, 2, 7, 8]: # ccw
 			var total_angle = angle_1 - angle_2
-			while total_angle < 0:
+			while total_angle <= 0:
 				total_angle += TAU
-			while total_angle >= 0+TAU:
+			while total_angle > 0+TAU:
 				total_angle -= TAU
 			for i in range(total_angle / TAU * frequency):
 				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
@@ -360,9 +360,9 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 				curve.add_point(radius * Vector2(1, 0) * Transform2D(-point_angle, Vector2(0, 0)))
 		elif int(initial_note_position) in [3, 4, 5, 6]: # cw
 			var total_angle = angle_2 - angle_1
-			while total_angle < 0:
+			while total_angle <= 0:
 				total_angle += TAU
-			while total_angle >= 0+TAU:
+			while total_angle > 0+TAU:
 				total_angle -= TAU
 			for i in range(total_angle / TAU * frequency):
 				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
@@ -376,9 +376,9 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		var frequency: int = 360
 		if int(initial_note_position) in [3, 4, 5, 6]: # ccw
 			var total_angle = angle_1 - angle_2
-			while total_angle < 0:
+			while total_angle <= 0:
 				total_angle += TAU
-			while total_angle >= 0+TAU:
+			while total_angle > 0+TAU:
 				total_angle -= TAU
 			for i in range(int(total_angle / TAU * frequency)):
 				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
@@ -386,9 +386,9 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 				curve.add_point(radius * Vector2(1, 0) * Transform2D(-point_angle, Vector2(0, 0)))
 		elif int(initial_note_position) in [1, 2, 7, 8]: # cw
 			var total_angle = angle_2 - angle_1
-			while total_angle < 0:
+			while total_angle <= 0:
 				total_angle += TAU
-			while total_angle >= 0+TAU:
+			while total_angle > 0+TAU:
 				total_angle -= TAU
 			for i in range(int(total_angle / TAU * frequency)):
 				var radius = radius_start + (radius_end - radius_start) * i / (int(total_angle / TAU * frequency))
