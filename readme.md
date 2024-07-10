@@ -3,7 +3,19 @@ this is a project of adx chart editor
 
 still in progress tho
 
+disclaimer: im using this to organize thought process or write notes sometimes
+
+note placement optiomization thoughts:
+	- tap/touch/hold placing: click "tap" -> consecutive placements 
+	- hold/slider: remembers the most recent used duration to place them faster
+	- 
+
+some known bugs:
+	- hold toggle causing result note to not have correct properties
+	- delay became negative after loading a chart?
+
 todo:
+	- improve adding slider convenience
 	- add sounds + note effects
 	- make firework function
 

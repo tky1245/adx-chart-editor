@@ -55,6 +55,7 @@ func _ready():
 	$MetadataOptions/DifficultySelect.selected = current_difficulty-1
 	$MetadataOptions/ChartConstant.text = str(Global.current_chart_data.get(str("lv_" + str(current_difficulty))))
 	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get(str("first_" + str(current_difficulty))))
+	Global.current_offset = float($MetadataOptions/MusicOffset.text)
 	# Draw a circle
 	var density = 180
 	for k in range(density):
@@ -180,35 +181,30 @@ func _process(_delta):
 # Placement Tool Toggles
 func _on_tap_toggle_pressed():
 	if placement_selected == "Tap":
-		if toggle_multiplacing == false:
-			toggle_multiplacing = true
-		else:
-			placement_selected = "None"
+		placement_selected = "None"
+		toggle_multiplacing = false
 	else:
 		placement_selected = "Tap"
-		toggle_multiplacing = false
+		toggle_multiplacing = true
 	placement_tools_highlight_update()
 
 func _on_hold_toggle_pressed():
 	if placement_selected == "Hold":
-		if toggle_multiplacing == false:
-			toggle_multiplacing = true
-		else:
-			placement_selected = "None"
+		placement_selected = "None"
+		toggle_multiplacing = false
 	else:
 		placement_selected = "Hold"
-		toggle_multiplacing = false
+		toggle_multiplacing = true
 	placement_tools_highlight_update()
 
 func _on_slider_toggle_pressed():
+	Global.selected_notes = []
 	if placement_selected == "Slider":
-		if toggle_multiplacing == false:
-			toggle_multiplacing = true
-		else:
-			placement_selected = "None"
+		placement_selected = "None"
+		toggle_multiplacing = false
 	else:
 		placement_selected = "Slider"
-		toggle_multiplacing = false
+		toggle_multiplacing = true
 	placement_tools_highlight_update()
 
 func placement_tools_highlight_update():
@@ -242,12 +238,10 @@ func _on_play_pause_pressed(): # Play/Pause Button
 		if current_time < 0 - Global.current_offset: # set a timer before starting the track
 			$PlaybackControls/PlayPause.text = "❚❚"
 			$Timeline/StartCountdown.start(-Global.current_offset - current_time)
-			print("prepare to start, ", -Global.current_offset - current_time)
 		elif current_time < song_length - Global.current_offset:
 			$PlaybackControls/PlayPause.text = "❚❚"
 			$Timeline/SongTimer.start(song_length - current_time - Global.current_offset)
 			$AudioPlayers/TrackPlayer.play(current_time + Global.current_offset)
-			print("starting at , ", current_time + Global.current_offset)
 	else:
 		$PlaybackControls/PlayPause.text = "▶"
 		current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset # Move time cursor to where it stopped
@@ -666,10 +660,8 @@ func _on_zoom_down_pressed():
 		note.set_selected()
 
 func _on_button_pressed(): # debug button
-	var dir = DirAccess.open("C:/stuffs/test")
-	#dir.make_dir("seg")
-	#dir.copy("C:/stuffs/test/segs.txt", "C:/stuffs/test/New folder/segs2.txt") this works
-	dir.copy("segs.txt", "New folder/segs2.txt")
+	if Global.selected_notes.size() > 0:
+		print(Global.selected_notes[0].get_args())
 
 
 # Note Properties Edit
@@ -726,6 +718,7 @@ func sync_note_details():
 				new_node.slider_index = i
 				new_node.sync_details()
 				new_node.connect("slider_deleted", _on_slider_deleted, 8)
+				new_node.connect("duration_changed", recent_slider_duration_update, 8)
 				$NoteDetails/ScrollContainer/Properties/SliderProperties/VBoxContainer.add_child(new_node)
 	else:
 		$NoteDetails.visible = false
@@ -802,29 +795,32 @@ func _on_tapless_toggled(toggled_on):
 		note.slider_tapless = toggled_on
 		note.note_draw()
 
-func _on_hold_pressed():
+func _on_hold_pressed(): # change a tap to a hold
 	var note = Global.selected_notes[0]
 	if $NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible:
 		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
 			var new_type = Note.type.TAP if note.type == Note.type.TAP_HOLD else Note.type.TOUCH
 			var args: Dictionary = note.get_args()
-			args.erase("duration")
 			args.erase("duration_arr")
+			args["type"] = new_type
 			var new_note = Note.new_note(new_type, args)
 			new_note.initialize()
 			$Notes.add_child(new_note)
 			Global.selected_notes = [new_note]
-			note.queue_free()
+			new_note.set_selected()
+			note.free()
 		else:
 			var new_type = Note.type.TAP_HOLD if note.type == Note.type.TAP else Note.type.TOUCH_HOLD
 			var args: Dictionary = note.get_args()
 			args.erase("note_property_star")
+			args["type"] = new_type
 			args["duration_arr"] = last_used_hold_duration_arr
 			var new_note = Note.new_note(new_type, args)
 			new_note.initialize()
 			$Notes.add_child(new_note)
 			Global.selected_notes = [new_note]
-			note.queue_free()
+			new_note.set_selected()
+			note.free()
 	sync_note_details()
 
 func _on_hold_duration_x_text_changed(new_text):
@@ -854,7 +850,7 @@ func _on_add_slide_pressed():
 	num = num + 1 if num != 8 else 1
 	var new_slider_dict: Dictionary = {
 		"duration_arr" = last_used_slide_duration_arr,
-		"delay_arr" = [1, 4],
+		"delay_arr" = [1.0, 4],
 		"slider_shape_arr" = [["-", str(num)]]
 	}
 	if note.type in [Note.type.TAP, Note.type.TOUCH]:
@@ -866,11 +862,12 @@ func _on_add_slide_pressed():
 	sync_note_details()
 
 func _on_delete_note_pressed():
-	var note = Global.selected_notes[0]
-	Global.selected_notes = []
-	note.free()
-	note_both_update()
-	sync_note_details()
+	if Global.selected_notes.size() == 1:
+		var note = Global.selected_notes[0]
+		Global.selected_notes = []
+		note.free()
+		note_both_update()
+		sync_note_details()
 
 func _touch_area_clicked(touch_position: String): # handle note adding
 	print("clicked ", touch_position)
@@ -883,33 +880,29 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 		note_position = touch_position.right(1)
 	note_position = "C1" if note_position == "C" else note_position
 	
-	if Global.selected_notes.size() == 1 and placement_selected == "Slider": # append straight slider directly
+	if Global.selected_notes.size() == 1 and placement_selected == "Slider" and !toggle_multiplacing: # append straight slider directly
 		var note = Global.selected_notes[0]
-		if note.sliders.size() == 0: # no sliders?
-			var new_slider_dict: Dictionary = {
-				"duration_arr" = last_used_slide_duration_arr,
-				"delay_arr" = [1, 4],
-				"slider_shape_arr" = [["-", note_position]],
-				"note_property_break" = toggle_break
-			}
-			if note.type in [Note.type.TAP, Note.type.TOUCH]:
-				note.note_property_star = true
-			note.sliders.append(new_slider_dict)
-			note.note_draw()
-			note.initialize()
-			note.set_selected()
-			sync_note_details()
-		else:
-			var slider_dict = note.sliders[0]
-			slider_dict["slider_shape_arr"].append(["-", note_position])
-			note.slider_draw()
-			sync_note_details()
-		
-		if toggle_multiplacing:
-			return
-		else:
-			placement_selected = "None"
-			placement_tools_highlight_update()
+		if note.type in [Note.type.TAP, Note.type.TOUCH]: # not planning to do hold slides for now
+			if note.sliders.size() == 0: # no sliders?
+				var new_slider_dict: Dictionary = {
+					"duration_arr" = last_used_slide_duration_arr,
+					"delay_arr" = [1.0, 4],
+					"slider_shape_arr" = [["-", note_position]],
+					"note_property_break" = toggle_break
+				}
+				if note.type in [Note.type.TAP, Note.type.TOUCH]:
+					note.note_property_star = true
+				note.sliders.append(new_slider_dict)
+				note.note_draw()
+				note.slider_draw()
+				Global.selected_notes = [note]
+				note.set_selected(true)
+				sync_note_details()
+			else:
+				var slider_dict = note.sliders[0]
+				slider_dict["slider_shape_arr"].append(["-", note_position])
+				note.slider_draw()
+				sync_note_details()
 		
 	elif placement_selected == "Hold": # add a hold
 		var args = {
@@ -940,7 +933,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		
-	elif placement_selected == "Slider" or placement_selected == "Tap": # add a tap
+	elif placement_selected == "Tap": # add a tap
 		var args = {
 			"note_position" = note_position,
 			"beat" = time_to_beat(current_time),
@@ -955,8 +948,6 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
 				return
-			elif placement_selected == "Slider":
-				Global.selected_notes = [new_note]
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
@@ -969,6 +960,28 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
+	
+	elif placement_selected == "Slider" and (Global.selected_notes.size() == 0 or toggle_multiplacing): # Add a note; point to the note after
+		var args = {
+			"note_position" = note_position,
+			"beat" = time_to_beat(current_time),
+			"bpm" = beat_to_bpm(time_to_beat(current_time)),
+			"note_property_break" = toggle_break,
+			"note_property_ex" = toggle_ex,
+			"note_property_firework" = toggle_firework,
+		}
+		if toggle_touch:
+			var new_note = add_note(Note.type.TOUCH, args)
+			note_both_update()
+			Global.selected_notes = [new_note]
+			new_note.set_selected(true)
+		else:
+			var new_note = add_note(Note.type.TAP, args)
+			note_both_update()
+			Global.selected_notes = [new_note]
+			new_note.set_selected(true)
+		toggle_multiplacing = false
+		placement_tools_highlight_update()
 
 func add_note(note_type: Note.type, args: Dictionary) -> Node:
 	var new_note = Note.new_note(note_type, args)
@@ -1094,6 +1107,9 @@ func _on_notice_window_confirmed():
 
 func _on_notice_window_canceled():
 	$FileOptions/NoticeWindow.visible = false
+
+func recent_slider_duration_update(duration_arr: Array):
+	last_used_slide_duration_arr = duration_arr
 
 # Metadata
 func metadata_update():

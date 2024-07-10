@@ -649,7 +649,6 @@ offset_bottom = 492.0
 text = "delete node"
 
 [node name="Button" type="Button" parent="."]
-visible = false
 offset_left = 119.0
 offset_right = 271.0
 offset_bottom = 67.0

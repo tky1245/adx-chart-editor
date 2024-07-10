@@ -7,6 +7,7 @@ script/source = "extends VBoxContainer
 var note: Node2D
 var slider_index: int
 signal slider_deleted
+signal duration_changed
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	pass # Replace with function body.
@@ -67,11 +68,13 @@ func _on_duration_x_text_changed(new_text):
 	var new_duration_arr = [float(new_text), int($Properties/SliderDuration/DurationY.text)]
 	note.sliders[slider_index][\"duration_arr\"] = new_duration_arr
 	note.slider_draw()
+	duration_changed.emit(new_duration_arr)
 
 func _on_duration_y_text_changed(new_text):
 	var new_duration_arr = [float($Properties/SliderDuration/DurationX.text), int(new_text)]
 	note.sliders[slider_index][\"duration_arr\"] = new_duration_arr
 	note.slider_draw()
+	duration_changed.emit(new_duration_arr)
 
 
 func _on_delay_x_text_changed(new_text):
