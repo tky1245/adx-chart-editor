@@ -1,5 +1,5 @@
 extends Node
-const CHART_STORAGE_PATH: String = "user://Charts/"
+var CHART_STORAGE_PATH: String = "user://Charts/"
 var current_chart_name: String # song name usually
 var current_chart_data: Dictionary
 var root_folder: String
@@ -104,6 +104,13 @@ func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
 	return pos_x
 
 func _ready():
+	root_folder = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+	if OS.has_feature("android"):
+		CHART_STORAGE_PATH = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP) + "/ADXChartViewer/Charts"
+		var dir = DirAccess.open(OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP))
+		dir.make_dir("ADXChartViewer")
+		dir.change_dir("ADXChartViewer")
+		dir.make_dir("Charts")
 	# Generate touch positions
 	for i in range(8):
 		var pos_name = "A" + str(i + 1)
@@ -139,7 +146,7 @@ func _ready():
 		var angle = PI / 8 * (1 + i * 2)
 		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
-		root_folder = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
+		
 
 func note_pos_mod(num: int):
 	return (num - 1) % 8 + 1

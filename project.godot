@@ -21,6 +21,10 @@ Global="*res://global.gd"
 Note="*res://note detail stuffs/note.gd"
 Savefile="*res://savefile.gd"
 
+[display]
+
+window/stretch/mode="viewport"
+
 [dotnet]
 
 project/assembly_name="adeex"

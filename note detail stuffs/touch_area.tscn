@@ -6,7 +6,8 @@ signal area_clicked
 var note_position: String
 
 func _on_input_event(viewport, event, shape_idx):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT \\
+	or (event is InputEventScreenTouch and event.pressed):
 		area_clicked.emit(note_position)
 
 func sync_shapes():

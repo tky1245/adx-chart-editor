@@ -7,6 +7,7 @@ func _ready():
 	if Global.root_folder:
 		$SelectSong.root_subfolder = Global.root_folder
 		$SelectMaidata.root_subfolder = Global.root_folder
+		$SelectMaidataAndroid.root_subfolder = Global.root_folder
 
 func _on_new_chart_pressed():
 	if !$SelectSong.visible:
@@ -137,3 +138,12 @@ func _on_select_maidata_file_selected(path):
 
 func _on_import_from_maidata_pressed():
 	$SelectMaidata.visible = true
+
+
+func _on_import_from_maidata_android_pressed():
+	$SelectMaidataAndroid.visible = true
+
+
+func _on_select_maidata_android_dir_selected(dir):
+	Savefile.import_maidata(dir)
+	get_tree().change_scene_to_file("res://chart_editor.tscn")

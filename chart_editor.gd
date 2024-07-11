@@ -80,7 +80,8 @@ func _ready():
 func _input(event):
 	# Time skips
 	if bar_dragging: # Progress bar dragging
-		if event is InputEventMouse:
+		if event is InputEventMouse \
+		or event is InputEventScreenTouch or event is InputEventScreenDrag:
 			if event.position.x < $PlaybackControls/TimeSlider/ProgressBar.position.x:
 				current_time = 0 - extra_time
 			elif event.position.x > $PlaybackControls/TimeSlider/ProgressBar.position.x + $PlaybackControls/TimeSlider/ProgressBar.size.x:
@@ -89,11 +90,12 @@ func _input(event):
 				current_time = -extra_time + (song_length + 2 * extra_time) * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
 		#TODO: Rerender everything 
 		timeline_render("all")
-	if event is InputEventMouseButton and !event.pressed:
+	if !event.pressed and (event is InputEventMouseButton \
+	or event is InputEventScreenTouch):
 		bar_dragging = false
 	
 	if timeline_dragging: # Timeline dragging
-		if event is InputEventMouseMotion:
+		if event is InputEventMouseMotion or event is InputEventScreenDrag:
 			var position_delta = event.position - previous_mouse_position if previous_mouse_position != Vector2(-1, -1) else Vector2(0, 0)
 			var time_delta = position_delta.x / Global.timeline_pixels_to_second / Global.timeline_zoom
 			previous_mouse_position = event.position
@@ -105,10 +107,11 @@ func _input(event):
 				current_time = current_time - time_delta
 			#TODO: render
 		timeline_render("all")
-		if event is InputEventMouseButton and !event.pressed:
+		if !event.pressed and (event is InputEventMouseButton or event is InputEventScreenTouch):
 			timeline_dragging = false
 	
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT \
+	or (event is InputEventScreenTouch and event.pressed):
 		if placement_selected == "None":
 			var note_clicked = false
 			Global.clicked_notes = []
@@ -166,7 +169,15 @@ func _input(event):
 					else:
 						note.set_selected(false)
 				sync_note_details()
-
+	
+	# some keybinds
+	if event.is_action_pressed("ui_right"):
+		beat_skip(1)
+	if event.is_action_pressed("ui_left"):
+		beat_skip(-1)
+	if event.is_action_pressed("ui_text_delete"):
+		_on_delete_note_pressed()
+	
 func _process(_delta):
 	for note in $Notes.get_children():
 		note.preview_render(current_time)
@@ -198,7 +209,11 @@ func _on_hold_toggle_pressed():
 	placement_tools_highlight_update()
 
 func _on_slider_toggle_pressed():
+	if Global.selected_notes.size() > 0:
+		for note in Global.selected_notes:
+			note.set_selected(false)
 	Global.selected_notes = []
+	
 	if placement_selected == "Slider":
 		placement_selected = "None"
 		toggle_multiplacing = false
@@ -320,14 +335,14 @@ func load_external_song(chart_dir): # Load a song
 # Bar and Timeline
 
 func _on_progress_bar_gui_input(event): # Song Progress Bar Dragged
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton or event is InputEventScreenTouch and event.pressed:
 		bar_dragging = true
 		$PlaybackControls/PlayPause.text = "▶" # Stop the song from continue playing
 		$Timeline/SongTimer.stop()
 		$AudioPlayers/TrackPlayer.stop()
 
 func _on_note_timeline_gui_input(event): # Timeline Dragged
-	if event is InputEventMouseButton and event.pressed:
+	if event is InputEventMouseButton or event is InputEventScreenTouch and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			timeline_dragging = true
 			$PlaybackControls/PlayPause.text = "▶" # Stop the song from continue playing
@@ -335,15 +350,21 @@ func _on_note_timeline_gui_input(event): # Timeline Dragged
 			$AudioPlayers/TrackPlayer.stop()
 			previous_mouse_position = Vector2(-1, -1)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) <  Global.timeline_beats.size() - 1:
-				current_time = Global.timeline_beats[time_to_beat(current_time) + 1]
-			else:
-				current_time =  Global.timeline_beats[time_to_beat(current_time)]
+			beat_skip(1)
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) > 0:
-				current_time = Global.timeline_beats[time_to_beat(current_time) - 1]
-			else:
-				current_time =  Global.timeline_beats[time_to_beat(current_time)]
+			beat_skip(-1)
+
+func beat_skip(direction: int):
+	if direction == 1:
+		if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) <  Global.timeline_beats.size() - 1:
+			current_time = Global.timeline_beats[time_to_beat(current_time) + 1]
+		else:
+			current_time =  Global.timeline_beats[time_to_beat(current_time) + 1]
+	elif direction == -1:
+		if current_time ==  Global.timeline_beats[time_to_beat(current_time)] and time_to_beat(current_time) > 0:
+			current_time = Global.timeline_beats[time_to_beat(current_time) - 1]
+		else:
+			current_time =  Global.timeline_beats[time_to_beat(current_time) - 1]
 
 func timeline_visible_range_update(): # Update timeline, use before render
 	var leftmost_time: float = current_time + float(Global.timeline_leftmost_x - Global.timeline_pointer_x) / Global.timeline_pixels_to_second / Global.timeline_zoom
@@ -827,11 +848,13 @@ func _on_hold_duration_x_text_changed(new_text):
 	var note = Global.selected_notes[0]
 	var new_duration_arr = [float(new_text), note.duration_arr[1]]
 	note.set_duration(new_duration_arr)
+	last_used_hold_duration_arr = new_duration_arr
 
 func _on_hold_duration_y_text_changed(new_text):
 	var note = Global.selected_notes[0]
 	var new_duration_arr = [note.duration_arr[0], int(new_text)]
 	note.set_duration(new_duration_arr)
+	last_used_hold_duration_arr = new_duration_arr
 
 func _on_slider_deleted(slider_index):
 	var note = Global.selected_notes[0]
@@ -845,21 +868,22 @@ func _on_slider_deleted(slider_index):
 	sync_note_details()
 
 func _on_add_slide_pressed():
-	var note = Global.selected_notes[0]
-	var num = int(note.note_position)
-	num = num + 1 if num != 8 else 1
-	var new_slider_dict: Dictionary = {
-		"duration_arr" = last_used_slide_duration_arr,
-		"delay_arr" = [1.0, 4],
-		"slider_shape_arr" = [["-", str(num)]]
-	}
-	if note.type in [Note.type.TAP, Note.type.TOUCH]:
-		note.note_property_star = true
-	if note.type in [Note.type.TAP]:
-		note.note_star_spinning = true
-	note.sliders.append(new_slider_dict)
-	note.slider_draw()
-	sync_note_details()
+	if Global.selected_notes.size() == 1:
+		var note = Global.selected_notes[0]
+		var num = int(note.note_position)
+		num = num + 1 if num != 8 else 1
+		var new_slider_dict: Dictionary = {
+			"duration_arr" = last_used_slide_duration_arr,
+			"delay_arr" = [1.0, 4],
+			"slider_shape_arr" = [["-", str(num)]]
+		}
+		if note.type in [Note.type.TAP, Note.type.TOUCH]:
+			note.note_property_star = true
+		if note.type in [Note.type.TAP]:
+			note.note_star_spinning = true
+		note.sliders.append(new_slider_dict)
+		note.slider_draw()
+		sync_note_details()
 
 func _on_delete_note_pressed():
 	if Global.selected_notes.size() == 1:

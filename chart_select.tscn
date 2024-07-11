@@ -19,7 +19,8 @@ func initialize(chart_name: String, song_artist: String, chart_bpm: String, avai
 		$Control/HBoxContainer2/VBoxContainer2/Difficulties.get_child(i).visible = true if i+1 in available_difficulties else false
 
 func _input(event):
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT \\
+	or (event is InputEventScreenTouch and event.pressed):
 		if Geometry2D.is_point_in_polygon(event.position, $Control/ClickDetection/CollisionPolygon2D.polygon * Transform2D(0.0, -global_position)):
 			chart_clicked.emit(self)
 
