@@ -37,7 +37,7 @@ func slider_render(current_time: float) -> void:
 		slider_progress = 0
 		transparency_value = initial_transparency
 		scale_value = initial_scale
-	elif current_time < slide_head_hit_time: # star appear until star hits
+	elif current_time <= slide_head_hit_time: # star appear until star hits
 		$SliderArrows.visible = true
 		var transparency = (current_time - slide_intro_time - Global.note_speed_in_time * 0.5) / (Global.note_speed_in_time * 0.5) 
 		transparency = transparency if transparency >= 0 else 0
@@ -47,7 +47,7 @@ func slider_render(current_time: float) -> void:
 		slider_progress = 0
 		transparency_value = initial_transparency
 		scale_value = initial_scale
-	elif current_time < slide_start_time: # slider delay
+	elif current_time <= slide_start_time: # slider delay
 		$SliderArrows.visible = true
 		$SliderSegments.visible = true
 		var scale_time_start = Global.timeline_beats[beat] + delay * 0.5
@@ -61,7 +61,7 @@ func slider_render(current_time: float) -> void:
 			progress = 1
 		transparency_value = initial_transparency + (target_transparency - initial_transparency) * progress
 		scale_value = initial_scale + (target_scale - initial_scale) * progress
-	elif current_time < slide_end_time:	# slider sliding
+	elif current_time <= slide_end_time:	# slider sliding
 		$SliderArrows.visible = true
 		$SliderSegments.visible = true
 		slider_progress = (current_time - Global.timeline_beats[beat] - delay) / duration
@@ -339,7 +339,9 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 	var curve = Curve2D.new()
 	var initial_position = Global.touch_positions[initial_note_position]
 	var target_position = Global.touch_positions[target_note_position]
-	curve.add_point(Vector2(initial_position)) # from previous pos
+	if shape not in ["<", ">"]:
+		curve.add_point(Vector2(initial_position)) # from previous pos
+	
 	if shape == "-" or shape == "w": # straight line, ezpz
 		curve.add_point(Vector2(target_position))
 	elif shape == "<":

@@ -27,6 +27,8 @@ func create_chart(chart_name: String, track_path: String) -> void:
 	save_chart()
 
 func load_chart(chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"):
+	if chart_dir.ends_with("//"):
+		chart_dir = chart_dir.left(-1)
 	var file = FileAccess.open(chart_dir + "chart.mai", FileAccess.READ)
 	var json_string = file.get_line()
 	var json = JSON.new()
@@ -142,6 +144,10 @@ func maidata_to_chart(data: String) -> Dictionary:
 						note_args["note_position"] = note_string.left(2)
 						note_args["type"] = Note.type.TOUCH
 						note_string = note_string.right(-2)
+					elif note_string.left(1) == "C":
+						note_args["note_position"] = "C1"
+						note_args["type"] = Note.type.TOUCH
+						note_string = note_string.right(-1)
 					else: # no note here, probably
 						break
 						
@@ -193,6 +199,7 @@ func maidata_to_chart(data: String) -> Dictionary:
 					
 					# search for sliders
 					if note_string.left(2) in slider_shape_2_digits or note_string.left(1) in slider_shape_1_digits: # has a slider
+						note_args["note_star_spinning"] = true
 						var sliders: Array = []
 						var slider_split = note_string.split("*")
 						for slider_string in slider_split:
@@ -233,8 +240,34 @@ func maidata_to_chart(data: String) -> Dictionary:
 									print("Slider shape position error, at line ", line_count)
 									print('"', string_splited_by_tick[delay_ticks] ,'"')
 									break
-									
+								
+								if segment_shape == "^": # needs correction
+									var initial_position: String
+									if slider_args.get("slider_shape_arr").size() == 0:
+										initial_position = note_args.get("note_position")
+									else:
+										initial_position = slider_args.get("slider_shape_arr")[slider_args.get("slider_shape_arr").size() - 1][1]
+									var clockwise_diff = int(target_position) - int(initial_position)
+									while clockwise_diff <= 0:
+										clockwise_diff += 8
+									if clockwise_diff < 4: # its clockwise
+										segment_shape = ">" if int(initial_position) in [7, 8, 1, 2] else "<"
+									else:
+										segment_shape = "<" if int(initial_position) in [7, 8, 1, 2] else ">"
+								
 								slider_args["slider_shape_arr"].append([segment_shape, target_position])
+							
+							# handle slider decorator
+							while !slider_string.begins_with("["):
+								if slider_string.left(1) == "b":
+									slider_args["slider_property_break"] = true
+									slider_string = slider_string.right(-1)
+								else:
+									print("Invalid slider decorator, at line ", line_count)
+									print('"', string_splited_by_tick[delay_ticks] ,'"')
+									while !slider_string.begins_with("["):
+										slider_string = slider_string.right(-1)
+									break
 							
 							# handle slider duration
 							if slider_string.begins_with("["):
@@ -269,7 +302,7 @@ func maidata_to_chart(data: String) -> Dictionary:
 									print('"', string_splited_by_tick[delay_ticks] ,'"')
 									break
 							
-							# handle slider decorator
+							# look for slider decorator again cus funny
 							while len(slider_string) > 0:
 								if slider_string.left(1) == "b":
 									slider_args["slider_property_break"] = true
@@ -411,7 +444,7 @@ func chart_to_maidata(data: Dictionary) -> String:
 				chart_string += "\n"
 	return chart_string
 
-func import_maidata(chart_dir: String) -> void:
+func import_maidata(chart_dir: String) -> bool:
 	var dir = DirAccess.open(chart_dir)
 	var chart_storage = DirAccess.open(Global.CHART_STORAGE_PATH)
 	var chart_name: String
@@ -431,11 +464,12 @@ func import_maidata(chart_dir: String) -> void:
 				else:
 					chart_storage.make_dir(chart_name)
 					break
-			
+		if data_name.begins_with("inote_"):
+			data_value = chart_to_maidata(maidata_to_chart(data_value.replace(" ", "").replace("\n", "")))
 		chart_save[data_name] = data_value
 	if !chart_name:
 		print("maidata &title property not found.")
-		return
+		return false
 	
 	var track_exists: bool = false
 	for track_extension in track_extensions: # copy track over
@@ -445,7 +479,7 @@ func import_maidata(chart_dir: String) -> void:
 			break
 	if !track_exists:
 		print("Track doesnt exist")
-		return
+		return false
 	
 	
 	for img_extension in img_extensions: # copy a jacket over
@@ -456,6 +490,7 @@ func import_maidata(chart_dir: String) -> void:
 	Global.current_chart_name = chart_name
 	Global.current_chart_data = chart_save
 	save_chart()
+	return true
 
 func export_maidata(export_path: String, chart_dir = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/", chart_data = Global.current_chart_data):
 	var dir = DirAccess.open(export_path)
@@ -465,38 +500,38 @@ func export_maidata(export_path: String, chart_dir = Global.CHART_STORAGE_PATH +
 	var maidata_string: String = ""
 	
 	if chart_data.get("title"):
-		maidata_string += "&title=" + chart_data.get("title") + "\n"
+		maidata_string = str(maidata_string, "&title=", chart_data.get("title"), "\n")
 	
 	if chart_data.get("artist"):
-		maidata_string += "&artist=" + chart_data.get("artist") + "\n"
+		maidata_string = str(maidata_string, "&artist=", chart_data.get("artist"), "\n")
 
 	for key in chart_data:
 		if !key.begins_with("des_") and !key.begins_with("first_") and !key.begins_with("lv_") and !key.begins_with("inote_") and !(key in ["title", "artist", ""]):
-			maidata_string += "&" + key +"=" + chart_data.get(key) + "\n"
+			maidata_string = str(maidata_string ,"&", key, "=", chart_data.get(key), "\n")
 	
-	maidata_string += "\n"
+	maidata_string = str(maidata_string, "\n")
 	
 	for i in range(7):
 		if chart_data.get("des_" + str(i+1)):
-			maidata_string += "&des_" + str(i+1) + "=" + chart_data.get("des_" + str(i+1)) + "\n"
+			maidata_string = str(maidata_string, "&des_", str(i+1), "=", chart_data.get(str("des_", str(i+1))), "\n")
 	
-	maidata_string += "\n"
+	maidata_string = str(maidata_string, "\n")
 	
 	for i in range(7):
 		if chart_data.get("first_" + str(i+1)):
-			maidata_string += "&first_" + str(i+1) + "=" + chart_data.get("first_" + str(i+1)) + "\n"
+			maidata_string = str(maidata_string, "&first_", str(i+1), "=", chart_data.get(str("first_", str(i+1))), "\n")
 	
-	maidata_string += "\n"
+	maidata_string = str(maidata_string, "\n")
 	
 	for i in range(7):
 		if chart_data.get("lv_" + str(i+1)):
-			maidata_string += "&lv_" + str(i+1) + "=" + chart_data.get("lv_" + str(i+1)) + "\n"
+			maidata_string = str(maidata_string, "&lv_", str(i+1), "=", chart_data.get(str("lv_", str(i+1))), "\n")
 	
-	maidata_string += "\n"
+	maidata_string = str(maidata_string, "\n")
 	
 	for i in range(7):
 		if chart_data.get("inote_" + str(i+1)):
-			maidata_string += "&inote_" + str(i+1) + "=" + chart_data.get("inote_" + str(i+1)) + "\n"
+			maidata_string = str(maidata_string, "&inote_", str(i+1), "=", chart_data.get(str("inote_", str(i+1))) + "\n")
 	
 	var maidata = FileAccess.open(export_path + Global.current_chart_name + "/maidata.txt", FileAccess.WRITE)
 	maidata.store_string(maidata_string)

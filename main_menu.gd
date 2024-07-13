@@ -132,8 +132,8 @@ func _on_rename_button_pressed():
 
 func _on_select_maidata_file_selected(path):
 	var dir = path.left(-len("maidata.txt"))
-	Savefile.import_maidata(dir)
-	get_tree().change_scene_to_file("res://chart_editor.tscn")
+	if Savefile.import_maidata(dir):
+		get_tree().change_scene_to_file("res://chart_editor.tscn")
 
 
 func _on_import_from_maidata_pressed():

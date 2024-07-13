@@ -144,7 +144,7 @@ show_hidden_files = true
 use_native_dialog = true
 
 [node name="SelectMaidataAndroid" type="FileDialog" parent="."]
-title = "Select Chart Directory"
+title = "Open a Directory"
 initial_position = 1
 size = Vector2i(1050, 550)
 ok_button_text = "Select Current Folder"

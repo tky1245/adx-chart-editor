@@ -11,13 +11,21 @@ note placement optiomization thoughts:
 	- 
 
 some known bugs:
-	- hold toggle causing result note to not have correct properties
-	- delay became negative after loading a chart?
+	- touch slider delay(bpm#x:y) loaded incorrectly if there is a bpm change on the note (QuiQ)
+	- yellow sliders doesnt return to blue after deleting other slides
+	- touch slider bugs like: 
+		- sliders not being rendered after slider creation using the insert slider tool
+		- slider both property not being applied
+	- holds not adjusting timeline hold icon after changing note position
+	
 
 todo:
+	- negative time formating
+	- optimize code for when adding bpm/beat divisors
 	- improve adding slider convenience
 	- add sounds + note effects
 	- make firework function
+	- change C1 to C when exporting
 
 soontm:
 	- optimization (its a bit laggy rn)

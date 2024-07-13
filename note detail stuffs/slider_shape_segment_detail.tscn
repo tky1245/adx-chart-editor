@@ -43,7 +43,7 @@ func _on_pos_2_text_changed(new_text):
 			_note_position_change(note_position)
 			$Pos2.text = note_position.right(1)
 		else:
-			$Pos2.text = \"\"
+			$Pos2.text = shape_arr[1].right(1)
 	else:
 		$Pos2.text = shape_arr[1].right(1)
 

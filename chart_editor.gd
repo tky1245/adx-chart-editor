@@ -72,8 +72,6 @@ func _ready():
 	
 	
 	$ChartPreview/ChartPreviewArea.connect("area_clicked", _touch_area_clicked)
-	note_both_update()
-	timeline_object_update()
 	timeline_render("all")
 	jacket_load()
 
@@ -90,8 +88,8 @@ func _input(event):
 				current_time = -extra_time + (song_length + 2 * extra_time) * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
 		#TODO: Rerender everything 
 		timeline_render("all")
-	if !event.pressed and (event is InputEventMouseButton \
-	or event is InputEventScreenTouch):
+	if (event is InputEventMouseButton \
+	or event is InputEventScreenTouch) and !event.pressed:
 		bar_dragging = false
 	
 	if timeline_dragging: # Timeline dragging
@@ -107,7 +105,7 @@ func _input(event):
 				current_time = current_time - time_delta
 			#TODO: render
 		timeline_render("all")
-		if !event.pressed and (event is InputEventMouseButton or event is InputEventScreenTouch):
+		if (event is InputEventMouseButton or event is InputEventScreenTouch) and !event.pressed:
 			timeline_dragging = false
 	
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT \
@@ -214,7 +212,7 @@ func _on_slider_toggle_pressed():
 			note.set_selected(false)
 	Global.selected_notes = []
 	
-	if placement_selected == "Slider":
+	if placement_selected == "Slider" and toggle_multiplacing:
 		placement_selected = "None"
 		toggle_multiplacing = false
 	else:
@@ -335,14 +333,14 @@ func load_external_song(chart_dir): # Load a song
 # Bar and Timeline
 
 func _on_progress_bar_gui_input(event): # Song Progress Bar Dragged
-	if event is InputEventMouseButton or event is InputEventScreenTouch and event.pressed:
+	if event is InputEventMouseButton and event.pressed:
 		bar_dragging = true
 		$PlaybackControls/PlayPause.text = "▶" # Stop the song from continue playing
 		$Timeline/SongTimer.stop()
 		$AudioPlayers/TrackPlayer.stop()
 
 func _on_note_timeline_gui_input(event): # Timeline Dragged
-	if event is InputEventMouseButton or event is InputEventScreenTouch and event.pressed:
+	if event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			timeline_dragging = true
 			$PlaybackControls/PlayPause.text = "▶" # Stop the song from continue playing
@@ -414,8 +412,7 @@ func timeline_object_update():
 		temp_time += (60.0 / temp_bpm) / temp_beat_divisor * Global.beats_per_bar # time calculation
 		temp_beat += 1
 		
-	# print("Global.timeline_beats: ", Global.timeline_beats)    -too long tbh
-	
+	#print("Global.timeline_beats: ", Global.timeline_beats)    
 	# bar array starts here
 	
 	timeline_bar_time.clear()
@@ -449,7 +446,7 @@ func timeline_object_update():
 					break
 			else:
 				note.bpm = bpm_array[idx]["Value"]
-		note.initialize()
+		#note.initialize()
 
 	timeline_render("bar")
 	timeline_render("beat")
@@ -502,7 +499,6 @@ func timeline_render(type: String): # Render objects on timeline
 	elif type == "note":
 		for note in $Notes.get_children():
 			note.timeline_object_render()
-			note.set_selected()
 	elif type == "all": # Default, render everything 
 		timeline_visible_range_update()
 		timeline_render("bar")
@@ -865,6 +861,7 @@ func _on_slider_deleted(slider_index):
 	if note.type in [Note.type.TAP]:
 		note.note_star_spinning = false
 	note.slider_draw()
+	note_both_update(note.get("beat"))
 	sync_note_details()
 
 func _on_add_slide_pressed():
@@ -883,14 +880,16 @@ func _on_add_slide_pressed():
 			note.note_star_spinning = true
 		note.sliders.append(new_slider_dict)
 		note.slider_draw()
+		note_both_update(note.get("beat"))
 		sync_note_details()
 
 func _on_delete_note_pressed():
 	if Global.selected_notes.size() == 1:
 		var note = Global.selected_notes[0]
+		var beat = note.get("beat")
 		Global.selected_notes = []
 		note.free()
-		note_both_update()
+		note_both_update(beat)
 		sync_note_details()
 
 func _touch_area_clicked(touch_position: String): # handle note adding
@@ -940,19 +939,23 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 		}
 		if toggle_touch: # touch hold
 			var new_note = add_note(Note.type.TOUCH_HOLD, args)
-			note_both_update()
+			if Global.selected_notes.size() > 0:
+				for note in Global.selected_notes:
+					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
-				return
+				pass
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap hold
 			var new_note = add_note(Note.type.TAP_HOLD, args)
-			note_both_update()
+			if Global.selected_notes.size() > 0:
+				for note in Global.selected_notes:
+					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
-				return
+				pass
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
@@ -968,19 +971,23 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 		}
 		if toggle_touch: # touch
 			var new_note = add_note(Note.type.TOUCH, args)
-			note_both_update()
+			if Global.selected_notes.size() > 0:
+				for note in Global.selected_notes:
+					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
-				return
+				pass
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap
 			var new_note = add_note(Note.type.TAP, args)
-			note_both_update()
+			if Global.selected_notes.size() > 0:
+				for note in Global.selected_notes:
+					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			if toggle_multiplacing:
-				return
+				pass
 			else:
 				placement_selected = "None"
 				placement_tools_highlight_update()
@@ -996,43 +1003,66 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 		}
 		if toggle_touch:
 			var new_note = add_note(Note.type.TOUCH, args)
-			note_both_update()
+			if Global.selected_notes.size() > 0:
+				for note in Global.selected_notes:
+					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			new_note.set_selected(true)
 		else:
 			var new_note = add_note(Note.type.TAP, args)
-			note_both_update()
+			if Global.selected_notes.size() > 0:
+				for note in Global.selected_notes:
+					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			new_note.set_selected(true)
 		toggle_multiplacing = false
 		placement_tools_highlight_update()
+	sync_note_details()
 
 func add_note(note_type: Note.type, args: Dictionary) -> Node:
 	var new_note = Note.new_note(note_type, args)
 	new_note.initialize()
 	$Notes.add_child(new_note)
+	note_both_update(new_note.get("beat"))
 	return new_note
 
-func note_both_update() -> void:
-	for i in Global.timeline_beats.size():
+func note_both_update(beat = null) -> void:
+	var checking_beats: Array = []
+	if beat == null:
+		for i in Global.timeline_beats.size():
+			checking_beats.append(i)
+	elif typeof(beat) == TYPE_INT:
+		checking_beats.append(beat)
+	elif typeof(beat) == TYPE_ARRAY:
+		checking_beats.append_array(beat)
+	
+	for i in checking_beats:
 		var notes_at_current_beat: Array = []
 		for note in $Notes.get_children():
 			if note.beat == i:
 				notes_at_current_beat.append(note)
 		if notes_at_current_beat.size() == 1:
 			for note in notes_at_current_beat:
-				note.note_property_both = false
+				note.set("note_property_both", false)
+				note.set("slider_both", false)
 				note.note_draw()
+				note.slider_draw()
 		elif notes_at_current_beat.size() > 1:
 			for note in notes_at_current_beat:
-				note.note_property_both = false
+				note.set("note_property_both", false)
+				note.set("slider_both", false)
+			var slider_both = false
 			for j in range(notes_at_current_beat.size()):
 				for k in range(notes_at_current_beat.size()):
 					if j != k and notes_at_current_beat[j].delay_ticks == notes_at_current_beat[k].delay_ticks:
-						notes_at_current_beat[j].note_property_both = true
-						notes_at_current_beat[k].note_property_both = true
+						notes_at_current_beat[j].set("note_property_both", true)
+						notes_at_current_beat[k].set("note_property_both", true)
+						if notes_at_current_beat[j].sliders.size() > 0 and notes_at_current_beat[k].sliders.size() > 0:
+							notes_at_current_beat[j].set("slider_both", true)
+							notes_at_current_beat[k].set("slider_both", true)
 			for note in notes_at_current_beat:
 				note.note_draw()
+				note.slider_draw()
 
 # Menu and Save
 func _on_option_pressed(index):
@@ -1102,12 +1132,15 @@ func load_difficulty(difficulty: int) -> void: # uh
 			new_node.button_update()
 			$BeatDivisorChanges.add_child(new_node)
 		
+		
 		for note_args in chart_dict.get("notes"):
-			$Notes.add_child(Note.new_note(note_args["type"], note_args))
-	
-	timeline_object_update()
-	timeline_render("all")
-	note_both_update()
+			var note = Note.new_note(note_args["type"], note_args)
+			$Notes.add_child(note)
+		timeline_object_update()
+		timeline_render("all")
+		note_both_update()
+		for note in $Notes.get_children():
+			note.initialize()
 
 func clear_chart() -> void:
 	Global.selected_notes = []
@@ -1184,6 +1217,7 @@ func other_metadata_read():
 		if key not in common_keys:
 			text += ("&" + key + "=" + Global.current_chart_data.get(key) + "\n")
 	$MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text = text
+	$MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer/ArtistField.text = Global.current_chart_data.get("artist")
 
 func other_metadata_save():
 	var text = $MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text

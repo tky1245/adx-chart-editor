@@ -13,6 +13,7 @@ var note_property_mine: bool = false
 var note_position: String = ""
 var sliders: Array = []
 var slider_tapless: bool = false
+var slider_both: bool = false
 var delay_ticks: int = 0
 
 var selected: bool = false
@@ -38,17 +39,17 @@ func note_render(current_time: float) -> void:
 	if slider_tapless and sliders.size() > 0:
 		$Note.visible = false
 	else:
-		if current_time < intro_time:
+		if current_time <= intro_time:
 			$Note.visible = false
 			intro_progress = 0
 			start_progress = 0
 			end_progress = 0
-		elif current_time < move_time_start_point:
+		elif current_time <= move_time_start_point:
 			$Note.visible = true
 			intro_progress = (current_time - intro_time) / (move_time_start_point - intro_time)
 			start_progress = 0
 			end_progress = 0
-		elif current_time >= judge_time_end_point:
+		elif current_time > judge_time_end_point:
 			$Note.visible = false
 			intro_progress = 1
 			start_progress = 1

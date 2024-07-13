@@ -104,6 +104,7 @@ func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
 	return pos_x
 
 func _ready():
+	# android stuffs
 	root_folder = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
 	if OS.has_feature("android"):
 		CHART_STORAGE_PATH = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP) + "/ADXChartViewer/Charts"

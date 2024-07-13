@@ -12,6 +12,7 @@ var note_star_spinning: bool = false
 var note_position: String = ""
 var sliders: Array = []
 var slider_tapless: bool = false
+var slider_both: bool = false
 var delay_ticks: int = 0
 
 var selected: bool = false
@@ -36,11 +37,11 @@ func note_render(current_time: float) -> void:
 			$Note.visible = false
 			scale_progress = 0
 			path_progress = 0
-		elif current_time < move_time:
+		elif current_time <= move_time:
 			$Note.visible = true
 			scale_progress = (current_time - intro_time) / (move_time - intro_time)
 			path_progress = 0
-		elif current_time < judge_time:
+		elif current_time <= judge_time:
 			$Note.visible = true
 			scale_progress = 1
 			path_progress = (current_time - move_time) / (judge_time - move_time)
@@ -214,7 +215,7 @@ func slider_draw() -> void:
 	for node in $Sliders.get_children():
 		node.queue_free()
 		for slider_args in sliders: # make sliders
-			if sliders.size() > 1:
+			if sliders.size() > 1 or slider_both:
 				slider_args["slider_property_both"] = true
 			create_slider(slider_args)
 
