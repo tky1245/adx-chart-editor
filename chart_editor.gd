@@ -698,34 +698,36 @@ func sync_note_details():
 	$NoteDetails.visible = true
 	if Global.selected_notes.size() == 1:
 		var note = Global.selected_notes[0]
-		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = note.note_position.left(-1)
-		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = note.note_position.right(1)
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = note.get("note_position").left(-1)
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = note.get("note_position").right(1)
 		
-		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Break.button_pressed = note.note_property_break
-		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/EX.button_pressed = note.note_property_ex
-		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.visible = false
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Break.button_pressed = note.get("note_property_break")
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/EX.button_pressed = note.get("note_property_ex")
+		if note.get("type") in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star.visible = false
 		else:
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.visible = true
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star.button_pressed = note.note_property_star
-		if note.type in [Note.type.TAP] and note.note_property_star:
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate.visible = true
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate.button_pressed = note.note_star_spinning
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star.visible = true
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star.button_pressed = note.get("note_property_star")
+		if note.get("type") in [Note.type.TAP] and note.note_property_star:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate.visible = true
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate.button_pressed = note.get("note_star_spinning")
 		else:
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate.visible = false
-		if note.sliders.size() > 0:
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless.visible = true
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless.button_pressed = note.slider_tapless
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate.visible = false
+		if note.get("sliders").size() > 0:
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Tapless.visible = true
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Tapless.button_pressed = note.get("slider_tapless")
 		else:
-			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless.visible = false
+			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Tapless.visible = false
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Firework.button_pressed = note.get("note_property_firework")
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Mine.button_pressed = note.get("note_property_mine")
+		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Backtick.value = int(note.get("delay_ticks"))
 		
-		
-		if note.sliders.size() > 0: # toggle hold fix TODO
+		if note.get("sliders").size() > 0: # toggle hold fix TODO
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = false
 		else:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = true
 		
-		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+		if note.get("type") in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide.visible = false
 			$NoteDetails/ScrollContainer/Properties/HoldProperties.visible = true
 			$NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX.text = str(note.duration_arr[0])
@@ -734,13 +736,13 @@ func sync_note_details():
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide.visible = true
 			$NoteDetails/ScrollContainer/Properties/HoldProperties.visible = false
 		
-		if note.sliders.size() == 0:
+		if note.get("sliders").size() == 0:
 			$NoteDetails/ScrollContainer/Properties/SliderProperties.visible = false
 		else:
 			$NoteDetails/ScrollContainer/Properties/SliderProperties.visible = true
 			for node in $NoteDetails/ScrollContainer/Properties/SliderProperties/VBoxContainer.get_children():
 				node.queue_free()
-			for i in range(note.sliders.size()):
+			for i in range(note.get("sliders").size()):
 				var slider_detail = preload("res://note detail stuffs/slider_detail.tscn")
 				var new_node = slider_detail.instantiate()
 				new_node.note = note
@@ -819,6 +821,22 @@ func _on_tapless_toggled(toggled_on):
 	if note.sliders.size() > 0:
 		note.slider_tapless = toggled_on
 		note.note_draw()
+
+func _on_firework_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	note.note_property_firework = toggled_on
+	note.note_draw()
+
+func _on_mine_toggled(toggled_on):
+	var note = Global.selected_notes[0]
+	note.note_property_mine = toggled_on
+	note.note_draw()
+
+func _on_backtick_value_changed(value):
+	var note = Global.selected_notes[0]
+	note.delay_ticks = value
+	note.timeline_object_render()
+	note.preview_render(current_time)
 
 func _on_hold_pressed(): # change a tap to a hold
 	var note = Global.selected_notes[0]
@@ -1313,3 +1331,6 @@ func _on_pick_bg_file_selected(path: String):
 func effect_trigger(effect_name: String, note_position: String):
 	#if !$Timeline/SongTimer.is_stopped():
 	$EffectMap.effect_trigger(effect_name, note_position)
+
+
+

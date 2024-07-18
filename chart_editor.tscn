@@ -221,34 +221,52 @@ layout_mode = 2
 placeholder_text = "1-8"
 max_length = 2
 
-[node name="NodeBX" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
+[node name="NoteParams1" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
 layout_mode = 2
 
-[node name="Break" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+[node name="Break" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Break"
 
-[node name="EX" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+[node name="EX" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "EX"
 
-[node name="Star" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+[node name="Star" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Star"
 
-[node name="Rotate" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+[node name="Rotate" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Spinning"
 
-[node name="Tapless" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX"]
+[node name="Tapless" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1"]
 visible = false
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "Tapless"
+
+[node name="NoteParams2" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
+layout_mode = 2
+
+[node name="Firework" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2"]
+layout_mode = 2
+text = "Firework"
+
+[node name="Mine" type="CheckBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2"]
+layout_mode = 2
+text = "Mine"
+
+[node name="Backtick" type="SpinBox" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+max_value = 127.0
+value = 100.0
+suffix = "ticks"
 
 [node name="HoldSlideChange" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
 layout_mode = 2
@@ -260,9 +278,6 @@ text = "Hold Toggle"
 [node name="AddSlide" type="Button" parent="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange"]
 layout_mode = 2
 text = "Add Slide"
-
-[node name="HBoxContainer2" type="HBoxContainer" parent="NoteDetails/ScrollContainer/Properties/NoteProperties"]
-layout_mode = 2
 
 [node name="HoldProperties" type="VBoxContainer" parent="NoteDetails/ScrollContainer/Properties"]
 visible = false
@@ -678,11 +693,14 @@ text = "btn"
 [connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HBoxContainer/DeleteNote" to="." method="_on_delete_note_pressed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1" to="." method="_on_note_pos_1_text_changed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2" to="." method="_on_note_pos_2_text_changed"]
-[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Break" to="." method="_on_break_toggled"]
-[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/EX" to="." method="_on_ex_toggled"]
-[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Star" to="." method="_on_star_toggled"]
-[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Rotate" to="." method="_on_rotate_toggled"]
-[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NodeBX/Tapless" to="." method="_on_tapless_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Break" to="." method="_on_break_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/EX" to="." method="_on_ex_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star" to="." method="_on_star_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate" to="." method="_on_rotate_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Tapless" to="." method="_on_tapless_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Firework" to="." method="_on_firework_toggled"]
+[connection signal="toggled" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Mine" to="." method="_on_mine_toggled"]
+[connection signal="value_changed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Backtick" to="." method="_on_backtick_value_changed"]
 [connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold" to="." method="_on_hold_pressed"]
 [connection signal="pressed" from="NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide" to="." method="_on_add_slide_pressed"]
 [connection signal="text_changed" from="NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX" to="." method="_on_hold_duration_x_text_changed"]

@@ -11,14 +11,14 @@ some known bugs:
 		- slider both property not being applied
 
 todo:
-	- improve adding slider convenience
 	- add sounds + note hit effects
-	- change C1 to C when exporting
+	- sound control
+	- other settings like note speed
+	- control to add backticks (+ check if both property works correctly on it) and firework/mines
 
 soontm:
+	- change C1 to C when exporting for adx(?)
 	- optimization
-	- sound control
-	- control to add backticks (+ check if both property works correctly on it)
 	- note edit(move notes on timeline directly)
 	- handle console spitting out zero length interval when things like 1-1 is declared
 	- finish each note type function(mostly done):

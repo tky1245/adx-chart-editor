@@ -93,8 +93,12 @@ func tap_draw() -> void:
 	var note_color_outer
 	var note_color_inner
 	var note_color_highlight_ex
-
-	if note_property_break:
+	
+	if note_property_mine:
+		note_color_outer = Global.note_colors["tap_outer_mine"]
+		note_color_inner = Global.note_colors["tap_inner_mine"]
+		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_mine"]
+	elif note_property_break:
 		note_color_outer = Global.note_colors["tap_outer_break"]
 		note_color_inner = Global.note_colors["tap_inner_break"]
 		note_color_highlight_ex = Global.note_colors["tap_highlight_ex_break"]
@@ -130,7 +134,11 @@ func star_draw() -> void:
 	var note_color_outer
 	var note_color_inner
 	var note_color_highlight_ex
-	if note_property_break:
+	if note_property_mine:
+		note_color_outer = Global.note_colors["star_outer_mine"]
+		note_color_inner = Global.note_colors["star_inner_mine"]
+		note_color_highlight_ex = Global.note_colors["star_highlight_ex_mine"]
+	elif note_property_break:
 		note_color_outer = Global.note_colors["star_outer_break"]
 		note_color_inner = Global.note_colors["star_inner_break"]
 		note_color_highlight_ex = Global.note_colors["star_highlight_ex_break"]
@@ -182,7 +190,9 @@ func slider_draw(both: bool = slider_both) -> void:
 func timeline_object_draw() -> void:
 	if !note_property_star:
 		var note_color_timeline_indicator
-		if note_property_break:
+		if note_property_mine:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_mine"]
+		elif note_property_break:
 			note_color_timeline_indicator = Global.note_colors["tap_indicator_break"]
 		elif note_property_both:
 			note_color_timeline_indicator = Global.note_colors["tap_indicator_both"]

@@ -164,6 +164,8 @@ func _on_delete_confirmation_confirmed():
 				$NoticeWindow/Context.text = "Chart Removed"
 				$NoticeWindow/Context.visible = true
 				chart_dir_load()
+				$DeleteConfirmation.visible = false
+				return
 	$DeleteConfirmation.visible = false
 
 func _on_submit_pressed(): # rename
@@ -189,6 +191,8 @@ func _on_submit_pressed(): # rename
 						$NoticeWindow/Context.text = "Chart Renamed"
 						$NoticeWindow/Context.visible = true
 						chart_dir_load()
+						$RenameChart.visible = false
+						return
 					else:
 						print("Wrong file contents")
 	$RenameChart.visible = false
