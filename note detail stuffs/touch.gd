@@ -16,6 +16,7 @@ var slider_both: bool = false
 var delay_ticks: int = 0
 
 var selected: bool = false
+signal effect_trigger
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
@@ -37,23 +38,24 @@ func note_render(current_time: float) -> void:
 			$Note.visible = false
 			scale_progress = 0
 			path_progress = 0
+		elif current_time > judge_time:
+			if $Note.visible:
+				effect_trigger.emit("touch_hit", note_position)
+				if note_property_firework:
+					effect_trigger.emit("firework", note_position)
+			$Note.visible = false
+			scale_progress = 1
+			path_progress = 1
 		elif current_time <= move_time:
 			$Note.visible = true
 			scale_progress = (current_time - intro_time) / (move_time - intro_time)
 			path_progress = 0
 		elif current_time <= judge_time:
+			#$Note/JudgeOutline.visible = true if current_time > judge_time + 0.15 else false
 			$Note.visible = true
 			scale_progress = 1
 			path_progress = (current_time - move_time) / (judge_time - move_time)
-		else:
-			$Note.visible = false
-			scale_progress = 1
-			path_progress = 1
 		
-		set_node_images_transparency($Note, scale_progress)
-		for i in range(5):
-			var note_pathfollow = $Note.get_child(i).get_child(0).get_child(0)
-			note_pathfollow.progress_ratio = path_progress
 		
 		var size = 45 - path_progress * 18
 		var line = $Note/SelectedHighlight
@@ -66,6 +68,15 @@ func note_render(current_time: float) -> void:
 			for i in range(4):
 				var vec = Vector2(cos(i * TAU/4+TAU/8), sin(i * TAU/4+TAU/8)) * size / cos(TAU/8)
 				line.add_point(vec)
+		if $Note.visible:
+			for i in range(5):
+				if path_progress < 0.9:
+					$Note/JudgeOutline.visible = false
+					var note_pathfollow = $Note.get_child(i).get_child(0).get_child(0)
+					note_pathfollow.progress_ratio = path_progress / 0.9 
+				else:
+					$Note/JudgeOutline.visible = true
+			set_node_images_transparency($Note, scale_progress)
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -113,6 +124,16 @@ func touch_draw() -> void:
 	$Note/CenterDot.add_child(note_center_outline)
 	var note_center_dot = circle(note_color_outer, 5, 2, 16)
 	$Note/CenterDot.add_child(note_center_dot)
+	
+	# Judge outline
+	var outline_size = 25
+	var judge_outline = $Note/JudgeOutline/Line2D
+	judge_outline.clear_points()
+	for i in range(4):
+		judge_outline.add_point(Vector2(outline_size, outline_size - 8).rotated(i * TAU / 4))
+		judge_outline.add_point(Vector2(outline_size - 2, outline_size - 2).rotated(i * TAU / 4))
+		judge_outline.add_point(Vector2(outline_size - 8, outline_size).rotated(i * TAU / 4))
+
 	
 	# 4 Segments and their pathing
 	for i in range(4):
@@ -211,13 +232,16 @@ func touch_star_draw() -> void:
 		note_path.curve = new_curve
 	timeline_object_draw()
 
-func slider_draw() -> void:
+func slider_draw(both: bool = slider_both) -> void:
+	slider_both = both
 	for node in $Sliders.get_children():
 		node.queue_free()
-		for slider_args in sliders: # make sliders
-			if sliders.size() > 1 or slider_both:
-				slider_args["slider_property_both"] = true
-			create_slider(slider_args)
+	for slider_args in sliders: # make sliders
+		if sliders.size() > 1 or both:
+			slider_args["slider_property_both"] = true
+		else:
+			slider_args["slider_property_both"] = false
+		create_slider(slider_args)
 
 func timeline_object_draw() -> void:
 	if !note_property_star:

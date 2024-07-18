@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cmbnm81hqjj7w"]
+[gd_scene load_steps=15 format=3 uid="uid://cmbnm81hqjj7w"]
 
 [ext_resource type="Script" path="res://chart_editor.gd" id="1_0e0hw"]
 [ext_resource type="Texture2D" uid="uid://bt5o0b8qyb3wd" path="res://note detail stuffs/tap.png" id="2_3jjh2"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://d0c2d5yiag0qj" path="res://note detail stuffs/frame_yellow.png" id="4_l8ibe"]
 [ext_resource type="Texture2D" uid="uid://dtp6uksbnuglt" path="res://note detail stuffs/hold.png" id="5_0yoip"]
 [ext_resource type="Texture2D" uid="uid://bv7e1bkhhnyua" path="res://note detail stuffs/slider.png" id="6_tnwyh"]
+[ext_resource type="PackedScene" uid="uid://bpr58vstropk0" path="res://note detail stuffs/effect_map.tscn" id="10_2cdv0"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_dhqh1"]
 animations = [{
@@ -64,6 +65,13 @@ width = 3.0
 
 [node name="ChartPreviewArea" parent="ChartPreview" instance=ExtResource("3_7ko7q")]
 position = Vector2(425, 250)
+
+[node name="FPS" type="Label" parent="ChartPreview"]
+offset_left = 1073.0
+offset_right = 1149.0
+offset_bottom = 36.0
+text = "FPS: 60"
+horizontal_alignment = 2
 
 [node name="Timeline" type="Node2D" parent="."]
 
@@ -540,6 +548,9 @@ width = 2.0
 
 [node name="Polygon2D" type="Polygon2D" parent="TimelinePointer/Pointer"]
 polygon = PackedVector2Array(230, 513, 250, 513, 240, 530)
+
+[node name="EffectMap" parent="." instance=ExtResource("10_2cdv0")]
+position = Vector2(425, 250)
 
 [node name="Notes" type="Node2D" parent="."]
 

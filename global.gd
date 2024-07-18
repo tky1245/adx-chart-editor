@@ -55,9 +55,9 @@ const note_colors: Dictionary = {
 	"star_outer_base" = Color.SKY_BLUE,
 	"star_outer_both" = Color.LIGHT_GOLDENROD,
 	"star_outer_break" = Color.LIGHT_SALMON,
-	"star_highlight_ex_base" = Color(Color.SKY_BLUE, 0.7),
+	"star_highlight_ex_base" = Color(Color.LIGHT_BLUE, 0.6),
 	"star_highlight_ex_both" = Color(Color.YELLOW, 0.4),
-	"star_highlight_ex_break" = Color(Color.YELLOW, 0.4),
+	"star_highlight_ex_break" = Color(Color.ORANGE_RED, 0.4),
 	"star_indicator_base" = Color.SKY_BLUE,
 	"star_indicator_both" = Color.YELLOW,
 	"star_indicator_break" = Color.ORANGE_RED,
@@ -107,6 +107,7 @@ func _ready():
 	# android stuffs
 	root_folder = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP)
 	if OS.has_feature("android"):
+		OS.request_permissions()
 		CHART_STORAGE_PATH = OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP) + "/ADXChartViewer/Charts"
 		var dir = DirAccess.open(OS.get_system_dir(OS.SYSTEM_DIR_DESKTOP))
 		dir.make_dir("ADXChartViewer")

@@ -10,6 +10,7 @@ script = ExtResource("1_y3c0u")
 [node name="Sliders" type="Node2D" parent="."]
 
 [node name="Note" type="Node2D" parent="."]
+visible = false
 
 [node name="Segment0" type="Node2D" parent="Note"]
 
@@ -47,6 +48,12 @@ curve = SubResource("Curve2D_2i1nq")
 [node name="PathFollow2D" type="PathFollow2D" parent="Note/Segment4/Path2D"]
 
 [node name="CenterDot" type="Node2D" parent="Note"]
+
+[node name="JudgeOutline" type="Node2D" parent="Note"]
+
+[node name="Line2D" type="Line2D" parent="Note/JudgeOutline"]
+closed = true
+width = 4.0
 
 [node name="SelectedHighlight" type="Line2D" parent="Note"]
 closed = true

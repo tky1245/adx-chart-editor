@@ -8,6 +8,7 @@ script = ExtResource("1_yb7pe")
 [node name="Sliders" type="Node2D" parent="."]
 
 [node name="Note" type="Node2D" parent="."]
+visible = false
 
 [node name="SelectedHighlight" type="Line2D" parent="Note"]
 closed = true

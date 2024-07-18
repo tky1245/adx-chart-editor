@@ -1,0 +1,100 @@
+[gd_scene load_steps=2 format=3 uid="uid://bel102k2aryst"]
+
+[sub_resource type="GDScript" id="GDScript_0sxs0"]
+script/source = "extends Node2D
+var explosion_fade_progress: float = 0
+var outer_star_move_progress: float = 0
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	touch_hit_trigger()
+
+
+func touch_hit_trigger():
+	var out_circle = Line2D.new()
+	out_circle.points = circle(20)
+	out_circle.default_color = Color(Color.YELLOW, 1)
+	out_circle.closed = true
+	out_circle.width = 10
+	$Explosion.add_child(out_circle)
+	var in_circle = Line2D.new()
+	in_circle.points = circle(12)
+	in_circle.default_color = Color(Color.YELLOW, 0.6)
+	in_circle.closed = true
+	in_circle.width = 12
+	$Explosion.add_child(in_circle)
+	$Explosion.scale = Vector2(0, 0)
+	for i in range(8):
+		var angle = i * TAU / 8 - TAU * 3 / 16
+		if i % 2 == 0:
+			var poly = Polygon2D.new()
+			poly.polygon = star(3)
+			poly.color = Color.YELLOW
+			poly.position = Vector2(16, 0).rotated(angle)
+			poly.rotation = angle
+			$InnerStars.add_child(poly)
+		else:
+			var line = Line2D.new()
+			line.points = star(3)
+			line.closed = true
+			line.default_color = Color.YELLOW
+			line.width = 1
+			line.position = Vector2(16, 0).rotated(angle)
+			line.rotation = angle
+			$InnerStars.add_child(line)
+	for i in range(8):
+		var angle = i * TAU / 8 - TAU * 3 / 16
+		if i % 2 == 0:
+			var line = Line2D.new()
+			line.points = star(6)
+			line.closed = true
+			line.default_color = Color.YELLOW
+			line.width = 1
+			line.position = Vector2(20, 0).rotated(angle)
+			line.rotation = angle
+			$OuterStars.add_child(line)
+		else:
+			var poly = Polygon2D.new()
+			poly.polygon = star(6)
+			poly.color = Color.YELLOW
+			poly.position = Vector2(20, 0).rotated(angle)
+			poly.rotation = angle
+			$OuterStars.add_child(poly)
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	outer_star_move_progress += delta / 0.2
+	for node in $Explosion.get_children():
+		node.self_modulate.a = 1 - pow(outer_star_move_progress, 2)
+	$Explosion.scale += Vector2(delta / 0.17, delta / 0.17)
+	for i in range(8):
+		var angle = i * TAU / 8 - TAU * 3 / 16
+		var node = $OuterStars.get_child(i)
+		if outer_star_move_progress < 1:
+			node.position = Vector2(20 + 15 * (outer_star_move_progress), 0).rotated(angle)
+	$InnerStars.self_modulate.a -= delta / 0.2
+	$OuterStars.self_modulate.a -= delta / 0.2
+	if $OuterStars.self_modulate.a <= 0:
+		queue_free()
+
+func star(size: float) -> PackedVector2Array:
+	var poly: PackedVector2Array = []
+	for i in range(4):
+		poly.append(Vector2(size, 0).rotated(i * TAU / 4))
+		poly.append(Vector2(0.4 * size, 0.4 * size).rotated(i * TAU / 4))
+	return poly
+
+func circle(size: float) -> PackedVector2Array:
+	var poly: PackedVector2Array = []
+	for i in range(32):
+		poly.append(Vector2(size, 0) * Transform2D(i * TAU / 32, Vector2(0, 0)))
+	return poly
+"
+
+[node name="TouchHitEffect" type="Node2D"]
+script = SubResource("GDScript_0sxs0")
+
+[node name="Explosion" type="Node2D" parent="."]
+
+[node name="InnerStars" type="Node2D" parent="."]
+
+[node name="OuterStars" type="Node2D" parent="."]

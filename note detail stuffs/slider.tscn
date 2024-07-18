@@ -6,9 +6,12 @@
 script = ExtResource("1_u2yxk")
 
 [node name="SliderArrows" type="Node2D" parent="."]
+visible = false
 
 [node name="SliderSegments" type="Node2D" parent="."]
+visible = false
 
 [node name="SelectedHighlight" type="Node2D" parent="."]
+visible = false
 
 [node name="TimelineIndicator" type="Node2D" parent="."]

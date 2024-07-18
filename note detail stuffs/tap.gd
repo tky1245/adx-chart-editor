@@ -16,6 +16,7 @@ var slider_both: bool = false
 var delay_ticks: int = 0 # 128ths per tick
 
 var selected: bool = false
+signal effect_trigger
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
@@ -36,6 +37,17 @@ func note_render(current_time: float) -> void:
 			$Note.visible = false
 			scale_progress = 0
 			path_progress = 0
+		elif current_time > judge_time:
+			if $Note.visible:
+				if !note_property_break:
+					effect_trigger.emit("tap_hit", note_position)
+				else:
+					effect_trigger.emit("break_hit", note_position)
+				if note_property_firework:
+					effect_trigger.emit("firework", note_position)
+			$Note.visible = false
+			scale_progress = 1
+			path_progress = 1
 		elif current_time <= move_time:
 			$Note.visible = true
 			scale_progress = (current_time - intro_time) / (move_time - intro_time)
@@ -44,25 +56,20 @@ func note_render(current_time: float) -> void:
 			$Note.visible = true
 			scale_progress = 1
 			path_progress = (current_time - move_time) / (judge_time - move_time)
-		else:
-			$Note.visible = false
-			scale_progress = 1
-			path_progress = 1
-		
+
 		var note_pathfollow = $Note/Path2D/PathFollow2D
-		
-		for node in note_pathfollow.get_children():
-			node.scale = Vector2(scale_progress, scale_progress)
-			node.self_modulate.a = scale_progress
-			
 		note_pathfollow.progress_ratio = path_progress
-		
-		if note_property_star and note_star_spinning:
+		if $Note.visible:
 			for node in note_pathfollow.get_children():
-				node.rotation = current_time * TAU * 4 #TODO probably need to set a correct speed
-		else:
-			for node in note_pathfollow.get_children():
-				node.rotation = 0
+				node.scale = Vector2(scale_progress, scale_progress)
+				node.self_modulate.a = scale_progress
+			
+			if note_property_star and note_star_spinning:
+				for node in note_pathfollow.get_children():
+					node.rotation = current_time * TAU * 4 #TODO probably need to set a correct speed
+			else:
+				for node in note_pathfollow.get_children():
+					node.rotation = 0
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -143,15 +150,15 @@ func star_draw() -> void:
 			node.queue_free()
 	# Star tap
 	if note_property_ex:
-		var note_highlight = star(note_color_highlight_ex, 5, 26)
+		var note_highlight = star(note_color_highlight_ex, 5, 27)
 		note_pathfollow.add_child(note_highlight)
 	var note_star_inner = star(note_color_inner, 4, 15)
 	note_pathfollow.add_child(note_star_inner)
-	var note_star_outer = star(note_color_outer, 1, 19)
+	var note_star_outer = star(note_color_outer, 2, 19.5)
 	note_pathfollow.add_child(note_star_outer)
 	var note_outline_in = star(Color.WHITE, 1, 10)
 	note_pathfollow.add_child(note_outline_in)
-	var note_outline_out = star(Color.WHITE, 1, 22)
+	var note_outline_out = star(Color.WHITE, 1.2, 22)
 	note_pathfollow.add_child(note_outline_out)
 	var note_outline_out_2 = star(Color.BLACK, 1, 24)
 	note_pathfollow.add_child(note_outline_out_2)
@@ -161,12 +168,15 @@ func star_draw() -> void:
 	
 	timeline_object_draw()
 
-func slider_draw() -> void:
+func slider_draw(both: bool = slider_both) -> void:
+	slider_both = both
 	for node in $Sliders.get_children():
-		node.queue_free()
+		node.free()
 	for slider_args in sliders: # make sliders
-		if sliders.size() > 1 or slider_both:
+		if sliders.size() > 1 or both:
 			slider_args["slider_property_both"] = true
+		else:
+			slider_args["slider_property_both"] = false
 		create_slider(slider_args)
 
 func timeline_object_draw() -> void:

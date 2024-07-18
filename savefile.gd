@@ -86,9 +86,9 @@ func maidata_to_chart(data: String) -> Dictionary:
 		remaining_string.replace(" ", "") # space removal
 		
 		var string_splited_by_beat = remaining_string.split(",", true)
+		var ongoing_bpm: float = 0.0 # used to calculate slider delay
 		for beat in string_splited_by_beat.size():
 			var string_splited_by_tick = string_splited_by_beat[beat].split("`", true)
-			var ongoing_bpm: float = 0.0 # used to calculate slider delay
 			for delay_ticks in string_splited_by_tick.size():
 				for note_string in string_splited_by_tick[delay_ticks].split("/", true):
 					var current_bpm: float
@@ -285,8 +285,8 @@ func maidata_to_chart(data: String) -> Dictionary:
 									var duration_y = int(slider_duration_string.split("#")[1].split(":")[0])
 									var bpm_ratio = float_to_fraction(ongoing_bpm/custom_bpm)
 									slider_args["delay_arr"] = [float(bpm_ratio[0]), int(4 * bpm_ratio[1])]
-									slider_args["duration_arr"] = [duration_x, duration_y]
-								elif slider_duration_string.contains("#") and not slider_duration_string.contains(":"): # custom bpm abs duration
+									slider_args["duration_arr"] = [float(duration_x * bpm_ratio[0]), int(duration_y * bpm_ratio[1])]
+								elif slider_duration_string.contains("#") and !slider_duration_string.contains(":"): # custom bpm abs duration
 									var custom_bpm = float(slider_duration_string.split("#")[0])
 									var abs_duration = float(slider_duration_string.split("#")[1])
 									var bpm_ratio = float_to_fraction(ongoing_bpm/custom_bpm)
@@ -421,9 +421,11 @@ func chart_to_maidata(data: Dictionary) -> String:
 							if slider.get("delay_arr") == [1.0, 4] and slider.get("duration_arr")[1] != 0: # default
 								note_string += "[" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr") != [1.0, 4] and slider.get("duration_arr")[1] != 0: # fake bpm change
-								note_string += "[" + str(note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1]) / 0.25) + "#" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
+								var custom_bpm = note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1] * 4)
+								note_string += "[" + str(custom_bpm) + "#" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr")[1] != 0 and slider.get("duration_arr")[1] == 0: # custom bpm + abs duration
-								note_string += "["+ str(note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1]) / 0.25) + "#" + str(slider.get("duration_arr")[0]) + "]"
+								var custom_bpm = note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1] * 4)
+								note_string += "["+ str(custom_bpm) + "#" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr")[1] == 0 and slider.get("duration_arr")[1] == 0: # abs delay abs duration
 								note_string += "[" + str(slider.get("delay_arr")[0]) + "##" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr")[1] == 0 and slider.get("duration_arr")[1] != 0: # abs delay, beat divisor duration; not supported in simai

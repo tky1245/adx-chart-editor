@@ -23,7 +23,7 @@ Savefile="*res://savefile.gd"
 
 [display]
 
-window/stretch/mode="viewport"
+window/stretch/mode="canvas_items"
 
 [dotnet]
 

@@ -92,7 +92,9 @@ func _on_delay_y_text_changed(new_text):
 func _on_add_slider_shape_pressed():
 	# temporary set position to avoid zero length
 	var num = int(note.sliders[slider_index][\"slider_shape_arr\"].back()[1].right(1))
-	num = num + 1 if num != 8 else 1
+	num = num + 4 
+	if num < 1:
+		num += 8
 	note.sliders[slider_index][\"slider_shape_arr\"].append([\"-\", str(num), 0.0])
 	note.slider_draw()
 	sync_details()

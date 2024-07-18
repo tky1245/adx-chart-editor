@@ -37,6 +37,13 @@ func slider_render(current_time: float) -> void:
 		slider_progress = 0
 		transparency_value = initial_transparency
 		scale_value = initial_scale
+	elif current_time > slide_end_time: # Not visible too, slide ends
+		
+		$SliderArrows.visible = false
+		$SliderSegments.visible = false
+		slider_progress = 1
+		transparency_value = target_transparency
+		scale_value = target_scale
 	elif current_time <= slide_head_hit_time: # star appear until star hits
 		$SliderArrows.visible = true
 		var transparency = (current_time - slide_intro_time - Global.note_speed_in_time * 0.5) / (Global.note_speed_in_time * 0.5) 
@@ -67,52 +74,49 @@ func slider_render(current_time: float) -> void:
 		slider_progress = (current_time - Global.timeline_beats[beat] - delay) / duration
 		transparency_value = target_transparency
 		scale_value = target_scale
-	else: # Slide ends
-		$SliderArrows.visible = false
-		$SliderSegments.visible = false
-		slider_progress = 1
-		transparency_value = target_transparency
-		scale_value = target_scale
 	
-	for path_holder in $SliderSegments.get_children():
-		for path in path_holder.get_children():
-			for path_follow in path.get_children():
-				for node in path_follow.get_children():
-					node.scale = Vector2(scale_value, scale_value)
-	set_node_images_transparency($SliderSegments, transparency_value)
+	if $SliderSegments.visible:
+		for path_holder in $SliderSegments.get_children():
+			for path in path_holder.get_children():
+				for path_follow in path.get_children():
+					for node in path_follow.get_children():
+						node.scale = Vector2(scale_value, scale_value)
+		set_node_images_transparency($SliderSegments, transparency_value)
 	$SelectedHighlight.visible = selected and $SliderArrows.visible
 	
-	for arrow_path in $SliderArrows.get_children():
-		for arrow_path_follow in arrow_path.get_children():
-			for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
-				arrow.visible_toggle(slider_progress)
-			
-	var total_distance: float = 0.0
-	for length in slider_length_arr: # Calculate total distance
-		total_distance += length
-	var path_index: int = 0
-	for i in range(slider_length_arr.size()): # Move stars along the path
-		var elapsed_path_length: float = 0
-		if i != 0:
-			for j in range(i):
-				elapsed_path_length += slider_length_arr[j]
-		var current_path_length = slider_length_arr[i]
-		if current_path_length > 0:
-			var path_holder = $SliderSegments.get_child(path_index)
-			var path_progress: float
-			if slider_progress < elapsed_path_length / total_distance:
-				path_holder.visible = false
-				path_progress = 0
-			elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
-				path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
-				for path in path_holder.get_children():
-					var path_follow = path.get_child(0)
-					path_follow.progress_ratio = path_progress
-				path_holder.visible = true
-			else:
-				path_holder.visible = false
-				path_progress = 1
-			path_index += 1
+	if $SliderArrows.visible:
+		for arrow_path in $SliderArrows.get_children():
+			for arrow_path_follow in arrow_path.get_children():
+				for arrow in arrow_path_follow.get_children(): # Hide arrows when time has passed a threshold
+					arrow.visible_toggle(slider_progress)
+	
+	if $SliderSegments.visible:
+		var total_distance: float = 0.0
+		for length in slider_length_arr: # Calculate total distance
+			total_distance += length
+		var path_index: int = 0
+		for i in range(slider_length_arr.size()): # Move stars along the path
+			var elapsed_path_length: float = 0
+			if i != 0:
+				for j in range(i):
+					elapsed_path_length += slider_length_arr[j]
+			var current_path_length = slider_length_arr[i]
+			if current_path_length > 0:
+				var path_holder = $SliderSegments.get_child(path_index)
+				var path_progress: float
+				if slider_progress < elapsed_path_length / total_distance:
+					path_holder.visible = false
+					path_progress = 0
+				elif slider_progress < (elapsed_path_length + current_path_length) / total_distance:
+					path_progress = (slider_progress * total_distance - elapsed_path_length) / current_path_length
+					for path in path_holder.get_children():
+						var path_follow = path.get_child(0)
+						path_follow.progress_ratio = path_progress
+					path_holder.visible = true
+				else:
+					path_holder.visible = false
+					path_progress = 1
+				path_index += 1
 
 func initialize(parent_position: Vector2) -> void: # set up all the shape positions
 	set_position_offset(-parent_position)
@@ -249,11 +253,11 @@ func initialize(parent_position: Vector2) -> void: # set up all the shape positi
 			var path_follow = path.get_child(0)
 			var note_star_inner = star(star_color_inner, 4, 15)
 			path_follow.add_child(note_star_inner)
-			var note_star_outer = star(star_color_outer, 1, 19)
+			var note_star_outer = star(star_color_outer, 2, 19.5)
 			path_follow.add_child(note_star_outer)
 			var note_outline_in = star(Color.WHITE, 1, 10)
 			path_follow.add_child(note_outline_in)
-			var note_outline_out = star(Color.WHITE, 1, 22)
+			var note_outline_out = star(Color.WHITE, 1.2, 22)
 			path_follow.add_child(note_outline_out)
 			var note_outline_out_2 = star(Color.BLACK, 1, 24)
 			path_follow.add_child(note_outline_out_2)

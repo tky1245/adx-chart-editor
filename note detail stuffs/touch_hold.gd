@@ -17,6 +17,9 @@ var slider_both: bool = false
 var delay_ticks: int = 0
 
 var selected: bool = false
+signal effect_trigger
+
+var holding: bool = false
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
@@ -46,6 +49,18 @@ func note_render(current_time: float) -> void:
 			intro_progress = 0
 			path_progress = 0
 			hold_progress = 0
+		elif current_time > judge_end:
+			if $Note.visible:
+				if !note_property_break:
+					effect_trigger.emit("tap_hit", note_position)
+				else:
+					effect_trigger.emit("break_hit", note_position)
+				if note_property_firework:
+					effect_trigger.emit("firework", note_position)
+			$Note.visible = false
+			intro_progress = 1
+			path_progress = 1
+			hold_progress = 1
 		elif current_time <= move_time:
 			$Note.visible = true
 			intro_progress = (current_time - intro_time) / (move_time - intro_time)
@@ -61,37 +76,40 @@ func note_render(current_time: float) -> void:
 			intro_progress = 1
 			path_progress = 1
 			hold_progress = (current_time - judge_start) / duration
-		else:
-			$Note.visible = false
-			intro_progress = 1
-			path_progress = 1
-			hold_progress = 1
 		
-		for i in range(4):
-			var note_pathfollow = $Note/Segments.get_child(i).get_child(0).get_child(0)
-			for node in note_pathfollow.get_children():
-				node.self_modulate.a = intro_progress	
-			note_pathfollow.progress_ratio = path_progress
-		for node in $Note/CenterDot.get_children():
-			node.self_modulate.a = intro_progress
+		if !holding and current_time > judge_start and current_time <= judge_end:
+			holding = true
+			effect_trigger.emit("hold_start", note_position)
+		elif holding and (current_time <= judge_start or current_time > judge_end):
+			holding = false
+			effect_trigger.emit("hold_end", note_position)
 		
-		if hold_progress == 0.0:
-			for node in $Note/ProgressCircle.get_children():
-				node.visible = false
-		else:
+		if $Note.visible:
 			for i in range(4):
-				var progress_circle_polygon = $Note/ProgressCircle.get_child(i)
-				var n = int(hold_progress * 4)
-				progress_circle_polygon.self_modulate.a = intro_progress
-				if i < n:
-					progress_circle_polygon.polygon = polygon
-					progress_circle_polygon.visible = true
-				elif i == n:
-					progress_circle_polygon.visible = true
-					var angle = TAU / 4 - (hold_progress * 4 - n) * TAU / 4
-					progress_circle_polygon.polygon = reshape(polygon, angle, )
-				else:
-					progress_circle_polygon.visible = false
+				var note_pathfollow = $Note/Segments.get_child(i).get_child(0).get_child(0)
+				for node in note_pathfollow.get_children():
+					node.self_modulate.a = intro_progress	
+				note_pathfollow.progress_ratio = path_progress
+			for node in $Note/CenterDot.get_children():
+				node.self_modulate.a = intro_progress
+			
+			if hold_progress == 0.0:
+				for node in $Note/ProgressCircle.get_children():
+					node.visible = false
+			else:
+				for i in range(4):
+					var progress_circle_polygon = $Note/ProgressCircle.get_child(i)
+					var n = int(hold_progress * 4)
+					progress_circle_polygon.self_modulate.a = intro_progress
+					if i < n:
+						progress_circle_polygon.polygon = polygon
+						progress_circle_polygon.visible = true
+					elif i == n:
+						progress_circle_polygon.visible = true
+						var angle = TAU / 4 - (hold_progress * 4 - n) * TAU / 4
+						progress_circle_polygon.polygon = reshape(polygon, angle, )
+					else:
+						progress_circle_polygon.visible = false
 		
 		# Selected Highlight
 		var new_polygon: PackedVector2Array = []
@@ -111,7 +129,6 @@ func initialize() -> void:
 	slider_draw()
 	set_selected()
 
-
 func set_duration(arr: Array = duration_arr) -> void:
 	duration_arr = arr
 	if duration_arr[1] == 0:
@@ -123,6 +140,8 @@ func set_duration(arr: Array = duration_arr) -> void:
 func set_note_position(pos: String = note_position) -> void:
 	note_position = pos
 	$Note.position = Global.preview_center + Global.touch_positions[note_position]
+	$Sliders.position = $Note.position
+	$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
 	for slider in $Sliders.get_children():
 		slider.initialize($Note.position - Global.preview_center)
 
@@ -194,7 +213,7 @@ func touch_hold_draw() -> void:
 	timeline_object_draw()
 	$Note/SelectedHighlight.default_color = Color.LIME
 
-func slider_draw() -> void:
+func slider_draw(both: bool = false) -> void:
 	for node in $Sliders.get_children():
 		node.queue_free()
 		for slider_args in sliders: # make sliders

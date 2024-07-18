@@ -10,6 +10,7 @@ script = ExtResource("1_c71yu")
 [node name="Sliders" type="Node2D" parent="."]
 
 [node name="Note" type="Node2D" parent="."]
+visible = false
 
 [node name="ProgressCircle" type="Node2D" parent="Note"]
 

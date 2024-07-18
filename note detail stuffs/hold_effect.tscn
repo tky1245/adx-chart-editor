@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3 uid="uid://cx4xdkk8uh3lv"]
+
+[sub_resource type="GDScript" id="GDScript_51amm"]
+script/source = "extends Node2D
+
+var effect_color = Color.YELLOW
+var spawn_timer: float = 0
+
+func _process(delta):
+	spawn_timer += delta
+	if spawn_timer > 0.07:
+		spawn_timer -= 0.1
+		var new_line = Line2D.new()
+		var radius = 35
+		for i in range(32):
+			new_line.add_point(Vector2(radius, 0).rotated(i * TAU / 32))
+		new_line.closed = true
+		new_line.default_color = effect_color
+		new_line.width = 3
+		new_line.scale = Vector2(0.5, 0.5)
+		add_child(new_line)
+	
+	for line in get_children():
+		if line.scale.x < 1:
+			line.scale = line.scale + Vector2(delta / 0.15, delta / 0.15)
+		elif line.self_modulate.a > 1:
+			line.self_modulate.a -= delta / 0.05
+		else:
+			line.queue_free()
+"
+
+[node name="HoldEffect" type="Node2D"]
+script = SubResource("GDScript_51amm")

@@ -17,6 +17,9 @@ var slider_both: bool = false
 var delay_ticks: int = 0
 
 var selected: bool = false
+signal effect_trigger
+
+var holding: bool = false
 
 func preview_render(current_time: float) -> void:
 	note_render(current_time)
@@ -44,16 +47,23 @@ func note_render(current_time: float) -> void:
 			intro_progress = 0
 			start_progress = 0
 			end_progress = 0
+		elif current_time > judge_time_end_point:
+			if $Note.visible:
+				if !note_property_break:
+					effect_trigger.emit("tap_hit", note_position)
+				else:
+					effect_trigger.emit("break_hit", note_position)
+				if note_property_firework:
+					effect_trigger.emit("firework", note_position)
+			$Note.visible = false
+			intro_progress = 1
+			start_progress = 1
+			end_progress = 1
 		elif current_time <= move_time_start_point:
 			$Note.visible = true
 			intro_progress = (current_time - intro_time) / (move_time_start_point - intro_time)
 			start_progress = 0
 			end_progress = 0
-		elif current_time > judge_time_end_point:
-			$Note.visible = false
-			intro_progress = 1
-			start_progress = 1
-			end_progress = 1
 		else:
 			$Note.visible = true
 			intro_progress = 1
@@ -66,15 +76,30 @@ func note_render(current_time: float) -> void:
 			elif current_time < judge_time_end_point:
 				end_progress = (current_time - move_time_end_point) / (judge_time_end_point - move_time_end_point)
 			else:
+				
 				end_progress = 1
 		
-		var start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
-		var end_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * end_progress
-		for line in $Note.get_children():
+		if !holding and current_time > judge_time_start_point and current_time <= judge_time_end_point:
+			holding = true
+			effect_trigger.emit("hold_start", note_position)
+		elif holding and (current_time <= judge_time_start_point or current_time > judge_time_end_point):
+			holding = false
+			effect_trigger.emit("hold_end", note_position)
+		
+		if $Note.visible:
+			var start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
+			var end_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * end_progress
+			for line in $Note.get_children():
 				var radius = 18 if line.name != "SelectedHighlight" else 32
 				hexagon_shape(start_point, end_point, radius, line)
 				line.self_modulate.a = intro_progress
 				line.scale = Vector2(intro_progress, intro_progress)
+		else:
+			var start_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * start_progress
+			var end_point = Vector2(sin(angle), -cos(angle)) * (Global.preview_radius - Global.initial_note_distance) * end_progress
+			for line in $Note.get_children():
+				if line.name == "SelectedHighlight":
+					hexagon_shape(start_point, end_point, 32, line)
 
 func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
@@ -134,7 +159,7 @@ func tap_hold_draw() -> void:
 	
 	timeline_object_draw()
 
-func slider_draw() -> void:
+func slider_draw(both: bool = false) -> void:
 	for node in $Sliders.get_children():
 		node.queue_free()
 		for slider_args in sliders: # make sliders
@@ -175,6 +200,8 @@ func set_note_position(pos: String = note_position) -> void:
 
 	var angle = (int(note_position) * 2 - 1) * TAU / 16
 	$Note.position = Global.preview_center + Global.initial_note_distance * Vector2(sin(angle), -cos(angle))
+	$Sliders.position = $Note.position
+	$TimelineIndicator.position = Vector2(0, 15 * int(note_position) + 510)
 	for slider in $Sliders.get_children():
 		slider.initialize($Note.position - Global.preview_center)
 	
@@ -217,6 +244,7 @@ func hexagon_shape(point_1: Vector2, point_2: Vector2, radius: float = 18, hexag
 		hexagon.set_point_position(4, point_2 + Vector2(radius, 0).rotated(angle))
 		hexagon.set_point_position(5, point_2 + Vector2(radius, 0).rotated(angle + TAU / 6))
 		return hexagon
+
 
 func create_slider(slider_args: Dictionary) -> void:
 	pass

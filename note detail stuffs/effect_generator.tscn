@@ -1,0 +1,67 @@
+[gd_scene load_steps=2 format=3 uid="uid://dtblwmv5offur"]
+
+[sub_resource type="GDScript" id="GDScript_lqvuu"]
+script/source = "extends Node2D
+var note_position: String
+var hold_count: int = 0
+
+func _ready():
+	$TapHit.position = global_position
+	$Hold.position = global_position
+	$TouchHit.position = global_position
+
+func tap_hit():
+	for node in $TapHit.get_children():
+		node.free()
+	var effect = preload(\"res://note detail stuffs/tap_hit_effect.tscn\")
+	var node = effect.instantiate()
+	$TapHit.add_child(node)
+
+func touch_hit():
+	for node in $TouchHit.get_children():
+		node.free()
+	var effect = preload(\"res://note detail stuffs/touch_hit_effect.tscn\")
+	var node = effect.instantiate()
+	$TouchHit.add_child(node)
+
+func hold_start():
+	if hold_count == 0:
+		var effect = preload(\"res://note detail stuffs/hold_effect.tscn\")
+		var node = effect.instantiate()
+		$Hold.add_child(node)
+	hold_count += 1
+
+func hold_end():
+	hold_count -= 1
+	if hold_count == 0:
+		for node in $Hold.get_children():
+			node.free()
+
+func firework():
+	for node in $Firework.get_children():
+		node.free()
+	var effect = preload(\"res://note detail stuffs/firework.tscn\")
+	var node = effect.instantiate()
+	$Firework.add_child(node)
+
+func break_hit():
+	for node in $TapHit.get_children():
+		node.free()
+	var effect = preload(\"res://note detail stuffs/break_hit_effect.tscn\")
+	var node = effect.instantiate()
+	$TapHit.add_child(node)
+"
+
+[node name="EffectGenerator" type="Node2D"]
+script = SubResource("GDScript_lqvuu")
+
+[node name="TapHit" type="Node2D" parent="."]
+top_level = true
+
+[node name="Hold" type="Node2D" parent="."]
+top_level = true
+
+[node name="TouchHit" type="Node2D" parent="."]
+top_level = true
+
+[node name="Firework" type="Node2D" parent="."]

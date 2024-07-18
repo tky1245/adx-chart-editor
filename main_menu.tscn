@@ -1,6 +1,47 @@
-[gd_scene load_steps=2 format=3 uid="uid://cshhy4ff5xcv6"]
+[gd_scene load_steps=5 format=3 uid="uid://cshhy4ff5xcv6"]
 
 [ext_resource type="Script" path="res://main_menu.gd" id="1_n2763"]
+
+[sub_resource type="GDScript" id="GDScript_p2j8w"]
+script/source = "extends AcceptDialog
+
+func _on_canceled():
+	visible = false
+
+
+func _on_confirmed():
+	visible = false
+"
+
+[sub_resource type="GDScript" id="GDScript_2bn68"]
+script/source = "extends ConfirmationDialog
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	pass # Replace with function body.
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	pass
+
+
+func _on_canceled():
+	visible = false
+
+
+func _on_close_requested():
+	visible = false
+"
+
+[sub_resource type="GDScript" id="GDScript_v75fk"]
+script/source = "extends Window
+
+
+func _on_close_requested():
+	visible = false
+"
 
 [node name="MainMenu" type="Node2D"]
 script = ExtResource("1_n2763")
@@ -153,6 +194,60 @@ access = 2
 show_hidden_files = true
 use_native_dialog = true
 
+[node name="NoticeWindow" type="AcceptDialog" parent="."]
+title = "Notice"
+initial_position = 1
+script = SubResource("GDScript_p2j8w")
+
+[node name="Context" type="Label" parent="NoticeWindow"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 92.0
+offset_bottom = 51.0
+text = "segs"
+horizontal_alignment = 1
+
+[node name="DeleteConfirmation" type="ConfirmationDialog" parent="."]
+title = "Notice"
+initial_position = 1
+script = SubResource("GDScript_2bn68")
+
+[node name="Label" type="Label" parent="DeleteConfirmation"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 192.0
+offset_bottom = 51.0
+text = "Delete This Chart?"
+horizontal_alignment = 1
+
+[node name="RenameChart" type="Window" parent="."]
+initial_position = 1
+size = Vector2i(150, 100)
+visible = false
+script = SubResource("GDScript_v75fk")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RenameChart"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -49.0
+offset_right = 49.0
+offset_bottom = 58.0
+grow_horizontal = 2
+
+[node name="Label" type="Label" parent="RenameChart/VBoxContainer"]
+layout_mode = 2
+text = "Chart Name:"
+horizontal_alignment = 1
+
+[node name="NameField" type="LineEdit" parent="RenameChart/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="Submit" type="Button" parent="RenameChart/VBoxContainer"]
+layout_mode = 2
+text = "submit"
+
 [connection signal="pressed" from="Buttons/NewChart" to="." method="_on_new_chart_pressed"]
 [connection signal="pressed" from="Buttons/OpenChart" to="." method="_on_open_chart_pressed"]
 [connection signal="pressed" from="Buttons/ImportFromMaidata" to="." method="_on_import_from_maidata_pressed"]
@@ -166,3 +261,10 @@ use_native_dialog = true
 [connection signal="pressed" from="OpenChartSelection/VBoxContainer/Options/BoxContainer2/SelectButton" to="." method="_on_select_button_pressed"]
 [connection signal="file_selected" from="SelectMaidata" to="." method="_on_select_maidata_file_selected"]
 [connection signal="dir_selected" from="SelectMaidataAndroid" to="." method="_on_select_maidata_android_dir_selected"]
+[connection signal="canceled" from="NoticeWindow" to="NoticeWindow" method="_on_canceled"]
+[connection signal="confirmed" from="NoticeWindow" to="NoticeWindow" method="_on_confirmed"]
+[connection signal="canceled" from="DeleteConfirmation" to="DeleteConfirmation" method="_on_canceled"]
+[connection signal="close_requested" from="DeleteConfirmation" to="DeleteConfirmation" method="_on_close_requested"]
+[connection signal="confirmed" from="DeleteConfirmation" to="." method="_on_delete_confirmation_confirmed"]
+[connection signal="close_requested" from="RenameChart" to="RenameChart" method="_on_close_requested"]
+[connection signal="pressed" from="RenameChart/VBoxContainer/Submit" to="." method="_on_submit_pressed"]

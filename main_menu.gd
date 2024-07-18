@@ -123,11 +123,13 @@ func _on_select_button_pressed():
 
 
 func _on_delete_button_pressed():
-	pass # Replace with function body.
+	if open_chart_selected_chart != -1:
+		$DeleteConfirmation.visible = true
 
 
 func _on_rename_button_pressed():
-	pass # Replace with function body.
+	if open_chart_selected_chart != -1:
+		$RenameChart.visible = true
 
 
 func _on_select_maidata_file_selected(path):
@@ -147,3 +149,46 @@ func _on_import_from_maidata_android_pressed():
 func _on_select_maidata_android_dir_selected(dir):
 	Savefile.import_maidata(dir)
 	get_tree().change_scene_to_file("res://chart_editor.tscn")
+
+
+
+func _on_delete_confirmation_confirmed():
+	if open_chart_selected_chart != -1:
+		for chart_select in $OpenChartSelection/VBoxContainer/ScrollContainer/Charts.get_children():
+			if chart_select.index == open_chart_selected_chart:
+				var chart_name = chart_select.title
+				var dir = DirAccess.open(Global.CHART_STORAGE_PATH + chart_name + "/")
+				for file in dir.get_files():
+					dir.remove(file)
+				dir.remove(Global.CHART_STORAGE_PATH + chart_name)
+				$NoticeWindow/Context.text = "Chart Removed"
+				$NoticeWindow/Context.visible = true
+				chart_dir_load()
+	$DeleteConfirmation.visible = false
+
+func _on_submit_pressed(): # rename
+	var new_name = $RenameChart/VBoxContainer/NameField.text
+	if open_chart_selected_chart != -1:
+		for chart_select in $OpenChartSelection/VBoxContainer/ScrollContainer/Charts.get_children():
+			if chart_select.index == open_chart_selected_chart:
+				var old_chart_name = chart_select.title
+				
+				var file = FileAccess.open(Global.CHART_STORAGE_PATH + old_chart_name + "/chart.mai", FileAccess.READ_WRITE)
+				var json_string = file.get_line()
+				var json = JSON.new()
+				var error = json.parse(json_string)
+				if error == OK:
+					var data_received = json.data
+					if typeof(data_received) == TYPE_DICTIONARY:
+						data_received["title"] = new_name
+						var new_save = JSON.stringify(data_received)
+						file.store_line(new_save)
+						file.close()
+						var dir = DirAccess.open(Global.CHART_STORAGE_PATH)
+						dir.rename(Global.CHART_STORAGE_PATH + old_chart_name + "/", Global.CHART_STORAGE_PATH + new_name + "/")
+						$NoticeWindow/Context.text = "Chart Renamed"
+						$NoticeWindow/Context.visible = true
+						chart_dir_load()
+					else:
+						print("Wrong file contents")
+	$RenameChart.visible = false

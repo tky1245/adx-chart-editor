@@ -1,0 +1,148 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3ov0fl258lii"]
+
+[sub_resource type="GDScript" id="GDScript_iybq0"]
+script/source = "extends Node2D
+const strip_count: int = 15
+var strip_spawn_timer: float = -0.1
+var strip_color_change_timer: float = 0
+var strip_shade_spawn_timer: float = 0
+# Called when the node enters the scene tree for the first time.
+func _ready():
+	firework_trigger()
+	
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta):
+	strip_spawn_timer += delta
+	strip_color_change_timer += delta
+	strip_shade_spawn_timer += delta
+	for i in range(2):
+		var explosion = $Explosion.get_child(i)
+		var explosion_aftereffect = $ExplosionAfterEffects.get_child(i)
+		if i == 0:
+			explosion.scale += Vector2(1, 1) * (delta/2)
+			explosion.self_modulate.a -= delta / 0.25
+			explosion_aftereffect.scale += Vector2(1, 1) * delta/2 /3.5
+			explosion_aftereffect.color.a -= delta / 2
+		elif i == 1:
+			explosion.scale += Vector2(1, 1) * (delta/2)
+			explosion.self_modulate.a -= delta / 0.15
+			explosion_aftereffect.scale += Vector2(1, 1) * delta/2 /1.7
+			explosion_aftereffect.color.a -= delta
+	
+	for strip in $Strips.get_children():
+		if strip_spawn_timer > 0 and strip_spawn_timer <= 0.6 and strip.self_modulate.a < 0.5:
+			strip.self_modulate.a = strip.self_modulate.a + delta / 0.1
+			
+		if strip_spawn_timer > 0.8 and strip.self_modulate.a > 0:
+			strip.self_modulate.a = max(strip.self_modulate.a - delta / 0.2, 0)
+		for shade in strip.get_children():
+			shade.self_modulate.a = strip.self_modulate.a
+	
+	if strip_spawn_timer > 0 and strip_spawn_timer <= 0.8 and $StripLights.get_child(0).self_modulate.a < 0.2:
+		$StripLights.get_child(0).self_modulate.a += delta / 0.2
+	elif strip_spawn_timer > 0.8:
+		$StripLights.get_child(0).self_modulate.a -= delta / 0.5
+	
+	if strip_spawn_timer > 1.02:
+		queue_free()
+		
+	$Strips.rotation += delta
+	if strip_color_change_timer > 0.17:
+		strip_color_change_timer -= 0.17
+		$Strips.rotation += TAU / 15
+	if strip_shade_spawn_timer > 0.6:
+		strip_shade_spawn_timer -= 0.6
+		for strip in $Strips.get_children():
+			strip.add_child(shade_polygon())
+	for strip in $Strips.get_children():
+		for shade in strip.get_children():
+			shade_resize(shade, delta*128)
+	
+	
+		
+
+func firework_trigger():
+	var explosion_1 = rainbow_circle(3.5)
+	$Explosion.add_child(explosion_1)
+	var explosion_2 = rainbow_circle(1.7)
+	$Explosion.add_child(explosion_2)
+	var explosion_aftereffect_1 = white_circle(3.5*32)
+	$ExplosionAfterEffects.add_child(explosion_aftereffect_1)
+	var explosion_aftereffect_2 = white_circle(1.7*32)
+	$ExplosionAfterEffects.add_child(explosion_aftereffect_2)
+	for i in range(15):
+		var color_arr = [Color.YELLOW_GREEN, Color.YELLOW, Color.ORANGE_RED, Color.HOT_PINK, Color.DEEP_SKY_BLUE]
+		var new_strip = Polygon2D.new()
+		var strip_poly: PackedVector2Array = []
+		strip_poly.append(Vector2(0, 0))
+		for j in range(5):
+			strip_poly.append(Vector2(250, 0).rotated(j*TAU/5/15/2))
+		new_strip.polygon = strip_poly
+		new_strip.color = color_arr[i%5]
+		$Strips.add_child(new_strip)
+		new_strip.add_child(shade_polygon())
+		var second_shade = shade_polygon()
+		new_strip.add_child(second_shade)
+		shade_resize(second_shade, 100)
+		new_strip.rotation = i*TAU/15
+		new_strip.self_modulate.a = 0
+	var strip_light = white_circle(250)
+	strip_light.self_modulate.a = 0
+	$StripLights.add_child(strip_light)
+
+
+func rainbow_circle(size: float) -> Sprite2D:
+	var new_sprite = Sprite2D.new()
+	new_sprite.texture = preload(\"res://note detail stuffs/rainbow_sphere.tres\")
+	new_sprite.scale = Vector2(size, size)
+	return new_sprite
+
+func white_circle(size) -> Polygon2D:
+	var new_poly = Polygon2D.new()
+	var shape: PackedVector2Array = []
+	for i in range(32):
+		shape.append(Vector2(size, 0).rotated(i*TAU/32))
+	new_poly.polygon = shape
+	new_poly.color = Color(Color.LIGHT_YELLOW, 0.3)
+	return new_poly
+
+func shade_polygon() -> Polygon2D:
+	var shade = Polygon2D.new()
+	var shade_poly: PackedVector2Array = []
+	for j in range(5):
+		shade_poly.append(Vector2(60, 0).rotated(j*TAU/5/15/2))
+	for j in range(5):
+		shade_poly.append(Vector2(10, 0).rotated((4-j)*TAU/5/15/2))
+	shade.polygon = shade_poly
+	shade.color = Color(Color.BLACK, 0.3)
+	return shade
+
+func shade_resize(shade: Polygon2D, length: float, limit: float = 250) -> void:
+	var poly: PackedVector2Array = []
+	for point in shade.polygon:
+		var distance = point.distance_to(Vector2.ZERO)
+		var bearing = atan2(point.y, point.x)
+		poly.append(Vector2(min(distance + length, limit), 0).rotated(bearing))
+	if poly[0] == poly[poly.size() - 1]:
+		shade.queue_free()
+	else:
+		shade.polygon = poly
+# generate 2 explosion balls 1 big then 1 small
+
+# generate the rainbow wheel thingy
+# apply gradual color changes to the wheel over time
+# color change (step) once in a while
+"
+
+[node name="Firework" type="Node2D"]
+script = SubResource("GDScript_iybq0")
+
+[node name="StripLights" type="Node2D" parent="."]
+
+[node name="Strips" type="Node2D" parent="."]
+
+[node name="ExplosionAfterEffects" type="Node2D" parent="."]
+
+[node name="Explosion" type="Node2D" parent="."]

@@ -10,6 +10,7 @@ script = ExtResource("1_ra24b")
 [node name="Sliders" type="Node2D" parent="."]
 
 [node name="Note" type="Node2D" parent="."]
+visible = false
 
 [node name="Path2D" type="Path2D" parent="Note"]
 curve = SubResource("Curve2D_env6b")
