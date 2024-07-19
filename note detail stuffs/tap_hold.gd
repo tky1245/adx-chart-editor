@@ -21,11 +21,11 @@ signal effect_trigger
 
 var holding: bool = false
 
-func preview_render(current_time: float) -> void:
+func preview_render(current_time: float = Global.current_time) -> void:
 	note_render(current_time)
 	slider_render(current_time)
 
-func note_render(current_time: float) -> void:
+func note_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var angle = (int(note_position) * 2 - 1) * TAU / 16
 	
@@ -101,7 +101,7 @@ func note_render(current_time: float) -> void:
 				if line.name == "SelectedHighlight":
 					hexagon_shape(start_point, end_point, 32, line)
 
-func slider_render(current_time: float) -> void:
+func slider_render(current_time: float = Global.current_time) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 

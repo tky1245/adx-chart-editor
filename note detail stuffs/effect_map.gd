@@ -72,3 +72,7 @@ func effect_trigger(effect_name: String, note_position: String):
 			effect_generator.break_hit()
 	elif !effect_generator:
 		print("Effect generator with position ", note_position, " not found.")
+
+func hold_clear():
+	for effect_generator in $Circle/EffectGenerators.get_children():
+		effect_generator.hold_clear()

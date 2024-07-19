@@ -21,11 +21,11 @@ signal effect_trigger
 
 var holding: bool = false
 
-func preview_render(current_time: float) -> void:
+func preview_render(current_time: float = Global.current_time) -> void:
 	note_render(current_time)
 	slider_render(current_time)
 
-func note_render(current_time: float) -> void:
+func note_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	
 	var intro_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time
@@ -118,7 +118,7 @@ func note_render(current_time: float) -> void:
 			new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
 		$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
 
-func slider_render(current_time: float) -> void:
+func slider_render(current_time: float = Global.current_time) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 

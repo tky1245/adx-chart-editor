@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://cmbnm81hqjj7w"]
+[gd_scene load_steps=18 format=3 uid="uid://cmbnm81hqjj7w"]
 
 [ext_resource type="Script" path="res://chart_editor.gd" id="1_0e0hw"]
 [ext_resource type="Texture2D" uid="uid://bt5o0b8qyb3wd" path="res://note detail stuffs/tap.png" id="2_3jjh2"]
@@ -11,6 +11,8 @@
 [ext_resource type="Texture2D" uid="uid://dtp6uksbnuglt" path="res://note detail stuffs/hold.png" id="5_0yoip"]
 [ext_resource type="Texture2D" uid="uid://bv7e1bkhhnyua" path="res://note detail stuffs/slider.png" id="6_tnwyh"]
 [ext_resource type="PackedScene" uid="uid://bpr58vstropk0" path="res://note detail stuffs/effect_map.tscn" id="10_2cdv0"]
+[ext_resource type="PackedScene" uid="uid://doll8s8y8so08" path="res://settings.tscn" id="11_tg34i"]
+[ext_resource type="PackedScene" uid="uid://dtnvfyk2lvftf" path="res://volume_mixer.tscn" id="12_37noa"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_dhqh1"]
 animations = [{
@@ -347,13 +349,17 @@ offset_right = 113.0
 offset_bottom = 54.0
 button_group = SubResource("ButtonGroup_o2ctu")
 text = "Options"
-item_count = 3
+item_count = 5
 popup/item_0/text = "Save"
 popup/item_0/id = 0
 popup/item_1/text = "Export to maidata"
 popup/item_1/id = 1
 popup/item_2/text = "Return to menu"
 popup/item_2/id = 2
+popup/item_3/text = "Settings"
+popup/item_3/id = 3
+popup/item_4/text = "Volume"
+popup/item_4/id = 4
 
 [node name="MaidataExport" type="FileDialog" parent="FileOptions"]
 title = "Open a Directory"
@@ -375,6 +381,12 @@ offset_right = 92.0
 offset_bottom = 51.0
 text = "segs"
 horizontal_alignment = 1
+
+[node name="Settings" parent="FileOptions" instance=ExtResource("11_tg34i")]
+visible = false
+
+[node name="VolumeMixer" parent="FileOptions" instance=ExtResource("12_37noa")]
+visible = false
 
 [node name="MetadataOptions" type="Node2D" parent="."]
 

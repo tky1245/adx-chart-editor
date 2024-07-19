@@ -15,7 +15,7 @@ var delay_ticks: int
 var selected: bool
 var position_offset: Vector2
 
-func slider_render(current_time: float) -> void:
+func slider_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	
 	var slide_intro_time = Global.timeline_beats[beat] + delay_tick_time- Global.note_speed_in_time

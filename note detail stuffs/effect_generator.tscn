@@ -40,6 +40,11 @@ func hold_end():
 		for node in $Hold.get_children():
 			node.free()
 
+func hold_clear():
+	hold_count = 0
+	for node in $Hold.get_children():
+		node.free()
+
 func firework():
 	for node in $Firework.get_children():
 		node.free()

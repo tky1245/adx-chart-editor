@@ -14,7 +14,6 @@ var toggle_firework: bool = false
 
 # Track Player
 var song_length: float
-var current_time: float = 0
 
 
 # Playback
@@ -78,39 +77,39 @@ func _ready():
 func _input(event):
 	# Time skips
 	if bar_dragging: # Progress bar dragging
-		var previous_time = current_time
+		var previous_time = Global.current_time
 		if event is InputEventMouse \
 		or event is InputEventScreenTouch or event is InputEventScreenDrag:
 			if event.position.x < $PlaybackControls/TimeSlider/ProgressBar.position.x:
-				current_time = 0 - extra_time
+				Global.current_time = 0 - extra_time
 			elif event.position.x > $PlaybackControls/TimeSlider/ProgressBar.position.x + $PlaybackControls/TimeSlider/ProgressBar.size.x:
-				current_time = song_length + extra_time
+				Global.current_time = song_length + extra_time
 			else:
-				current_time = -extra_time + (song_length + 2 * extra_time) * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
-		if previous_time != current_time:
+				Global.current_time = -extra_time + (song_length + 2 * extra_time) * (event.position.x - $PlaybackControls/TimeSlider/ProgressBar.position.x)/$PlaybackControls/TimeSlider/ProgressBar.size.x
+		if previous_time != Global.current_time:
 			timeline_render("all")
 			for note in $Notes.get_children():
-				note.preview_render(current_time)
+				note.preview_render()
 	if (event is InputEventMouseButton \
 	or event is InputEventScreenTouch) and !event.pressed:
 		bar_dragging = false
 	
 	if timeline_dragging: # Timeline dragging
 		if event is InputEventMouseMotion or event is InputEventScreenDrag:
-			var previous_time = current_time
+			var previous_time = Global.current_time
 			var position_delta = event.position - previous_mouse_position if previous_mouse_position != Vector2(-1, -1) else Vector2(0, 0)
 			var time_delta = position_delta.x / Global.timeline_pixels_to_second / Global.timeline_zoom
 			previous_mouse_position = event.position
-			if current_time - time_delta < -extra_time:
-				current_time = -extra_time
-			elif current_time - time_delta > song_length + extra_time:
-				current_time = song_length + extra_time
+			if Global.current_time - time_delta < -extra_time:
+				Global.current_time = -extra_time
+			elif Global.current_time - time_delta > song_length + extra_time:
+				Global.current_time = song_length + extra_time
 			else:
-				current_time = current_time - time_delta
-			if previous_time != current_time:
+				Global.current_time = Global.current_time - time_delta
+			if previous_time != Global.current_time:
 				timeline_render("all")
 				for note in $Notes.get_children():
-					note.preview_render(current_time)
+					note.preview_render()
 		if (event is InputEventMouseButton or event is InputEventScreenTouch) and !event.pressed:
 			timeline_dragging = false
 	
@@ -152,6 +151,8 @@ func _input(event):
 				#if ctrl or other keys isnt held down
 				if Global.clicked_notes.size() == 1:
 					if Global.selected_notes == Global.clicked_notes:
+						for note in Global.selected_notes:
+							note.set_selected(false)
 						Global.selected_notes = []
 					else:
 						Global.selected_notes = Global.clicked_notes
@@ -184,21 +185,21 @@ func _input(event):
 	
 func _process(_delta):
 	if !$Timeline/SongTimer.is_stopped():
-		var previous_time = current_time
-		current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset
+		var previous_time = Global.current_time
+		Global.current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset
 		timeline_render("all")
 		for note in $Notes.get_children():
-			note.preview_render(current_time)
-			note.sfx_trigger(previous_time, current_time)
+			note.preview_render()
+			note.sfx_trigger(previous_time, Global.current_time)
 	elif !$Timeline/StartCountdown.is_stopped():
-		var previous_time = current_time
-		current_time = - $Timeline/StartCountdown.time_left - Global.current_offset
+		var previous_time = Global.current_time
+		Global.current_time = - $Timeline/StartCountdown.time_left - Global.current_offset
 		timeline_render("all")
 		for note in $Notes.get_children():
-			note.preview_render(current_time)
-			note.sfx_trigger(previous_time, current_time)
-	$PlaybackControls/TimeSlider/ProgressBar.value = current_time
-	$PlaybackControls/ElapsedTime.text = time_format(current_time)
+			note.preview_render(Global.current_time)
+			note.sfx_trigger(previous_time, Global.current_time)
+	$PlaybackControls/TimeSlider/ProgressBar.value = Global.current_time
+	$PlaybackControls/ElapsedTime.text = time_format(Global.current_time)
 	
 	$ChartPreview/FPS.text = str("FPS: ", Engine.get_frames_per_second())
 
@@ -263,22 +264,23 @@ func _on_firework_toggle_toggled(toggled_on):
 # Song Player
 func _on_play_pause_pressed(): # Play/Pause Button
 	if $Timeline/SongTimer.is_stopped():
-		if current_time < 0 - Global.current_offset: # set a timer before starting the track
+		if Global.current_time < 0 - Global.current_offset: # set a timer before starting the track
 			$PlaybackControls/PlayPause.text = "❚❚"
-			$Timeline/StartCountdown.start(-Global.current_offset - current_time)
+			$Timeline/StartCountdown.start(-Global.current_offset - Global.current_time)
 			Global.track_is_playing = true
-		elif current_time < song_length - Global.current_offset:
+		elif Global.current_time < song_length - Global.current_offset:
 			$PlaybackControls/PlayPause.text = "❚❚"
-			$Timeline/SongTimer.start(song_length - current_time - Global.current_offset)
-			$AudioPlayers/TrackPlayer.play(current_time + Global.current_offset)
+			$Timeline/SongTimer.start(song_length - Global.current_time - Global.current_offset)
+			$AudioPlayers/TrackPlayer.play(Global.current_time + Global.current_offset)
 			Global.track_is_playing = true
 	else:
 		$PlaybackControls/PlayPause.text = "▶"
-		current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset # Move time cursor to where it stopped
+		Global.current_time = song_length - $Timeline/SongTimer.time_left - Global.current_offset # Move time cursor to where it stopped
 		$Timeline/SongTimer.stop()
 		$AudioPlayers/TrackPlayer.stop()
 		Global.track_is_playing = false
 		Sound.all_sfx_stop.emit()
+		$EffectMap.hold_clear()
 
 func _on_start_countdown_timeout(): # start the track from beginning
 	$Timeline/SongTimer.start(song_length)
@@ -291,12 +293,14 @@ func _on_stop_pressed():# Stop Button
 		$AudioPlayers/TrackPlayer.stop()
 		Global.track_is_playing = false
 		Sound.all_sfx_stop.emit()
+		$EffectMap.hold_clear()
 
 func _on_song_timer_timeout(): # Song Ended
 	$PlaybackControls/PlayPause.text = "▶"
 	$AudioPlayers/TrackPlayer.stop()
 	Global.track_is_playing = false
 	Sound.all_sfx_stop.emit()
+	$EffectMap.hold_clear()
 
 func time_format(time_num: float): # Seconds to Time String
 	var remaining_time: float = abs(time_num)
@@ -367,6 +371,7 @@ func _on_progress_bar_gui_input(event): # Song Progress Bar Dragged
 		$AudioPlayers/TrackPlayer.stop()
 		Global.track_is_playing = false
 		Sound.all_sfx_stop.emit()
+		$EffectMap.hold_clear()
 
 func _on_note_timeline_gui_input(event): # Timeline Dragged
 	if event is InputEventMouseButton and event.pressed:
@@ -377,6 +382,7 @@ func _on_note_timeline_gui_input(event): # Timeline Dragged
 			$AudioPlayers/TrackPlayer.stop()
 			Global.track_is_playing = false
 			Sound.all_sfx_stop.emit()
+			$EffectMap.hold_clear()
 			previous_mouse_position = Vector2(-1, -1)
 		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			beat_skip(1)
@@ -385,18 +391,18 @@ func _on_note_timeline_gui_input(event): # Timeline Dragged
 
 func beat_skip(direction: int):
 	if direction == 1:
-		if time_to_beat(current_time) + 1 <= Global.timeline_beats.size() - 1:
-			current_time = Global.timeline_beats[time_to_beat(current_time) + 1]
+		if time_to_beat(Global.current_time) + 1 <= Global.timeline_beats.size() - 1:
+			Global.current_time = Global.timeline_beats[time_to_beat(Global.current_time) + 1]
 	elif direction == -1:
-		if time_to_beat(current_time) - 1 >= 0:
-			current_time = Global.timeline_beats[time_to_beat(current_time) - 1]
+		if time_to_beat(Global.current_time) - 1 >= 0:
+			Global.current_time = Global.timeline_beats[time_to_beat(Global.current_time) - 1]
 	for note in $Notes.get_children():
-		note.preview_render(current_time)
+		note.preview_render()
 	timeline_render("all")
 
 func timeline_visible_range_update(): # Update timeline, use before render
-	var leftmost_time: float = current_time + float(Global.timeline_leftmost_x - Global.timeline_pointer_x) / Global.timeline_pixels_to_second / Global.timeline_zoom
-	var rightmost_time: float = current_time + float(Global.timeline_rightmost_x - Global.timeline_pointer_x) / Global.timeline_pixels_to_second / Global.timeline_zoom
+	var leftmost_time: float = Global.current_time + float(Global.timeline_leftmost_x - Global.timeline_pointer_x) / Global.timeline_pixels_to_second / Global.timeline_zoom
+	var rightmost_time: float = Global.current_time + float(Global.timeline_rightmost_x - Global.timeline_pointer_x) / Global.timeline_pixels_to_second / Global.timeline_zoom
 	Global.timeline_visible_time_range["Start"] = leftmost_time
 	Global.timeline_visible_time_range["End"] = rightmost_time
 
@@ -602,7 +608,7 @@ func add_bd_window_show():
 func _on_beat_divisor_field_text_submitted(new_text):
 	var beat_divisor = float(new_text)
 	if beat_divisor > 0:
-		var beat = time_to_beat(current_time) if $BeatDivisorChanges.get_child_count() > 0 else 0
+		var beat = time_to_beat(Global.current_time) if $BeatDivisorChanges.get_child_count() > 0 else 0
 		if !Global.beat_change_cursor:
 			var node_existed: bool
 			for bd_node in $BeatDivisorChanges.get_children():
@@ -633,7 +639,7 @@ func _on_beat_divisor_field_text_submitted(new_text):
 func _on_bpm_field_text_submitted(new_text):
 	var bpm = int(new_text)
 	if bpm > 0:
-		var beat = time_to_beat(current_time) if $BPMChanges.get_child_count() > 0 else 0
+		var beat = time_to_beat(Global.current_time) if $BPMChanges.get_child_count() > 0 else 0
 		if !Global.beat_change_cursor:
 			var node_existed: bool
 			for bpm_node in $BPMChanges.get_children(): # Check for overlaps
@@ -813,14 +819,14 @@ func _on_break_toggled(toggled_on):
 	var note = Global.selected_notes[0]
 	note.note_property_break = toggled_on
 	note.note_draw()
-	note.preview_render(current_time)
+	note.preview_render()
 	note.timeline_object_render()
 
 func _on_ex_toggled(toggled_on):
 	var note = Global.selected_notes[0]
 	note.note_property_ex = toggled_on
 	note.note_draw()
-	note.preview_render(current_time)
+	note.preview_render()
 	note.timeline_object_render()
 
 func _on_star_toggled(toggled_on):
@@ -828,7 +834,7 @@ func _on_star_toggled(toggled_on):
 	if note.type not in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
 		note.note_property_star = toggled_on
 		note.note_draw()
-		note.preview_render(current_time)
+		note.preview_render()
 		note.timeline_object_render()
 	sync_note_details()
 
@@ -837,7 +843,7 @@ func _on_rotate_toggled(toggled_on):
 	if note.type in [Note.type.TAP] and note.note_property_star:
 		note.note_star_spinning = toggled_on
 		note.note_draw()
-		note.preview_render(current_time)
+		note.preview_render()
 		note.timeline_object_render()
 
 func _on_tapless_toggled(toggled_on):
@@ -845,21 +851,21 @@ func _on_tapless_toggled(toggled_on):
 	if note.sliders.size() > 0:
 		note.slider_tapless = toggled_on
 		note.note_draw()
-		note.preview_render(current_time)
+		note.preview_render()
 		note.timeline_object_render()
 
 func _on_firework_toggled(toggled_on):
 	var note = Global.selected_notes[0]
 	note.note_property_firework = toggled_on
 	note.note_draw()
-	note.preview_render(current_time)
+	note.preview_render()
 	note.timeline_object_render()
 
 func _on_mine_toggled(toggled_on):
 	var note = Global.selected_notes[0]
 	note.note_property_mine = toggled_on
 	note.note_draw()
-	note.preview_render(current_time)
+	note.preview_render()
 	note.timeline_object_render()
 	
 
@@ -867,7 +873,7 @@ func _on_backtick_value_changed(value):
 	var note = Global.selected_notes[0]
 	note.delay_ticks = value
 	note.timeline_object_render()
-	note.preview_render(current_time)
+	note.preview_render()
 
 func _on_hold_pressed(): # change a tap to a hold
 	var note = Global.selected_notes[0]
@@ -898,12 +904,16 @@ func _on_hold_duration_x_text_changed(new_text):
 	var new_duration_arr = [float(new_text), note.duration_arr[1]]
 	note.set_duration(new_duration_arr)
 	last_used_hold_duration_arr = new_duration_arr
+	note.timeline_object_render()
+	note.preview_render()
 
 func _on_hold_duration_y_text_changed(new_text):
 	var note = Global.selected_notes[0]
 	var new_duration_arr = [note.duration_arr[0], int(new_text)]
 	note.set_duration(new_duration_arr)
 	last_used_hold_duration_arr = new_duration_arr
+	note.timeline_object_render()
+	note.preview_render()
 
 func _on_slider_deleted(slider_index):
 	var note = Global.selected_notes[0]
@@ -979,14 +989,17 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 				var slider_dict = note.sliders[0]
 				slider_dict["slider_shape_arr"].append(["-", note_position])
 				note.slider_draw()
+				note.set_selected()
+				note.preview_render()
+				note.timeline_object_render()
 				sync_note_details()
 		
 	elif placement_selected == "Hold": # add a hold
 		var args = {
 			"duration_arr" = last_used_hold_duration_arr,
 			"note_position" = note_position,
-			"beat" = time_to_beat(current_time),
-			"bpm" = beat_to_bpm(time_to_beat(current_time)),
+			"beat" = time_to_beat(Global.current_time),
+			"bpm" = beat_to_bpm(time_to_beat(Global.current_time)),
 			"note_property_break" = toggle_break,
 			"note_property_ex" = toggle_ex,
 			"note_property_firework" = toggle_firework,
@@ -1017,8 +1030,8 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 	elif placement_selected == "Tap": # add a tap
 		var args = {
 			"note_position" = note_position,
-			"beat" = time_to_beat(current_time),
-			"bpm" = beat_to_bpm(time_to_beat(current_time)),
+			"beat" = time_to_beat(Global.current_time),
+			"bpm" = beat_to_bpm(time_to_beat(Global.current_time)),
 			"note_property_break" = toggle_break,
 			"note_property_ex" = toggle_ex,
 			"note_property_firework" = toggle_firework,
@@ -1049,8 +1062,8 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 	elif placement_selected == "Slider" and (Global.selected_notes.size() == 0 or toggle_multiplacing): # Add a note; point to the note after
 		var args = {
 			"note_position" = note_position,
-			"beat" = time_to_beat(current_time),
-			"bpm" = beat_to_bpm(time_to_beat(current_time)),
+			"beat" = time_to_beat(Global.current_time),
+			"bpm" = beat_to_bpm(time_to_beat(Global.current_time)),
 			"note_property_break" = toggle_break,
 			"note_property_ex" = toggle_ex,
 			"note_property_firework" = toggle_firework,
@@ -1078,7 +1091,7 @@ func add_note(note_type: Note.type, args: Dictionary) -> Node:
 	new_note.initialize()
 	$Notes.add_child(new_note)
 	note_both_update(new_note.get("beat"))
-	new_note.preview_render(current_time)
+	new_note.preview_render()
 	new_note.connect("effect_trigger", effect_trigger, 8)
 	return new_note
 
@@ -1102,6 +1115,9 @@ func note_both_update(beat = null, wait: bool = false) -> void:
 				note.set("note_property_both", false)
 				note.set("slider_both", false)
 				note.note_draw()
+				note.preview_render()
+				note.set_selected()
+				note.timeline_object_render()
 		elif notes_at_current_beat.size() > 1:
 			for note in notes_at_current_beat:
 				note.set("note_property_both", false)
@@ -1117,23 +1133,29 @@ func note_both_update(beat = null, wait: bool = false) -> void:
 			for note in notes_at_current_beat:
 				note.note_draw()
 				note.slider_draw()
-				note.preview_render(current_time)
+				note.preview_render()
 				note.set_selected()
 				note.timeline_object_render()
 
 # Menu and Save
 func _on_option_pressed(index):
-	if index == 0: #Save
+	if index == 0: # Save
 		save_difficulty(current_difficulty)
 		Savefile.save_chart()
 		$FileOptions/NoticeWindow.visible = true
 		$FileOptions/NoticeWindow/Context.text = "Chart saved"
-	if index == 1: #Export to maidata
+	elif index == 1: # Export to maidata
 		$FileOptions/MaidataExport.visible = true
-	if index == 2: #Return to menu
+	elif index == 2: # Return to menu
 		save_difficulty(current_difficulty)
 		Savefile.save_chart()
 		get_tree().change_scene_to_file("res://main_menu.tscn")
+	elif index == 3: # Settings
+		$FileOptions/Settings.visible = true
+		$FileOptions/Settings.set("settings_cache", $FileOptions/Settings.get_cache())
+	elif index == 4: # Volume
+		$FileOptions/VolumeMixer.visible = true
+		$FileOptions/VolumeMixer.set("settings_cache", $FileOptions/VolumeMixer.get_cache())
 
 func get_chart_dict(difficulty: int) -> Dictionary:
 	var bpm_change_arr: Array = [] 
@@ -1196,7 +1218,7 @@ func load_difficulty(difficulty: int) -> void: # uh
 		note_both_update()
 		for note in $Notes.get_children():
 			note.initialize()
-			note.preview_render(current_time)
+			note.preview_render()
 
 func clear_chart() -> void:
 	Global.selected_notes = []

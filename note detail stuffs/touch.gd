@@ -18,11 +18,11 @@ var delay_ticks: int = 0
 var selected: bool = false
 signal effect_trigger
 
-func preview_render(current_time: float) -> void:
+func preview_render(current_time: float = Global.current_time) -> void:
 	note_render(current_time)
 	slider_render(current_time)
 
-func note_render(current_time: float) -> void:
+func note_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	
 	var intro_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time
@@ -78,7 +78,7 @@ func note_render(current_time: float) -> void:
 					$Note/JudgeOutline.visible = true
 			set_node_images_transparency($Note, scale_progress)
 
-func slider_render(current_time: float) -> void:
+func slider_render(current_time: float = Global.current_time) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 

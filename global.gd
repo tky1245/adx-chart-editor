@@ -22,6 +22,7 @@ var clicked_notes: Array[Node2D] = []
 var selected_notes: Array[Node2D] = []
 var current_offset: float
 var track_is_playing: bool = false
+var current_time: float
 
 # for mathing and rendering
 const timeline_pointer_x = 240
@@ -113,6 +114,7 @@ var beats_per_bar = 4
 var background_dim: float = 0.5
 var remove_num_from_c_when_exporting: bool = false
 var note_speed: float
+var touch_speed: float
 var sfx_offset: float
 
 func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
@@ -164,8 +166,7 @@ func _ready():
 		var angle = PI / 8 * (1 + i * 2)
 		var pos = Vector2(Vector2(distance * sin(angle), distance * -cos(angle)))
 		touch_positions[pos_name] = pos
-		
-
+	
 func note_pos_mod(num: int):
 	return (num - 1) % 8 + 1
 
@@ -180,3 +181,40 @@ func touch_position_angle(note_position: String):
 	while angle < 0:
 		angle += TAU
 	return angle
+
+func settings_load():
+	var file = FileAccess.open("user://settings.json", FileAccess.READ)
+	var json_string = file.get_line()
+	var json = JSON.new()
+	var error = json.parse(json_string)
+	if error == OK:
+		var data_received = json.data
+		if typeof(data_received) == TYPE_DICTIONARY:
+			settings_set(data_received)
+
+func settings_save():
+	var dict: Dictionary = {
+		"background_dim": background_dim,
+		"remove_num_from_c_when_exporting": remove_num_from_c_when_exporting,
+		"note_speed": note_speed,
+		"touch_speed": touch_speed,
+		"sfx_offset": sfx_offset
+	}
+	var json = JSON.stringify(dict)
+	var file = FileAccess.open("user://settings.json", FileAccess.WRITE)
+	file.store_line(json)
+	file.close()
+	print("Volume saved")
+
+func settings_set(settings_dict: Dictionary) -> void:
+	for key in settings_dict:
+		if key == "background_dim":
+			background_dim = settings_dict.get("background_dim")
+		if key == "remove_num_from_c_when_exporting":
+			remove_num_from_c_when_exporting = settings_dict.get("remove_num_from_c_when_exporting")
+		if key == "note_speed":
+			note_speed = settings_dict.get("note_speed")
+		if key == "touch_speed":
+			touch_speed = settings_dict.get("touch_speed")
+		if key == "sfx_offset":
+			sfx_offset = settings_dict.get("sfx_offset")

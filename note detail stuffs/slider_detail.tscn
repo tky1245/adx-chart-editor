@@ -8,14 +8,6 @@ var note: Node2D
 var slider_index: int
 signal slider_deleted
 signal duration_changed
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	pass # Replace with function body.
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
-	pass
 
 func sync_details():
 	if note:
@@ -45,12 +37,16 @@ func _on_shape_syntax_change(segment_index, shape_syntax):
 	slider_shape_arr[segment_index][0] = shape_syntax
 	note.sliders[slider_index][\"slider_shape_arr\"] = slider_shape_arr
 	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 	
 func _on_note_position_change(segment_index, note_position):
 	var slider_shape_arr = note.sliders[slider_index][\"slider_shape_arr\"]
 	slider_shape_arr[segment_index][1] = note_position
 	note.sliders[slider_index][\"slider_shape_arr\"] = slider_shape_arr
 	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 	
 func _on_delete_press(segment_index):
 	var slider_shape_arr: Array = note.sliders[slider_index][\"slider_shape_arr\"]
@@ -58,6 +54,8 @@ func _on_delete_press(segment_index):
 		slider_shape_arr.pop_at(segment_index)
 		note.sliders[slider_index][\"slider_shape_arr\"] = slider_shape_arr
 		note.slider_draw()
+		note.preview_render()
+		note.timeline_object_render()
 		sync_details()
 	
 func _on_properties_visible_toggled(toggled_on):
@@ -68,25 +66,31 @@ func _on_duration_x_text_changed(new_text):
 	var new_duration_arr = [float(new_text), int($Properties/SliderDuration/DurationY.text)]
 	note.sliders[slider_index][\"duration_arr\"] = new_duration_arr
 	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 	duration_changed.emit(new_duration_arr)
 
 func _on_duration_y_text_changed(new_text):
 	var new_duration_arr = [float($Properties/SliderDuration/DurationX.text), int(new_text)]
 	note.sliders[slider_index][\"duration_arr\"] = new_duration_arr
 	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 	duration_changed.emit(new_duration_arr)
 
 
 func _on_delay_x_text_changed(new_text):
 	var new_delay_arr = [float(new_text), int($Properties/SliderDelay/DelayY.text)]
 	note.sliders[slider_index][\"delay_arr\"] = new_delay_arr
-	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 
 
 func _on_delay_y_text_changed(new_text):
 	var new_delay_arr = [float($Properties/SliderDelay/DelayX.text), int(new_text)]
 	note.sliders[slider_index][\"delay_arr\"] = new_delay_arr
-	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 
 
 func _on_add_slider_shape_pressed():
@@ -95,18 +99,25 @@ func _on_add_slider_shape_pressed():
 	num = num + 4 
 	if num < 1:
 		num += 8
+	if num > 8:
+		num -= 8
 	note.sliders[slider_index][\"slider_shape_arr\"].append([\"-\", str(num), 0.0])
 	note.slider_draw()
+	note.set_selected()
 	sync_details()
 
 
 func _on_delete_slide_pressed():
 	slider_deleted.emit(slider_index)
+	note.slider_draw()
+	note.set_selected()
 
 
 func _on_break_toggled(toggled_on):
 	note.sliders[slider_index][\"slider_property_break\"] = toggled_on
 	note.slider_draw()
+	note.preview_render()
+	note.timeline_object_render()
 	
 "
 

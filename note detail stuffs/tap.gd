@@ -18,11 +18,11 @@ var delay_ticks: int = 0 # 128ths per tick
 var selected: bool = false
 signal effect_trigger
 
-func preview_render(current_time: float) -> void:
+func preview_render(current_time: float = Global.current_time) -> void:
 	note_render(current_time)
 	slider_render(current_time)
 
-func note_render(current_time: float) -> void:
+func note_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var intro_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time
 	var move_time: float = Global.timeline_beats[beat] + delay_tick_time - Global.note_speed_in_time * 0.7
@@ -71,7 +71,7 @@ func note_render(current_time: float) -> void:
 				for node in note_pathfollow.get_children():
 					node.rotation = 0
 
-func slider_render(current_time: float) -> void:
+func slider_render(current_time: float = Global.current_time) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 

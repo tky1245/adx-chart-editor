@@ -1,4 +1,106 @@
-[gd_scene format=3 uid="uid://doll8s8y8so08"]
+[gd_scene load_steps=2 format=3 uid="uid://doll8s8y8so08"]
+
+[ext_resource type="Script" path="res://settings.gd" id="1_bbvh6"]
 
 [node name="Settings" type="Window"]
 initial_position = 1
+size = Vector2i(400, 220)
+script = ExtResource("1_bbvh6")
+
+[node name="GridContainer" type="GridContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="BGDim" type="HBoxContainer" parent="GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GridContainer/BGDim"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+text = "Background Dim: "
+horizontal_alignment = 2
+
+[node name="BGDimField" type="LineEdit" parent="GridContainer/BGDim"]
+layout_mode = 2
+
+[node name="NoteSpeed" type="HBoxContainer" parent="GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GridContainer/NoteSpeed"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+text = "Note Speed: "
+horizontal_alignment = 2
+
+[node name="NoteSpeedField" type="LineEdit" parent="GridContainer/NoteSpeed"]
+layout_mode = 2
+
+[node name="TouchSpeed" type="HBoxContainer" parent="GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GridContainer/TouchSpeed"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+text = "Touch Speed: "
+horizontal_alignment = 2
+
+[node name="TouchSpeedField" type="LineEdit" parent="GridContainer/TouchSpeed"]
+layout_mode = 2
+
+[node name="SFXOffset" type="HBoxContainer" parent="GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GridContainer/SFXOffset"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+text = "SFX Offset: "
+horizontal_alignment = 2
+
+[node name="SFXOffsetField" type="LineEdit" parent="GridContainer/SFXOffset"]
+layout_mode = 2
+
+[node name="C1toC" type="HBoxContainer" parent="GridContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="GridContainer/C1toC"]
+custom_minimum_size = Vector2(270, 0)
+layout_mode = 2
+text = "Change C1 to C when exporting "
+horizontal_alignment = 2
+
+[node name="C1toCCheckBox" type="CheckBox" parent="GridContainer/C1toC"]
+layout_mode = 2
+
+[node name="SaveOptions" type="HBoxContainer" parent="."]
+custom_minimum_size = Vector2(350, 0)
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -54.0
+offset_top = -40.0
+offset_right = 54.0
+grow_horizontal = 2
+grow_vertical = 0
+size_flags_horizontal = 3
+theme_override_constants/separation = 25
+
+[node name="Save" type="Button" parent="SaveOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save"
+
+[node name="Cancel" type="Button" parent="SaveOptions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="text_submitted" from="GridContainer/BGDim/BGDimField" to="." method="_on_bg_dim_field_text_submitted"]
+[connection signal="text_submitted" from="GridContainer/NoteSpeed/NoteSpeedField" to="." method="_on_note_speed_field_text_submitted"]
+[connection signal="text_submitted" from="GridContainer/TouchSpeed/TouchSpeedField" to="." method="_on_touch_speed_field_text_submitted"]
+[connection signal="text_submitted" from="GridContainer/SFXOffset/SFXOffsetField" to="." method="_on_sfx_offset_field_text_submitted"]
+[connection signal="toggled" from="GridContainer/C1toC/C1toCCheckBox" to="." method="_on_c_1_to_c_check_box_toggled"]
+[connection signal="pressed" from="SaveOptions/Save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="SaveOptions/Cancel" to="." method="_on_cancel_pressed"]

@@ -8,16 +8,16 @@ disclaimer: im using this to organize thought process or write notes sometimes
 some known bugs:
 	- touch slider bugs like: (not sure if fixed completely)
 		- sliders not being rendered after slider creation using the insert slider tool
-		- slider both property not being applied
+		- slider selection highlight applied incorrectly
 
 todo:
-	- add sounds + note hit effects
 	- sound control
-	- other settings like note speed
 
 soontm:
 	- change C1 to C when exporting for adx(?)
 	- optimization
+	- android support
+	- ios support(i dont have an ios to test)
 	- note edit(move notes on timeline directly)
 	- handle console spitting out zero length interval when things like 1-1 is declared
 	- finish each note type function(mostly done):
