@@ -49,8 +49,7 @@ func save_chart(chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_c
 	var jstr = JSON.stringify(chart_data)
 	file.store_line(jstr)
 	file.close()
-	print("line_stored")
-	print(jstr)
+	print("chart_stored")
 
 func new_chart_save(title: String, artist: String = "") -> Dictionary:
 	var new_dict: Dictionary = {
@@ -533,7 +532,10 @@ func export_maidata(export_path: String, chart_dir = Global.CHART_STORAGE_PATH +
 	
 	for i in range(7):
 		if chart_data.get("inote_" + str(i+1)):
-			maidata_string = str(maidata_string, "&inote_", str(i+1), "=", chart_data.get(str("inote_", str(i+1))) + "\n")
+			if Global.remove_num_from_c_when_exporting:
+				maidata_string = str(maidata_string, "&inote_", str(i+1), "=", chart_data.get(str("inote_", str(i+1))).replace("C1", "C") + "\n")
+			else:
+				maidata_string = str(maidata_string, "&inote_", str(i+1), "=", chart_data.get(str("inote_", str(i+1))) + "\n")
 	
 	var maidata = FileAccess.open(export_path + Global.current_chart_name + "/maidata.txt", FileAccess.WRITE)
 	maidata.store_string(maidata_string)

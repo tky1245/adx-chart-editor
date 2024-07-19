@@ -14,7 +14,6 @@ todo:
 	- add sounds + note hit effects
 	- sound control
 	- other settings like note speed
-	- control to add backticks (+ check if both property works correctly on it) and firework/mines
 
 soontm:
 	- change C1 to C when exporting for adx(?)

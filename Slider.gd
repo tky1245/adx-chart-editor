@@ -118,6 +118,22 @@ func slider_render(current_time: float) -> void:
 					path_progress = 1
 				path_index += 1
 
+func sfx_trigger(previous_time: float, current_time: float, offset: float = Global.sfx_offset):
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
+	var slide_start_time = Global.timeline_beats[beat] + delay_tick_time + delay
+	var slide_end_time = Global.timeline_beats[beat] + delay_tick_time + delay + duration
+	
+	if previous_time < slide_start_time - offset and current_time >= slide_start_time - offset:
+		if !slider_property_break:
+			Sound.sfx_start.emit("slide", 0)
+		else:
+			Sound.sfx_start.emit("break_slide_start", 0)
+	if previous_time < slide_end_time - offset and current_time >= slide_end_time - offset:
+		if slider_property_break:
+			Sound.sfx_start.emit("break_slide", 0)
+			Sound.sfx_start.emit("judge_break_slide", 0)
+	
+
 func initialize(parent_position: Vector2) -> void: # set up all the shape positions
 	set_position_offset(-parent_position)
 	set_duration()

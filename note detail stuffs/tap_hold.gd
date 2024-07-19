@@ -105,6 +105,31 @@ func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 
+func sfx_trigger(previous_time: float, current_time: float, offset: float = Global.sfx_offset):
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
+	var judge_time_start_point = Global.timeline_beats[beat] + delay_tick_time
+	var judge_time_end_point = Global.timeline_beats[beat] + delay_tick_time + duration
+	
+	if previous_time < judge_time_start_point - offset and current_time >= judge_time_start_point - offset:
+		Sound.sfx_start.emit("judge", 0)
+		Sound.sfx_start.emit("answer", 0)
+		if note_property_break:
+			Sound.sfx_start.emit("judge_break", 0)
+		if note_property_ex:
+			Sound.sfx_start.emit("judge_ex", 0)
+	if previous_time < judge_time_end_point - offset and current_time >= judge_time_end_point - offset:
+		Sound.sfx_start.emit("answer", 0)
+		if !note_property_break and !note_property_ex:
+			Sound.sfx_start.emit("judge", 0)
+		if note_property_break:
+			Sound.sfx_start.emit("judge_break", 0)
+		if note_property_ex:
+			Sound.sfx_start.emit("judge_ex", 0)
+		if note_property_firework:
+			Sound.sfx_start.emit("hanabi", 0)
+	for slider in $Sliders.get_children():
+		slider.sfx_trigger(previous_time, current_time)
+
 func initialize() -> void:
 	set_duration()
 	set_note_position()

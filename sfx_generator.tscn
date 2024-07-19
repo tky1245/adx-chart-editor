@@ -1,0 +1,72 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5pvf61eljbwf"]
+
+[sub_resource type="GDScript" id="GDScript_vpceo"]
+script/source = "extends Node2D
+
+func _ready():
+	Sound.connect(\"sfx_start\", sfx_start)
+	Sound.connect(\"sfx_end\", sfx_end)
+	Sound.connect(\"all_sfx_stop\", all_sfx_stop)
+
+func _process(delta):
+	for player in get_children():
+		if !player.playing: # free finished players
+			player.queue_free()
+
+func sfx_start(sfx_name: String, node_index: int):
+	var player = AudioStreamPlayer.new()
+	if sfx_name == \"touch_hold\":
+		player.set(\"name\", str(node_index))
+		print(node_index)
+	var stream: AudioStream
+	if !stream:
+		if sfx_name == \"answer\":
+			stream = Sound.answer_sfx
+		elif sfx_name == \"break\":
+			stream = Sound.break_sfx
+		elif sfx_name == \"break_slide\":
+			stream = Sound.break_slide_sfx
+		elif sfx_name == \"break_slide_start\":
+			stream = Sound.break_slide_start_sfx
+		elif sfx_name == \"hanabi\":
+			stream = Sound.hanabi_sfx
+		elif sfx_name == \"judge\":
+			stream = Sound.judge_sfx
+		elif sfx_name == \"judge_break\":
+			stream = Sound.judge_break_sfx
+		elif sfx_name == \"judge_break_slide\":
+			stream = Sound.judge_break_slide_sfx
+		elif sfx_name == \"judge_ex\":
+			stream = Sound.judge_ex_sfx
+		elif sfx_name == \"slide\":
+			stream = Sound.slide_sfx
+		elif sfx_name == \"touch\":
+			stream = Sound.touch_sfx
+		elif sfx_name == \"touch_hold\":
+			stream = Sound.touch_hold_sfx
+		else:
+			print(\"SFX with name '\", sfx_name, \"' not found.\")
+			return
+	# TODO: change volume
+	
+	player.stream = stream
+	add_child(player)
+	player.play()
+
+func sfx_end(sfx_name: String, node_index: int):
+	if sfx_name == \"touch_hold\":
+		for player in get_children():
+			print(node_index)
+			if player.get(\"name\") == str(node_index):
+				player.stop()
+				player.queue_free()
+
+func all_sfx_stop():
+	for player in get_children():
+		player.stop()
+		player.queue_free()
+
+"
+
+[node name="SFXGenerator" type="Node2D"]
+script = SubResource("GDScript_vpceo")

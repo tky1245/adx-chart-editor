@@ -9,6 +9,9 @@ func _ready():
 	$TapHit.position = global_position
 	$Hold.position = global_position
 	$TouchHit.position = global_position
+	$TapHit.rotation = rotation
+	$Hold.rotation = rotation
+	$TouchHit.rotation = rotation
 
 func tap_hit():
 	for node in $TapHit.get_children():

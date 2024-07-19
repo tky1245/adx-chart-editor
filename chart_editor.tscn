@@ -1,8 +1,9 @@
-[gd_scene load_steps=15 format=3 uid="uid://cmbnm81hqjj7w"]
+[gd_scene load_steps=16 format=3 uid="uid://cmbnm81hqjj7w"]
 
 [ext_resource type="Script" path="res://chart_editor.gd" id="1_0e0hw"]
 [ext_resource type="Texture2D" uid="uid://bt5o0b8qyb3wd" path="res://note detail stuffs/tap.png" id="2_3jjh2"]
 [ext_resource type="Theme" uid="uid://cagtxxicx3p16" path="res://new_theme.tres" id="2_3k4yr"]
+[ext_resource type="PackedScene" uid="uid://c5pvf61eljbwf" path="res://sfx_generator.tscn" id="2_7i40c"]
 [ext_resource type="PackedScene" uid="uid://bodw6vmqh82bf" path="res://note detail stuffs/chart_preview_area.tscn" id="3_7ko7q"]
 [ext_resource type="PackedScene" uid="uid://cnfa6jwk4yk48" path="res://note detail stuffs/slider_detail.tscn" id="3_johcs"]
 [ext_resource type="Texture2D" uid="uid://bag2msk38mxhr" path="res://note detail stuffs/frame_white.png" id="3_l1iwb"]
@@ -44,6 +45,8 @@ script = ExtResource("1_0e0hw")
 [node name="AudioPlayers" type="Node2D" parent="."]
 
 [node name="TrackPlayer" type="AudioStreamPlayer" parent="AudioPlayers"]
+
+[node name="SFXGenerator" parent="AudioPlayers" instance=ExtResource("2_7i40c")]
 
 [node name="ChartPreview" type="Node2D" parent="."]
 
@@ -175,6 +178,7 @@ toggle_mode = true
 text = "Firework"
 
 [node name="NoteDetails" type="Node2D" parent="."]
+visible = false
 
 [node name="ScrollContainer" type="ScrollContainer" parent="NoteDetails"]
 offset_left = 756.0

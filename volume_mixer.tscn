@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://dtnvfyk2lvftf"]
+
+[node name="VolumeMixer" type="Window"]
+initial_position = 1

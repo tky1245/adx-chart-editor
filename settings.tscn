@@ -1,0 +1,4 @@
+[gd_scene format=3 uid="uid://doll8s8y8so08"]
+
+[node name="Settings" type="Window"]
+initial_position = 1

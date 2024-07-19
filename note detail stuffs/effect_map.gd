@@ -57,7 +57,7 @@ func effect_trigger(effect_name: String, note_position: String):
 	for node in $Circle/EffectGenerators.get_children():
 		if node.get("note_position") == note_position:
 			effect_generator = node
-	if effect_generator:
+	if effect_generator and Global.track_is_playing:
 		if effect_name == "tap_hit":
 			effect_generator.tap_hit()
 		elif effect_name == "hold_start":
@@ -70,5 +70,5 @@ func effect_trigger(effect_name: String, note_position: String):
 			effect_generator.firework()
 		elif effect_name == "break_hit":
 			effect_generator.break_hit()
-	else:
+	elif !effect_generator:
 		print("Effect generator with position ", note_position, " not found.")

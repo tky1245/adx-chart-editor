@@ -75,6 +75,23 @@ func slider_render(current_time: float) -> void:
 	for slider in $Sliders.get_children():
 		slider.slider_render(current_time)
 
+func sfx_trigger(previous_time: float, current_time: float, offset: float = Global.sfx_offset):
+	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
+	var judge_time: float = Global.timeline_beats[beat] + delay_tick_time
+	
+	if previous_time < judge_time - offset and current_time >= judge_time - offset:
+		Sound.sfx_start.emit("answer", 0)
+		Sound.sfx_start.emit("judge", 0)
+		if note_property_break:
+			Sound.sfx_start.emit("break", 0)
+			Sound.sfx_start.emit("judge_break", 0)
+		if note_property_ex:
+			Sound.sfx_start.emit("judge_ex", 0)
+		if note_property_firework:
+			Sound.sfx_start.emit("hanabi", 0)
+	for slider in $Sliders.get_children():
+		slider.sfx_trigger(previous_time, current_time)
+
 func initialize() -> void:
 	set_note_position()
 	note_draw()
@@ -209,7 +226,9 @@ func timeline_object_draw() -> void:
 		$TimelineIndicator.add_child(highlight_line)
 	else:
 		var note_color_timeline_indicator
-		if note_property_break:
+		if note_property_mine:
+			note_color_timeline_indicator = Global.note_colors["tap_indicator_mine"]
+		elif note_property_break:
 			note_color_timeline_indicator = Global.note_colors["star_indicator_break"]
 		elif note_property_both:
 			note_color_timeline_indicator = Global.note_colors["star_indicator_both"]

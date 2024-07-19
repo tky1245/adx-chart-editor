@@ -21,6 +21,7 @@ var note_speed_in_time = 0.4
 var clicked_notes: Array[Node2D] = []
 var selected_notes: Array[Node2D] = []
 var current_offset: float
+var track_is_playing: bool = false
 
 # for mathing and rendering
 const timeline_pointer_x = 240
@@ -50,7 +51,7 @@ const note_colors: Dictionary = {
 	"tap_indicator_base" = Color.HOT_PINK,
 	"tap_indicator_both" = Color.GOLD,
 	"tap_indicator_break" = Color.ORANGE_RED,
-	"tap_indicator_mine" = Color.NAVY_BLUE,
+	"tap_indicator_mine" = Color.BLUE,
 	
 	# Star tap/Slider star
 	"star_inner_base" = Color.CORNFLOWER_BLUE,
@@ -68,7 +69,7 @@ const note_colors: Dictionary = {
 	"star_indicator_base" = Color.SKY_BLUE,
 	"star_indicator_both" = Color.YELLOW,
 	"star_indicator_break" = Color.ORANGE_RED,
-	"star_indicator_mine" = Color.NAVY_BLUE,
+	"star_indicator_mine" = Color.BLUE,
 	
 	# Slider arrow
 	"slider_top_base" = Color.SKY_BLUE,
@@ -93,7 +94,7 @@ const note_colors: Dictionary = {
 	"touch_indicator_base" = Color.SKY_BLUE,
 	"touch_indicator_both" = Color.YELLOW,
 	"touch_indicator_break" = Color.ORANGE_RED,
-	"touch_indicator_mine" = Color.NAVY_BLUE,
+	"touch_indicator_mine" = Color.BLUE,
 	"touch_highlight_ex_base" = Color(Color.SKY_BLUE, 0.4),
 	"touch_highlight_ex_both" = Color(Color.YELLOW, 0.4),
 	"touch_highlight_ex_break" = Color(Color.YELLOW, 0.4),
@@ -110,6 +111,9 @@ const note_colors: Dictionary = {
 # Some settings
 var beats_per_bar = 4
 var background_dim: float = 0.5
+var remove_num_from_c_when_exporting: bool = false
+var note_speed: float
+var sfx_offset: float
 
 func time_to_timeline_pos_x(time): # convert time to pos_x on timeline
 	var pos_x = timeline_leftmost_x + (timeline_rightmost_x - timeline_leftmost_x) / (timeline_visible_time_range["End"] - timeline_visible_time_range["Start"]) * (time - timeline_visible_time_range["Start"])
