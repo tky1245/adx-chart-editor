@@ -30,11 +30,21 @@ func _on_cancel_pressed():
 	visible = false
 
 func _on_save_pressed():
+	var dict: Dictionary = {
+		"background_dim": float($GridContainer/BGDim/BGDimField.text),
+		"remove_num_from_c_when_exporting": bool($GridContainer/C1toC/C1toCCheckBox.button_pressed),
+		"note_speed": float($GridContainer/NoteSpeed/NoteSpeedField.text),
+		"touch_speed": float($GridContainer/TouchSpeed/TouchSpeedField.text),
+		"sfx_offset": float($GridContainer/SFXOffset/SFXOffsetField.text)
+	}
+	Global.settings_set(dict)
 	Global.settings_save()
+	settings_sync()
 	visible = false
 
 func _on_bg_dim_field_text_submitted(new_text):
 	Global.background_dim = float(new_text)
+	Global.bg_dim_changed.emit()
 	settings_sync()
 
 func _on_note_speed_field_text_submitted(new_text):

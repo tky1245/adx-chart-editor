@@ -11,23 +11,22 @@ some known bugs:
 		- slider selection highlight applied incorrectly
 
 todo:
-	- sound control
+	- judge arc for notes
+	- note edit(move notes on timeline directly; add beat or delete beat somewhere in the chart)
 
-soontm:
-	- change C1 to C when exporting for adx(?)
+soontm:	
+	- utils like multi select, copy pasta, bulk delete
+	- utils like flip/rotate selected notes
 	- optimization
 	- android support
 	- ios support(i dont have an ios to test)
-	- note edit(move notes on timeline directly)
 	- handle console spitting out zero length interval when things like 1-1 is declared
-	- finish each note type function(mostly done):
+	- finish each note type:
 		(hold slider implementation not done)
 	- finish drawing of each note type + distinguished color storing
 		(tap, hold and touch hold looks ok for now; fuck touch star)
 		(firework effect missing some stars)
-	- make sure everything works well
-	- utils like multi select, copy pasta, bulk delete
-	- utils like flip/rotate selected notes
+	
 
 limitations from godot:
 	- clip children bug (enjoy fireworks flashing outside the preview circle for now)

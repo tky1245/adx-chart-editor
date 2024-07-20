@@ -40,7 +40,7 @@ func _ready():
 	var chart_dir: String = Global.CHART_STORAGE_PATH + Global.current_chart_name + "/"
 	Savefile.load_chart() # load from save file to global var
 	$MetadataOptions/Window.visible = false
-	
+	Global.connect("bg_dim_changed", jacket_load, 8)
 	load_external_song(chart_dir)
 	song_length = $AudioPlayers/TrackPlayer.stream.get_length() #um
 	$PlaybackControls/TimeSlider/ProgressBar.max_value = song_length
@@ -271,6 +271,7 @@ func _on_play_pause_pressed(): # Play/Pause Button
 		elif Global.current_time < song_length - Global.current_offset:
 			$PlaybackControls/PlayPause.text = "❚❚"
 			$Timeline/SongTimer.start(song_length - Global.current_time - Global.current_offset)
+			$AudioPlayers/TrackPlayer.volume_db = linear_to_db(Sound.BGM_volume)
 			$AudioPlayers/TrackPlayer.play(Global.current_time + Global.current_offset)
 			Global.track_is_playing = true
 	else:
@@ -284,6 +285,7 @@ func _on_play_pause_pressed(): # Play/Pause Button
 
 func _on_start_countdown_timeout(): # start the track from beginning
 	$Timeline/SongTimer.start(song_length)
+	$AudioPlayers/TrackPlayer.volume_db = linear_to_db(Sound.BGM_volume)
 	$AudioPlayers/TrackPlayer.play(0)
 
 func _on_stop_pressed():# Stop Button
@@ -804,6 +806,9 @@ func _on_note_pos_1_text_changed(new_text):
 			note.set_note_position(note_position)
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = added_text_arr[0]
 	sync_note_details()
+	if Global.selected_notes.size() > 0:
+		Global.selected_notes[0].preview_render()
+		Global.selected_notes[0].timeline_object_render()
 
 func _on_note_pos_2_text_changed(new_text):
 	var note = Global.selected_notes[0]
@@ -814,6 +819,9 @@ func _on_note_pos_2_text_changed(new_text):
 			note.set_note_position(note_position)
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = added_text_arr[0]
 	sync_note_details()
+	if Global.selected_notes.size() > 0:
+		Global.selected_notes[0].preview_render()
+		Global.selected_notes[0].timeline_object_render()
 
 func _on_break_toggled(toggled_on):
 	var note = Global.selected_notes[0]
@@ -1153,9 +1161,11 @@ func _on_option_pressed(index):
 	elif index == 3: # Settings
 		$FileOptions/Settings.visible = true
 		$FileOptions/Settings.set("settings_cache", $FileOptions/Settings.get_cache())
+		$FileOptions/Settings.settings_sync()
 	elif index == 4: # Volume
 		$FileOptions/VolumeMixer.visible = true
 		$FileOptions/VolumeMixer.set("settings_cache", $FileOptions/VolumeMixer.get_cache())
+		$FileOptions/VolumeMixer.volume_sync()
 
 func get_chart_dict(difficulty: int) -> Dictionary:
 	var bpm_change_arr: Array = [] 
@@ -1292,7 +1302,7 @@ func other_metadata_read():
 		common_keys.append("inote_" + difficulty)
 	for key in Global.current_chart_data:
 		if key not in common_keys:
-			text += ("&" + key + "=" + Global.current_chart_data.get(key) + "\n")
+			text = str(text, "&", key, "=", Global.current_chart_data.get(key), "\n")
 	$MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text = text
 	$MetadataOptions/Window/VBoxContainer/VBoxContainer/HBoxContainer/ArtistField.text = Global.current_chart_data.get("artist")
 

@@ -38,15 +38,7 @@ func volume_load():
 	if error == OK:
 		var data_received = json.data
 		if typeof(data_received) == TYPE_DICTIONARY:
-			BGM_volume = data_received.get("BGM_volume")
-			answer_volume = data_received.get("answer_volume")
-			judge_volume = data_received.get("judge_volume")
-			slide_volume = data_received.get("slide_volume")
-			break_volume = data_received.get("break_volume")
-			break_slide_volume = data_received.get("break_slide_volume")
-			ex_volume = data_received.get("ex_volume")
-			touch_volume = data_received.get("touch_volume")
-			hanabi_volume = data_received.get("hanabi_volume")
+			volume_set(data_received)
 
 func volume_save():
 	var dict: Dictionary = {
@@ -66,3 +58,23 @@ func volume_save():
 	file.close()
 	print("Volume saved")
 	
+func volume_set(volume_dict: Dictionary):
+	for key in volume_dict:
+		if key == "BGM_volume":
+			BGM_volume = volume_dict.get("BGM_volume")
+		elif key == "answer_volume":
+			answer_volume = volume_dict.get("answer_volume")
+		elif key == "judge_volume":
+			judge_volume = volume_dict.get("judge_volume")
+		elif key == "slide_volume":
+			slide_volume = volume_dict.get("slide_volume")
+		elif key == "break_volume":
+			break_volume = volume_dict.get("break_volume")
+		elif key == "break_slide_volume":
+			break_slide_volume = volume_dict.get("break_slide_volume")
+		elif key == "ex_volume":
+			ex_volume = volume_dict.get("ex_volume")
+		elif key == "touch_volume":
+			touch_volume = volume_dict.get("touch_volume")
+		elif key == "hanabi_volume":
+			hanabi_volume = volume_dict.get("hanabi_volume")

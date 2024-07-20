@@ -349,6 +349,7 @@ func set_selected(option: bool = selected):
 	$TimelineIndicator/IndicatorHighlight.visible = selected
 	for slider_node in $Sliders.get_children():
 		slider_node.set_selected(selected)
+	preview_render()
 
 func create_slider(slider_args: Dictionary) -> void:
 	pass

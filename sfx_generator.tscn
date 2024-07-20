@@ -48,7 +48,23 @@ func sfx_start(sfx_name: String, node_index: int):
 			print(\"SFX with name '\", sfx_name, \"' not found.\")
 			return
 	# TODO: change volume
-	
+	if sfx_name in [\"answer\"]:
+		player.volume_db = linear_to_db(Sound.answer_volume)
+	elif sfx_name in [\"judge\"]:
+		player.volume_db = linear_to_db(Sound.judge_volume)
+	elif sfx_name in [\"slide\"]:
+		player.volume_db = linear_to_db(Sound.slide_volume)
+	elif sfx_name in [\"judge_break\", \"break\"]:
+		player.volume_db = linear_to_db(Sound.break_volume)
+	elif sfx_name in [\"judge_break_slide\", \"break_slide\", \"break_slide_start\"]:
+		player.volume_db = linear_to_db(Sound.break_slide_volume)
+	elif sfx_name in [\"judge_ex\"]:
+		player.volume_db = linear_to_db(Sound.ex_volume)
+	elif sfx_name in [\"touch\", \"touch_hold\"]:
+		player.volume_db = linear_to_db(Sound.touch_volume)
+	elif sfx_name in [\"hanabi\"]:
+		player.volume_db = linear_to_db(Sound.hanabi_volume)
+		
 	player.stream = stream
 	add_child(player)
 	player.play()
@@ -70,3 +86,5 @@ func all_sfx_stop():
 
 [node name="SFXGenerator" type="Node2D"]
 script = SubResource("GDScript_vpceo")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]

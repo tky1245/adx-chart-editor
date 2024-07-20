@@ -112,6 +112,7 @@ const note_colors: Dictionary = {
 # Some settings
 var beats_per_bar = 4
 var background_dim: float = 0.5
+signal bg_dim_changed
 var remove_num_from_c_when_exporting: bool = false
 var note_speed: float
 var touch_speed: float
@@ -210,6 +211,7 @@ func settings_set(settings_dict: Dictionary) -> void:
 	for key in settings_dict:
 		if key == "background_dim":
 			background_dim = settings_dict.get("background_dim")
+			bg_dim_changed.emit()
 		if key == "remove_num_from_c_when_exporting":
 			remove_num_from_c_when_exporting = settings_dict.get("remove_num_from_c_when_exporting")
 		if key == "note_speed":

@@ -1,4 +1,211 @@
-[gd_scene format=3 uid="uid://dtnvfyk2lvftf"]
+[gd_scene load_steps=2 format=3 uid="uid://dtnvfyk2lvftf"]
+
+[ext_resource type="Script" path="res://volume_mixer.gd" id="1_smajq"]
 
 [node name="VolumeMixer" type="Window"]
 initial_position = 1
+size = Vector2i(400, 350)
+script = ExtResource("1_smajq")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "BGM:"
+
+[node name="BGMSlider" type="HSlider" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="BGMTest" type="Button" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Answer:"
+
+[node name="AnswerSlider" type="HSlider" parent="VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="AnswerTest" type="Button" parent="VBoxContainer/HBoxContainer2"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Judge:"
+
+[node name="JudgeSlider" type="HSlider" parent="VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="JudgeTest" type="Button" parent="VBoxContainer/HBoxContainer3"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer4"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Slide:"
+
+[node name="SlideSlider" type="HSlider" parent="VBoxContainer/HBoxContainer4"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="SlideTest" type="Button" parent="VBoxContainer/HBoxContainer4"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer5"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Break:"
+
+[node name="BreakSlider" type="HSlider" parent="VBoxContainer/HBoxContainer5"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="BreakTest" type="Button" parent="VBoxContainer/HBoxContainer5"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer6" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer6"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "BreakSlide:"
+
+[node name="BreakSlideSlider" type="HSlider" parent="VBoxContainer/HBoxContainer6"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="BreakSlideTest" type="Button" parent="VBoxContainer/HBoxContainer6"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer7" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer7"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "EX:"
+
+[node name="EXSlider" type="HSlider" parent="VBoxContainer/HBoxContainer7"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="EXTest" type="Button" parent="VBoxContainer/HBoxContainer7"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer8" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer8"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Touch:"
+
+[node name="TouchSlider" type="HSlider" parent="VBoxContainer/HBoxContainer8"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="TouchTest" type="Button" parent="VBoxContainer/HBoxContainer8"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer9" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer9"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+text = "Hanabi:"
+
+[node name="HanabiSlider" type="HSlider" parent="VBoxContainer/HBoxContainer9"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="HanabiTest" type="Button" parent="VBoxContainer/HBoxContainer9"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+text = "0%"
+
+[node name="HBoxContainer10" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Save" type="Button" parent="VBoxContainer/HBoxContainer10"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Save"
+
+[node name="Cancel" type="Button" parent="VBoxContainer/HBoxContainer10"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Cancel"
+
+[connection signal="close_requested" from="." to="." method="_on_close_requested"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer/BGMSlider" to="." method="_on_bgm_slider_value_changed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer/BGMTest" to="." method="_on_bgm_test_pressed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer2/AnswerSlider" to="." method="_on_answer_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer3/JudgeSlider" to="." method="_on_judge_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer4/SlideSlider" to="." method="_on_slide_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer5/BreakSlider" to="." method="_on_break_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer6/BreakSlideSlider" to="." method="_on_break_slide_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer7/EXSlider" to="." method="_on_ex_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer8/TouchSlider" to="." method="_on_touch_slider_value_changed"]
+[connection signal="value_changed" from="VBoxContainer/HBoxContainer9/HanabiSlider" to="." method="_on_hanabi_slider_value_changed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer10/Save" to="." method="_on_save_pressed"]
+[connection signal="pressed" from="VBoxContainer/HBoxContainer10/Cancel" to="." method="_on_cancel_pressed"]
