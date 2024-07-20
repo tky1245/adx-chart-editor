@@ -53,7 +53,7 @@ func _ready():
 	load_difficulty(current_difficulty)
 	$MetadataOptions/DifficultySelect.selected = current_difficulty-1
 	$MetadataOptions/ChartConstant.text = str(Global.current_chart_data.get(str("lv_" + str(current_difficulty))))
-	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get(str("first_" + str(current_difficulty))))
+	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get("first"))
 	Global.current_offset = float($MetadataOptions/MusicOffset.text)
 	# Draw a circle
 	var density = 180
@@ -1251,7 +1251,7 @@ func metadata_update():
 	other_metadata_read()
 	$MetadataOptions/DifficultySelect.selected = current_difficulty - 1
 	$MetadataOptions/ChartConstant.text = Global.current_chart_data.get("lv_" + str(current_difficulty)) if Global.current_chart_data.get("lv_" + str(current_difficulty)) else ""
-	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get("first_" + str(current_difficulty))) if Global.current_chart_data.get("first_" + str(current_difficulty)) else "0"
+	$MetadataOptions/MusicOffset.text = str(Global.current_chart_data.get("first")) if Global.current_chart_data.get("first") else "0"
 	Global.current_offset = float($MetadataOptions/MusicOffset.text)
 
 func _on_difficulty_select_item_selected(index):
@@ -1272,7 +1272,7 @@ func _on_chart_constant_text_submitted(new_text):
 
 func music_offset_update():
 	var new_offset = float($MetadataOptions/MusicOffset.text)
-	Global.current_chart_data[str("first_" + str(current_difficulty))] = new_offset
+	Global.current_chart_data["first"] = new_offset
 	$MetadataOptions/MusicOffset.text = str(new_offset)
 	Global.current_offset = new_offset
 
@@ -1283,12 +1283,11 @@ func _on_music_offset_text_submitted(new_text):
 	music_offset_update()
 
 func other_metadata_read():
-	var common_keys = ["title", "artist"]
+	var common_keys = ["title", "artist", "first"]
 	var text: String
 	for i in range(7):
 		var difficulty = str(i+1)
 		common_keys.append("des_" + difficulty)
-		common_keys.append("first_" + difficulty)
 		common_keys.append("lv_" + difficulty)
 		common_keys.append("inote_" + difficulty)
 	for key in Global.current_chart_data:
@@ -1301,7 +1300,7 @@ func other_metadata_save():
 	var text = $MetadataOptions/Window/VBoxContainer/HBoxContainer/BoxContainer/OtherMetadata.text
 	var raw_data = text.split("&", false)
 	for key in Global.current_chart_data:
-		if !key.begins_with("des_") and !key.begins_with("first_") and !key.begins_with("lv_") and !key.begins_with("inote_") and !(key in ["title", "artist"]):
+		if !key.begins_with("des_") and !key.begins_with("lv_") and !key.begins_with("inote_") and !(key in ["title", "artist", "first"]):
 			Global.current_chart_data.erase(key)
 	for line in raw_data:
 		var key = line.split("=")[0]
