@@ -29,16 +29,19 @@ var ex_volume: float = 1
 var touch_volume: float = 1
 var hanabi_volume: float = 1
 
+func _ready():
+	volume_load()
 
 func volume_load():
 	var file = FileAccess.open("user://volume_mixer.json", FileAccess.READ)
-	var json_string = file.get_line()
-	var json = JSON.new()
-	var error = json.parse(json_string)
-	if error == OK:
-		var data_received = json.data
-		if typeof(data_received) == TYPE_DICTIONARY:
-			volume_set(data_received)
+	if file:
+		var json_string = file.get_line()
+		var json = JSON.new()
+		var error = json.parse(json_string)
+		if error == OK:
+			var data_received = json.data
+			if typeof(data_received) == TYPE_DICTIONARY:
+				volume_set(data_received)
 
 func volume_save():
 	var dict: Dictionary = {

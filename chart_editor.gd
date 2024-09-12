@@ -174,7 +174,9 @@ func _input(event):
 					else:
 						note.set_selected(false)
 				sync_note_details()
-	
+
+
+func _unhandled_input(event):
 	# some keybinds
 	if event.is_action_pressed("ui_right"):
 		beat_skip(1)
@@ -182,6 +184,28 @@ func _input(event):
 		beat_skip(-1)
 	if event.is_action_pressed("ui_text_delete"):
 		_on_delete_note_pressed()
+	if event is InputEventKey and event.pressed:
+		if Global.selected_notes.size() > 0:
+			if event.keycode == KEY_Q:
+				for note in Global.selected_notes:
+					note.beat -= 1
+					note.initialize()
+					note.preview_render()
+					note.timeline_object_render()
+			if event.keycode == KEY_E:
+				for note in Global.selected_notes:
+					note.beat += 1
+					note.initialize()
+					note.preview_render()
+					note.timeline_object_render()
+		if event.keycode == KEY_1:
+			_on_tap_toggle_pressed()
+		if event.keycode == KEY_2:
+			_on_hold_toggle_pressed()
+		if event.keycode == KEY_3:
+			_on_slider_toggle_pressed()
+		
+	
 	
 func _process(_delta):
 	if !$Timeline/SongTimer.is_stopped():
@@ -390,6 +414,7 @@ func _on_note_timeline_gui_input(event): # Timeline Dragged
 			beat_skip(1)
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
 			beat_skip(-1)
+		unfocus_fields() # totally unrefined method
 
 func beat_skip(direction: int):
 	if direction == 1:
@@ -408,6 +433,12 @@ func timeline_visible_range_update(): # Update timeline, use before render
 	Global.timeline_visible_time_range["Start"] = leftmost_time
 	Global.timeline_visible_time_range["End"] = rightmost_time
 
+func unfocus_fields(node: Node = $NoteDetails):
+	if node.get_child_count() == 0:
+		node.release_focus()
+	else:
+		for child in node.get_children():
+			unfocus_fields(child)
 # Use when editing notes
 func timeline_object_update():
 	#TODO: put note reader in
