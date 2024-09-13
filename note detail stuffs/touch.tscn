@@ -58,5 +58,6 @@ width = 4.0
 [node name="SelectedHighlight" type="Line2D" parent="Note"]
 closed = true
 width = 3.0
+default_color = Color(0, 1, 0, 1)
 
 [node name="TimelineIndicator" type="Node2D" parent="."]

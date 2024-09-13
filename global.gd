@@ -18,8 +18,8 @@ const preview_outcircle_radius: float = 225
 var touch_positions: Dictionary
 var initial_note_distance: float = 50
 var note_speed_in_time = 0.4
-var clicked_notes: Array[Node2D] = []
-var selected_notes: Array[Node2D] = []
+var clicked_notes: Array[Note] = []
+var selected_notes: Array[Note] = []
 var current_offset: float
 var track_is_playing: bool = false
 var current_time: float
@@ -132,6 +132,8 @@ func _ready():
 		dir.make_dir("ADXChartViewer")
 		dir.change_dir("ADXChartViewer")
 		dir.make_dir("Charts")
+	# Load settings
+	settings_load()
 	# Generate touch positions
 	for i in range(8):
 		var pos_name = "A" + str(i + 1)
@@ -185,13 +187,14 @@ func touch_position_angle(note_position: String):
 
 func settings_load():
 	var file = FileAccess.open("user://settings.json", FileAccess.READ)
-	var json_string = file.get_line()
-	var json = JSON.new()
-	var error = json.parse(json_string)
-	if error == OK:
-		var data_received = json.data
-		if typeof(data_received) == TYPE_DICTIONARY:
-			settings_set(data_received)
+	if file:
+		var json_string = file.get_line()
+		var json = JSON.new()
+		var error = json.parse(json_string)
+		if error == OK:
+			var data_received = json.data
+			if typeof(data_received) == TYPE_DICTIONARY:
+				settings_set(data_received)
 
 func settings_save():
 	var dict: Dictionary = {
@@ -220,3 +223,37 @@ func settings_set(settings_dict: Dictionary) -> void:
 			touch_speed = settings_dict.get("touch_speed")
 		if key == "sfx_offset":
 			sfx_offset = settings_dict.get("sfx_offset")
+
+func new_note(note_type: Note.type, args: Dictionary) -> Note:
+	var note
+	if note_type == Note.type.TAP:
+		var tap = preload("res://note detail stuffs/tap.tscn")
+		note = tap.instantiate()
+	elif note_type == Note.type.TOUCH:
+		var touch = preload("res://note detail stuffs/touch.tscn")
+		note = touch.instantiate()
+	elif note_type == Note.type.TAP_HOLD:
+		var tap_hold = preload("res://note detail stuffs/tap_hold.tscn")
+		note = tap_hold.instantiate()
+	elif note_type == Note.type.TOUCH_HOLD:
+		var touch_hold = preload("res://note detail stuffs/touch_hold.tscn")
+		note = touch_hold.instantiate()
+	for key in args:
+		note.set(key, args[key])
+
+	return note
+
+func sort_note_by_index(note_arr: Array[Note]) -> Array[Note]:
+	var temp_arr = note_arr
+	var swapped = false
+	for i in range(len(temp_arr)):
+		swapped = false
+		for j in range(len(temp_arr) - 1):
+			if temp_arr[j].get_index() > temp_arr[j + 1].get_index():
+				var temp = temp_arr[j] # dumb swapping
+				temp_arr[j] = temp_arr[j + 1]
+				temp_arr[j + 1] = temp
+				swapped = true
+		if swapped == false:
+			break
+	return temp_arr

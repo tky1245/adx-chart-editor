@@ -1,4 +1,4 @@
-extends Node2D
+class_name NoteSlider extends Node2D
 var beat: int
 var bpm: float
 var slider_property_break: bool

@@ -146,7 +146,7 @@ func _input(event):
 										Global.clicked_notes.append(note)
 										note_clicked = true
 										break
-			Global.clicked_notes = Note.sort_note_by_index(Global.clicked_notes)
+			Global.clicked_notes = Global.sort_note_by_index(Global.clicked_notes)
 			if note_clicked:
 				#if ctrl or other keys isnt held down
 				if Global.clicked_notes.size() == 1:
@@ -752,23 +752,23 @@ func _on_button_pressed(): # debug button
 func sync_note_details():
 	$NoteDetails.visible = true
 	if Global.selected_notes.size() == 1:
-		var note = Global.selected_notes[0]
+		var note: Note = Global.selected_notes[0]
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = note.get("note_position").left(-1)
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text = note.get("note_position").right(1)
 		
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Break.button_pressed = note.get("note_property_break")
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/EX.button_pressed = note.get("note_property_ex")
-		if note.get("type") in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+		if note is TapHold or note is TouchHold:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star.visible = false
 		else:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star.visible = true
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Star.button_pressed = note.get("note_property_star")
-		if note.get("type") in [Note.type.TAP] and note.note_property_star:
+		if note is Tap and note.is_star():
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate.visible = true
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate.button_pressed = note.get("note_star_spinning")
 		else:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Rotate.visible = false
-		if note.get("sliders").size() > 0:
+		if note.get_slider_count() > 0:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Tapless.visible = true
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams1/Tapless.button_pressed = note.get("slider_tapless")
 		else:
@@ -777,12 +777,12 @@ func sync_note_details():
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Mine.button_pressed = note.get("note_property_mine")
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NoteParams2/Backtick.value = int(note.get("delay_ticks"))
 		
-		if note.get("sliders").size() > 0: # toggle hold fix TODO
+		if note.get_slider_count() > 0: # toggle hold fix TODO
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = false
 		else:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible = true
 		
-		if note.get("type") in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+		if note is TapHold or note is TouchHold:
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide.visible = false
 			$NoteDetails/ScrollContainer/Properties/HoldProperties.visible = true
 			$NoteDetails/ScrollContainer/Properties/HoldProperties/HoldDuration/HoldDurationX.text = str(note.duration_arr[0])
@@ -791,7 +791,7 @@ func sync_note_details():
 			$NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/AddSlide.visible = true
 			$NoteDetails/ScrollContainer/Properties/HoldProperties.visible = false
 		
-		if note.get("sliders").size() == 0:
+		if note.get_slider_count() == 0:
 			$NoteDetails/ScrollContainer/Properties/SliderProperties.visible = false
 		else:
 			$NoteDetails/ScrollContainer/Properties/SliderProperties.visible = true
@@ -814,11 +814,11 @@ func _on_note_pos_1_text_changed(new_text):
 	var added_text_arr: PackedStringArray = new_text.split(note.note_position.left(-1), false)
 	if added_text_arr.size() == 0: # removing alphabets
 		var note_position = $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text
-		if note.type in [Note.type.TOUCH, Note.type.TOUCH_HOLD]:
-			var new_type = Note.type.TAP if note.type == Note.type.TOUCH else Note.type.TAP_HOLD
+		if note is Touch or note is TouchHold:
+			var new_type = Note.type.TAP if note is Touch else Note.type.TAP_HOLD
 			var args: Dictionary = note.get_args()
 			args["note_position"] = note_position
-			var new_note = add_note(new_type, args)
+			var new_note: Note = add_note(new_type, args)
 			Global.selected_notes = [new_note]
 			note.queue_free()
 		else: # not sure why is this needed tbh
@@ -826,8 +826,8 @@ func _on_note_pos_1_text_changed(new_text):
 		$NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos1.text = ""
 	elif added_text_arr[0].to_upper() in ["A", "B", "C", "D", "E"]:
 		var note_position = added_text_arr[0].to_upper() + $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text
-		if note.type in [Note.type.TAP, Note.type.TAP_HOLD]:
-			var new_type = Note.type.TOUCH if note.type == Note.type.TAP else Note.type.TOUCH_HOLD
+		if note is Tap or note is TapHold:
+			var new_type = Note.type.TOUCH if note is Tap else Note.type.TOUCH_HOLD
 			var args: Dictionary = note.get_args()
 			args["note_position"] = note_position
 			var new_note = add_note(new_type, args)
@@ -870,7 +870,7 @@ func _on_ex_toggled(toggled_on):
 
 func _on_star_toggled(toggled_on):
 	var note = Global.selected_notes[0]
-	if note.type not in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+	if note is Tap or note is Touch:
 		note.note_property_star = toggled_on
 		note.note_draw()
 		note.preview_render()
@@ -879,7 +879,7 @@ func _on_star_toggled(toggled_on):
 
 func _on_rotate_toggled(toggled_on):
 	var note = Global.selected_notes[0]
-	if note.type in [Note.type.TAP] and note.note_property_star:
+	if note is Tap and note.is_star():
 		note.note_star_spinning = toggled_on
 		note.note_draw()
 		note.preview_render()
@@ -917,8 +917,8 @@ func _on_backtick_value_changed(value):
 func _on_hold_pressed(): # change a tap to a hold
 	var note = Global.selected_notes[0]
 	if $NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible:
-		if note.type in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
-			var new_type = Note.type.TAP if note.type == Note.type.TAP_HOLD else Note.type.TOUCH
+		if note is TapHold or note is TouchHold:
+			var new_type = Note.type.TAP if note is TapHold else Note.type.TOUCH
 			var args: Dictionary = note.get_args()
 			args.erase("duration_arr")
 			args["type"] = new_type
@@ -927,7 +927,7 @@ func _on_hold_pressed(): # change a tap to a hold
 			new_note.set_selected(true)
 			note.free()
 		else:
-			var new_type = Note.type.TAP_HOLD if note.type == Note.type.TAP else Note.type.TOUCH_HOLD
+			var new_type = Note.type.TAP_HOLD if note is Tap else Note.type.TOUCH_HOLD
 			var args: Dictionary = note.get_args()
 			args.erase("note_property_star")
 			args["type"] = new_type
@@ -955,13 +955,13 @@ func _on_hold_duration_y_text_changed(new_text):
 	note.preview_render()
 
 func _on_slider_deleted(slider_index):
-	var note = Global.selected_notes[0]
+	var note: Note = Global.selected_notes[0]
 	var beat = note.get("beat")
 	note.sliders.pop_at(slider_index)
 	note.slider_tapless = false
-	if note.type in [Note.type.TAP, Note.type.TOUCH]:
+	if note is Tap or note is Touch:
 		note.note_property_star = false
-	if note.type in [Note.type.TAP]:
+	if note is Tap:
 		note.note_star_spinning = false
 	note_both_update(beat)
 	note.slider_draw()
@@ -969,7 +969,7 @@ func _on_slider_deleted(slider_index):
 
 func _on_add_slide_pressed():
 	if Global.selected_notes.size() == 1:
-		var note = Global.selected_notes[0]
+		var note: Note = Global.selected_notes[0]
 		var num = int(note.note_position)
 		num = num + 1 if num != 8 else 1
 		var new_slider_dict: Dictionary = {
@@ -977,9 +977,9 @@ func _on_add_slide_pressed():
 			"delay_arr" = [1.0, 4],
 			"slider_shape_arr" = [["-", str(num)]]
 		}
-		if note.type in [Note.type.TAP, Note.type.TOUCH]:
+		if note is Tap or note is Touch:
 			note.note_property_star = true
-		if note.type in [Note.type.TAP]:
+		if note is Tap:
 			note.note_star_spinning = true
 		note.sliders.append(new_slider_dict)
 		note.slider_draw()
@@ -1006,8 +1006,8 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 	note_position = "C1" if note_position == "C" else note_position
 	
 	if Global.selected_notes.size() == 1 and placement_selected == "Slider" and !toggle_multiplacing: # append straight slider directly
-		var note = Global.selected_notes[0]
-		if note.type in [Note.type.TAP, Note.type.TOUCH]: # not planning to do hold slides for now
+		var note: Note = Global.selected_notes[0]
+		if note is Tap or note is Touch: # not planning to do hold slides for now
 			if note.sliders.size() == 0: # no sliders?
 				var new_slider_dict: Dictionary = {
 					"duration_arr" = last_used_slide_duration_arr,
@@ -1015,7 +1015,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 					"slider_shape_arr" = [["-", note_position]],
 					"note_property_break" = toggle_break
 				}
-				if note.type in [Note.type.TAP, Note.type.TOUCH]:
+				if note is Tap or note is Touch:
 					note.note_property_star = true
 				note.sliders.append(new_slider_dict)
 				note.note_draw()
@@ -1044,7 +1044,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch: # touch hold
-			var new_note = add_note(Note.type.TOUCH_HOLD, args)
+			var new_note: Note = add_note(Note.type.TOUCH_HOLD, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1055,7 +1055,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap hold
-			var new_note = add_note(Note.type.TAP_HOLD, args)
+			var new_note: Note = add_note(Note.type.TAP_HOLD, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1076,7 +1076,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch: # touch
-			var new_note = add_note(Note.type.TOUCH, args)
+			var new_note: Note = add_note(Note.type.TOUCH, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1087,7 +1087,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap
-			var new_note = add_note(Note.type.TAP, args)
+			var new_note: Note = add_note(Note.type.TAP, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1108,14 +1108,14 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch:
-			var new_note = add_note(Note.type.TOUCH, args)
+			var new_note: Note = add_note(Note.type.TOUCH, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			new_note.set_selected(true)
 		else:
-			var new_note = add_note(Note.type.TAP, args)
+			var new_note: Note = add_note(Note.type.TAP, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1125,8 +1125,8 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 		placement_tools_highlight_update()
 	sync_note_details()
 
-func add_note(note_type: Note.type, args: Dictionary) -> Node:
-	var new_note = Note.new_note(note_type, args)
+func add_note(note_type: Note.type, args: Dictionary) -> Note:
+	var new_note: Note = Global.new_note(note_type, args)
 	new_note.initialize()
 	$Notes.add_child(new_note)
 	note_both_update(new_note.get("beat"))

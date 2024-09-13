@@ -1,26 +1,4 @@
-extends Node2D
-var type = Note.type.TOUCH
-var beat: int = 0
-var bpm: float = 0.0
-var note_property_break: bool = false
-var note_property_ex: bool = false
-var note_property_firework: bool = false
-var note_property_both: bool = false
-var note_property_star: bool = false
-var note_property_mine: bool = false
-var note_star_spinning: bool = false
-var note_position: String = ""
-var sliders: Array = []
-var slider_tapless: bool = false
-var slider_both: bool = false
-var delay_ticks: int = 0
-
-var selected: bool = false
-signal effect_trigger
-
-func preview_render(current_time: float = Global.current_time) -> void:
-	note_render(current_time)
-	slider_render(current_time)
+class_name Touch extends Note
 
 func note_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
@@ -78,10 +56,6 @@ func note_render(current_time: float = Global.current_time) -> void:
 					$Note/JudgeOutline.visible = true
 			set_node_images_transparency($Note, scale_progress)
 
-func slider_render(current_time: float = Global.current_time) -> void:
-	for slider in $Sliders.get_children():
-		slider.slider_render(current_time)
-
 func sfx_trigger(previous_time: float, current_time: float, offset: float = Global.sfx_offset):
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var judge_time: float = Global.timeline_beats[beat] + delay_tick_time
@@ -98,14 +72,6 @@ func sfx_trigger(previous_time: float, current_time: float, offset: float = Glob
 			Sound.sfx_start.emit("hanabi", 0)
 	for slider in $Sliders.get_children():
 		slider.sfx_trigger(previous_time, current_time)
-
-func initialize() -> void:
-	set_note_position()
-	note_draw()
-	slider_draw()
-	# Selected highlight
-	$Note/SelectedHighlight.default_color = Color.LIME
-	set_selected()
 
 func note_draw() -> void:
 	if note_property_star:
@@ -257,17 +223,6 @@ func touch_star_draw() -> void:
 		note_path.curve = new_curve
 	timeline_object_draw()
 
-func slider_draw(both: bool = slider_both) -> void:
-	slider_both = both
-	for node in $Sliders.get_children():
-		node.queue_free()
-	for slider_args in sliders: # make sliders
-		if sliders.size() > 1 or both:
-			slider_args["slider_property_both"] = true
-		else:
-			slider_args["slider_property_both"] = false
-		create_slider(slider_args)
-
 func timeline_object_draw() -> void:
 	if !note_property_star:
 		var note_color_timeline_indicator
@@ -343,18 +298,32 @@ func set_note_position(pos: String = note_position) -> void:
 			slider_args["slider_property_both"] = true
 		create_slider(slider_args)
 
-func timeline_object_render() -> void:
-	if slider_tapless and sliders.size() > 0:
-		$TimelineIndicator.visible = false
-	else:
-		var time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
-		if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
-			$TimelineIndicator.visible = true
-			$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)
-		else:
-			$TimelineIndicator.visible = false
+func set_selected(option: bool = selected):
+	selected = option
+	$Note/SelectedHighlight.visible = selected
+	$TimelineIndicator/IndicatorHighlight.visible = selected
+	for slider_node in $Sliders.get_children():
+		slider_node.set_selected(selected)
+	preview_render()
+
+func select_area() -> Array:
+	var arr: Array = []
+	if $TimelineIndicator.visible:
+		var indicator_highlight = $TimelineIndicator/IndicatorHighlight
+		arr.append(indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position))
+	if $Note.visible:
+		var note_selected_highlight = $Note/SelectedHighlight
+		arr.append(note_selected_highlight.points * Transform2D(0.0, -note_selected_highlight.global_position))
 	for slider in $Sliders.get_children():
-		slider.timeline_object_render()
+		arr.append_array(slider.select_area())
+	return arr
+
+func set_node_images_transparency(node: Node2D, transparency: float) -> void:
+	if node.get_children().size() == 0:
+		node.self_modulate.a = transparency
+	else:
+		for child_node in node.get_children():
+			set_node_images_transparency(child_node, transparency)
 
 func circle(color: Color, width: float, radius: float = 18, frequency: int = 360) -> Line2D:
 	var newLine = Line2D.new()
@@ -414,64 +383,3 @@ func star_rhombus(inner_radius: float = 16, outer_radius: float = 26) -> PackedV
 	new_polygon.append(Vector2(inner_radius, 0))
 	new_polygon.append(Vector2(inner_radius - inner_radius * sin(TAU/10)*cos(TAU/20)/sin(TAU*7/20), -inner_radius*sin(TAU/10)*sin(TAU/20)/sin(TAU*7/20)))
 	return new_polygon
-
-func create_slider(slider_args: Dictionary):
-	var slider = preload("res://note detail stuffs/slider.tscn")
-	var new_slider = slider.instantiate()
-	new_slider.beat = beat
-	new_slider.bpm = bpm
-	new_slider.slider_head_position = note_position
-	for key in slider_args:
-		new_slider.set(key, slider_args[key])
-	new_slider.initialize($Sliders.position - Global.preview_center)
-	$Sliders.add_child(new_slider)
-
-func delete_slider(slider_index: int):
-	$Sliders.get_child(slider_index).queue_free()
-	sliders.pop_at(slider_index)
-
-func set_node_images_transparency(node: Node2D, transparency: float) -> void:
-	if node.get_children().size() == 0:
-		node.self_modulate.a = transparency
-	else:
-		for child_node in node.get_children():
-			set_node_images_transparency(child_node, transparency)
-
-func set_selected(option: bool = selected):
-	selected = option
-	$Note/SelectedHighlight.visible = selected
-	$TimelineIndicator/IndicatorHighlight.visible = selected
-	for slider_node in $Sliders.get_children():
-		slider_node.set_selected(selected)
-	preview_render()
-
-func set_duration(arr: Array):
-	pass
-
-func select_area() -> Array:
-	var arr: Array = []
-	if $Note.visible:
-		var note_selected_highlight = $Note/SelectedHighlight
-		arr.append(note_selected_highlight.points * Transform2D(0.0, -note_selected_highlight.global_position))
-	if $TimelineIndicator.visible:
-		var indicator_highlight = $TimelineIndicator/IndicatorHighlight
-		arr.append(indicator_highlight.points * Transform2D(0.0, -indicator_highlight.global_position))
-	for slider in $Sliders.get_children():
-		arr.append_array(slider.select_area())
-	return arr
-
-func get_args() -> Dictionary:
-	var new_dict: Dictionary = {
-	"type": type,
-	"beat": beat,
-	"bpm": bpm,
-	"note_property_break": note_property_break,
-	"note_property_ex": note_property_ex,
-	"note_property_firework": note_property_firework,
-	"note_property_both": note_property_both,
-	"note_property_star": note_property_star,
-	"note_property_mine": note_property_mine,
-	"note_position": note_position,
-	"sliders": sliders,
-	}
-	return new_dict

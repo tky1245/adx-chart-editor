@@ -17,7 +17,6 @@ func sfx_start(sfx_name: String, node_index: int):
 	var player = AudioStreamPlayer.new()
 	if sfx_name == \"touch_hold\":
 		player.set(\"name\", str(node_index))
-		print(node_index)
 	var stream: AudioStream
 	if !stream:
 		if sfx_name == \"answer\":
@@ -72,7 +71,6 @@ func sfx_start(sfx_name: String, node_index: int):
 func sfx_end(sfx_name: String, node_index: int):
 	if sfx_name == \"touch_hold\":
 		for player in get_children():
-			print(node_index)
 			if player.get(\"name\") == str(node_index):
 				player.stop()
 				player.queue_free()
