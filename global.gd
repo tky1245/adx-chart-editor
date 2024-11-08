@@ -224,18 +224,18 @@ func settings_set(settings_dict: Dictionary) -> void:
 		if key == "sfx_offset":
 			sfx_offset = settings_dict.get("sfx_offset")
 
-func new_note(note_type: Note.type, args: Dictionary) -> Note:
+func new_note(note_type: Note.TYPE, args: Dictionary) -> Note:
 	var note
-	if note_type == Note.type.TAP:
+	if note_type == Note.TYPE.TAP:
 		var tap = preload("res://note detail stuffs/tap.tscn")
 		note = tap.instantiate()
-	elif note_type == Note.type.TOUCH:
+	elif note_type == Note.TYPE.TOUCH:
 		var touch = preload("res://note detail stuffs/touch.tscn")
 		note = touch.instantiate()
-	elif note_type == Note.type.TAP_HOLD:
+	elif note_type == Note.TYPE.TAP_HOLD:
 		var tap_hold = preload("res://note detail stuffs/tap_hold.tscn")
 		note = tap_hold.instantiate()
-	elif note_type == Note.type.TOUCH_HOLD:
+	elif note_type == Note.TYPE.TOUCH_HOLD:
 		var touch_hold = preload("res://note detail stuffs/touch_hold.tscn")
 		note = touch_hold.instantiate()
 	for key in args:

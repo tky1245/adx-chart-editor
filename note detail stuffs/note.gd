@@ -1,12 +1,12 @@
 class_name Note extends Node2D
 
-enum type{
+enum TYPE {
 	TAP,
 	TAP_HOLD,
 	TOUCH,
 	TOUCH_HOLD
 }
-
+var type: TYPE
 var beat: int = 0
 var bpm: float = 0.0
 var note_property_break: bool = false

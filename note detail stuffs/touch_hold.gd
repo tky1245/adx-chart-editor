@@ -1,5 +1,9 @@
 class_name TouchHold extends Note
 
+func _ready():
+	type = TYPE.TOUCH_HOLD
+
+
 var duration_arr: Array = [1, 4] # [x, y]: x/y of a bar; if y = 0, use x as seconds
 var duration: float = 0.0
 

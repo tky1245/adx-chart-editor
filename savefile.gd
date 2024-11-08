@@ -132,20 +132,20 @@ func maidata_to_chart(data: String) -> Dictionary:
 									"beat": beat,
 									"bpm": ongoing_bpm,
 									"note_position": note_position,
-									"type": Note.type.TAP,
+									"type": Note.TYPE.TAP,
 								})
 							break
 						else:
 							note_args["note_position"] = note_string.left(1)
-							note_args["type"] = Note.type.TAP
+							note_args["type"] = Note.TYPE.TAP
 							note_string = note_string.right(-1)
 					elif note_string.left(2).right(1) in numbers: # touch_position
 						note_args["note_position"] = note_string.left(2)
-						note_args["type"] = Note.type.TOUCH
+						note_args["type"] = Note.TYPE.TOUCH
 						note_string = note_string.right(-2)
 					elif note_string.left(1) == "C":
 						note_args["note_position"] = "C1"
-						note_args["type"] = Note.type.TOUCH
+						note_args["type"] = Note.TYPE.TOUCH
 						note_string = note_string.right(-1)
 					else: # no note here, probably
 						break
@@ -167,10 +167,10 @@ func maidata_to_chart(data: String) -> Dictionary:
 							elif decorator == "f":
 								note_args["note_property_firework"] = true
 							elif decorator == "h":
-								if note_args["type"] == Note.type.TAP:
-									note_args["type"] = Note.type.TAP_HOLD
-								elif note_args["type"] == Note.type.TOUCH:
-									note_args["type"] = Note.type.TOUCH_HOLD
+								if note_args["type"] == Note.TYPE.TAP:
+									note_args["type"] = Note.TYPE.TAP_HOLD
+								elif note_args["type"] == Note.TYPE.TOUCH:
+									note_args["type"] = Note.TYPE.TOUCH_HOLD
 							elif decorator == "$":
 								note_args["note_property_star"] = true
 							elif decorator == "?":
@@ -180,7 +180,7 @@ func maidata_to_chart(data: String) -> Dictionary:
 							note_string = note_string.right(-1)
 					
 					# search for hold duration
-					if note_args.get("type") in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+					if note_args.get("type") in [Note.TYPE.TAP_HOLD, Note.TYPE.TOUCH_HOLD]:
 						if note_string.begins_with("["):
 							var bracket_end_index = note_string.find("]")
 							var duration_string = note_string.left(bracket_end_index).right(-1)
@@ -396,7 +396,7 @@ func chart_to_maidata(data: Dictionary) -> String:
 						note_string += "?"
 					
 					# hold handling
-					if note.get("type") and note.get("type") in [Note.type.TAP_HOLD, Note.type.TOUCH_HOLD]:
+					if note.get("type") and note.get("type") in [Note.TYPE.TAP_HOLD, Note.TYPE.TOUCH_HOLD]:
 						if note.get("duration_arr")[1] == 0: # uses [0] as absolute time
 							note_string += "h[#" + str(note.get("duration_arr")[0]) + "]"
 						else:
@@ -455,6 +455,8 @@ func import_maidata(chart_dir: String) -> bool:
 	for data in maidata_text.split("&"):
 		var data_name = data.split("=")[0]
 		var data_value = "\n".join(data.right(-(data.find("=")+1)).split("\n", false))
+		#while data_value.contains("\r"):
+			#data_value = str(data_value.left(data_value.find("\\r")), data_value.right(-data_value.find("\\r")-2))
 		if data_name == "title":
 			chart_name = data_value
 			var i = 1
@@ -467,7 +469,8 @@ func import_maidata(chart_dir: String) -> bool:
 					break
 		if data_name.begins_with("inote_"):
 			data_value = chart_to_maidata(maidata_to_chart(data_value.replace(" ", "").replace("\n", "")))
-		chart_save[data_name] = data_value
+		if data_name:
+			chart_save[data_name] = data_value
 	if !chart_name:
 		print("maidata &title property not found.")
 		return false

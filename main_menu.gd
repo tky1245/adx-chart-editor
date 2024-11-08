@@ -13,7 +13,6 @@ func _on_new_chart_pressed():
 	if !$SelectSong.visible:
 		$SelectSong.visible = true
 
-
 func _on_select_song_file_selected(song_path):
 	selected_song_path = song_path
 	var temp_arr = song_path.split("/")

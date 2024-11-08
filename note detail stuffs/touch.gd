@@ -1,5 +1,8 @@
 class_name Touch extends Note
 
+func _ready():
+	type = TYPE.TOUCH
+
 func note_render(current_time: float = Global.current_time) -> void:
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	

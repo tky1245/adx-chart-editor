@@ -815,7 +815,7 @@ func _on_note_pos_1_text_changed(new_text):
 	if added_text_arr.size() == 0: # removing alphabets
 		var note_position = $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text
 		if note is Touch or note is TouchHold:
-			var new_type = Note.type.TAP if note is Touch else Note.type.TAP_HOLD
+			var new_type = Note.TYPE.TAP if note is Touch else Note.TYPE.TAP_HOLD
 			var args: Dictionary = note.get_args()
 			args["note_position"] = note_position
 			var new_note: Note = add_note(new_type, args)
@@ -827,7 +827,7 @@ func _on_note_pos_1_text_changed(new_text):
 	elif added_text_arr[0].to_upper() in ["A", "B", "C", "D", "E"]:
 		var note_position = added_text_arr[0].to_upper() + $NoteDetails/ScrollContainer/Properties/NoteProperties/NodePos/NotePos2.text
 		if note is Tap or note is TapHold:
-			var new_type = Note.type.TOUCH if note is Tap else Note.type.TOUCH_HOLD
+			var new_type = Note.TYPE.TOUCH if note is Tap else Note.TYPE.TOUCH_HOLD
 			var args: Dictionary = note.get_args()
 			args["note_position"] = note_position
 			var new_note = add_note(new_type, args)
@@ -918,7 +918,7 @@ func _on_hold_pressed(): # change a tap to a hold
 	var note = Global.selected_notes[0]
 	if $NoteDetails/ScrollContainer/Properties/NoteProperties/HoldSlideChange/Hold.visible:
 		if note is TapHold or note is TouchHold:
-			var new_type = Note.type.TAP if note is TapHold else Note.type.TOUCH
+			var new_type = Note.TYPE.TAP if note is TapHold else Note.TYPE.TOUCH
 			var args: Dictionary = note.get_args()
 			args.erase("duration_arr")
 			args["type"] = new_type
@@ -927,7 +927,7 @@ func _on_hold_pressed(): # change a tap to a hold
 			new_note.set_selected(true)
 			note.free()
 		else:
-			var new_type = Note.type.TAP_HOLD if note is Tap else Note.type.TOUCH_HOLD
+			var new_type = Note.TYPE.TAP_HOLD if note is Tap else Note.TYPE.TOUCH_HOLD
 			var args: Dictionary = note.get_args()
 			args.erase("note_property_star")
 			args["type"] = new_type
@@ -1044,7 +1044,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch: # touch hold
-			var new_note: Note = add_note(Note.type.TOUCH_HOLD, args)
+			var new_note: Note = add_note(Note.TYPE.TOUCH_HOLD, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1055,7 +1055,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap hold
-			var new_note: Note = add_note(Note.type.TAP_HOLD, args)
+			var new_note: Note = add_note(Note.TYPE.TAP_HOLD, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1076,7 +1076,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch: # touch
-			var new_note: Note = add_note(Note.type.TOUCH, args)
+			var new_note: Note = add_note(Note.TYPE.TOUCH, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1087,7 +1087,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 				placement_selected = "None"
 				placement_tools_highlight_update()
 		else: # tap
-			var new_note: Note = add_note(Note.type.TAP, args)
+			var new_note: Note = add_note(Note.TYPE.TAP, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1108,14 +1108,14 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 			"note_property_firework" = toggle_firework,
 		}
 		if toggle_touch:
-			var new_note: Note = add_note(Note.type.TOUCH, args)
+			var new_note: Note = add_note(Note.TYPE.TOUCH, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
 			Global.selected_notes = [new_note]
 			new_note.set_selected(true)
 		else:
-			var new_note: Note = add_note(Note.type.TAP, args)
+			var new_note: Note = add_note(Note.TYPE.TAP, args)
 			if Global.selected_notes.size() > 0:
 				for note in Global.selected_notes:
 					note.set_selected(false)
@@ -1125,7 +1125,7 @@ func _touch_area_clicked(touch_position: String): # handle note adding
 		placement_tools_highlight_update()
 	sync_note_details()
 
-func add_note(note_type: Note.type, args: Dictionary) -> Note:
+func add_note(note_type: Note.TYPE, args: Dictionary) -> Note:
 	var new_note: Note = Global.new_note(note_type, args)
 	new_note.initialize()
 	$Notes.add_child(new_note)
