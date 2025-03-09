@@ -283,8 +283,9 @@ func maidata_to_chart(data: String) -> Dictionary:
 									var duration_x = float(slider_duration_string.split("#")[1].split(":")[1])
 									var duration_y = int(slider_duration_string.split("#")[1].split(":")[0])
 									var bpm_ratio = float_to_fraction(ongoing_bpm/custom_bpm)
+									var slider_ratio = float_to_fraction(ongoing_bpm * duration_x/(custom_bpm * duration_y))
 									slider_args["delay_arr"] = [float(bpm_ratio[0]), int(4 * bpm_ratio[1])]
-									slider_args["duration_arr"] = [float(duration_x * bpm_ratio[0]), int(duration_y * bpm_ratio[1])]
+									slider_args["duration_arr"] = [float(slider_ratio[0]), int(slider_ratio[1])]
 								elif slider_duration_string.contains("#") and !slider_duration_string.contains(":"): # custom bpm abs duration
 									var custom_bpm = float(slider_duration_string.split("#")[0])
 									var abs_duration = float(slider_duration_string.split("#")[1])
@@ -420,8 +421,10 @@ func chart_to_maidata(data: Dictionary) -> String:
 							if slider.get("delay_arr") == [1.0, 4] and slider.get("duration_arr")[1] != 0: # default
 								note_string += "[" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
 							elif slider.get("delay_arr") != [1.0, 4] and slider.get("duration_arr")[1] != 0: # fake bpm change
-								var custom_bpm = note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1] * 4)
-								note_string += "[" + str(custom_bpm) + "#" + str(slider.get("duration_arr")[1]) + ":" + str(slider.get("duration_arr")[0]) + "]"
+								var delay_multiplier = (slider.get("delay_arr")[0] / slider.get("delay_arr")[1] * 4)
+								var custom_bpm = note.get("bpm") / delay_multiplier
+								var slider_ratio = float_to_fraction(slider.get("duration_arr")[0]/slider.get("duration_arr")[1] / delay_multiplier)
+								note_string += "[" + str(custom_bpm) + "#" + str(slider_ratio[1]) + ":" + str(slider_ratio[0]) + "]"
 							elif slider.get("delay_arr")[1] != 0 and slider.get("duration_arr")[1] == 0: # custom bpm + abs duration
 								var custom_bpm = note.get("bpm") / (slider.get("delay_arr")[0] / slider.get("delay_arr")[1] * 4)
 								note_string += "["+ str(custom_bpm) + "#" + str(slider.get("duration_arr")[0]) + "]"

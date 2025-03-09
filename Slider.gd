@@ -419,15 +419,15 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 	elif shape == "v": 
 		curve.add_point(Vector2(0, 0))
 		curve.add_point(Vector2(target_position))
-	elif shape == "s":
-		var head_bearing = atan2(Global.touch_positions[slider_head_position].x, -Global.touch_positions[slider_head_position].y)
-		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)))
-		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)))
+	elif shape == "s": # need a fix
+		var initial_bearing = atan2(Global.touch_positions[initial_position].x, -Global.touch_positions[initial_position].y)
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing - TAU / 4), -cos(initial_bearing - TAU / 4)))
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing + TAU / 4), -cos(initial_bearing + TAU / 4)))
 		curve.add_point(Vector2(target_position))
 	elif shape == "z":
-		var head_bearing = atan2(Global.touch_positions[slider_head_position].x, -Global.touch_positions[slider_head_position].y)
-		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing + TAU / 4), -cos(head_bearing + TAU / 4)))
-		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(head_bearing - TAU / 4), -cos(head_bearing - TAU / 4)))
+		var initial_bearing = atan2(Global.touch_positions[initial_position].x, -Global.touch_positions[initial_position].y)
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing + TAU / 4), -cos(initial_bearing + TAU / 4)))
+		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing - TAU / 4), -cos(initial_bearing - TAU / 4)))
 		curve.add_point(Vector2(target_position))
 	elif shape == "p": # ccw
 		var circle_radius = Global.preview_radius * sin(TAU / 16)

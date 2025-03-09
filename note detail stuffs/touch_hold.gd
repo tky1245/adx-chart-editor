@@ -102,6 +102,21 @@ func note_render(current_time: float = Global.current_time) -> void:
 			new_polygon.append_array(poly * Transform2D(i*TAU/4, Vector2(0, 0)))
 		$Note/SelectedHighlight.points = Geometry2D.offset_polygon(new_polygon, 10)[0]
 
+func timeline_object_render() -> void:
+	if slider_tapless and sliders.size() > 0:
+		$TimelineIndicator.visible = false
+	else:
+		if type in [TYPE.TAP_HOLD, TYPE.TOUCH_HOLD]:
+			var start_time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
+			var end_time = start_time + duration
+			if end_time > Global.timeline_visible_time_range["Start"] and start_time < Global.timeline_visible_time_range["End"]:
+				$TimelineIndicator.visible = true
+				$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(start_time)
+			else:
+				$TimelineIndicator.visible = false
+	for slider in $Sliders.get_children():
+		slider.timeline_object_render()
+
 func sfx_trigger(previous_time: float, current_time: float, offset: float = Global.sfx_offset):
 	var delay_tick_time = (delay_ticks / bpm / 128 * Global.beats_per_bar)
 	var judge_time_start_point = Global.timeline_beats[beat] + delay_tick_time

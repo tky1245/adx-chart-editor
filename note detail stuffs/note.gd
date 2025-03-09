@@ -42,12 +42,13 @@ func timeline_object_render() -> void:
 	if slider_tapless and sliders.size() > 0:
 		$TimelineIndicator.visible = false
 	else:
-		var time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
-		if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
-			$TimelineIndicator.visible = true
-			$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)
-		else:
-			$TimelineIndicator.visible = false
+		if type in [TYPE.TAP, TYPE.TOUCH]:
+			var time = Global.timeline_beats[beat] + (delay_ticks / bpm / 128 * Global.beats_per_bar)
+			if time > Global.timeline_visible_time_range["Start"] and time < Global.timeline_visible_time_range["End"]:
+				$TimelineIndicator.visible = true
+				$TimelineIndicator.position.x = Global.time_to_timeline_pos_x(time)
+			else:
+				$TimelineIndicator.visible = false
 	for slider in $Sliders.get_children():
 		slider.timeline_object_render()
 
