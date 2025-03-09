@@ -420,12 +420,12 @@ func slider_path(shape: String, target_note_position: String, initial_note_posit
 		curve.add_point(Vector2(0, 0))
 		curve.add_point(Vector2(target_position))
 	elif shape == "s": # need a fix
-		var initial_bearing = atan2(Global.touch_positions[initial_position].x, -Global.touch_positions[initial_position].y)
+		var initial_bearing = atan2(initial_position.x, -initial_position.y)
 		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing - TAU / 4), -cos(initial_bearing - TAU / 4)))
 		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing + TAU / 4), -cos(initial_bearing + TAU / 4)))
 		curve.add_point(Vector2(target_position))
 	elif shape == "z":
-		var initial_bearing = atan2(Global.touch_positions[initial_position].x, -Global.touch_positions[initial_position].y)
+		var initial_bearing = atan2(initial_position.x, -initial_position.y)
 		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing + TAU / 4), -cos(initial_bearing + TAU / 4)))
 		curve.add_point(Global.preview_radius * tan(PI / 8) * Vector2(sin(initial_bearing - TAU / 4), -cos(initial_bearing - TAU / 4)))
 		curve.add_point(Vector2(target_position))
