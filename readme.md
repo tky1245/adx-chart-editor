@@ -3,7 +3,7 @@
 
 this is a project of adx chart editor
 
-still in progress tho
+~~still in progress~~ abandoned
 
 disclaimer: im using this to organize thought process or write notes sometimes
 
