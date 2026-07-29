@@ -36,31 +36,31 @@ How to use:
 
 current hotkeys:
 
-a/d/left/right - skip to previous/next beat
-q/e - move selected note to previous/next beat
-1/2/3 - select tap/hold/slider
+- a/d/left/right - skip to previous/next beat
+- q/e - move selected note to previous/next beat
+- 1/2/3 - select tap/hold/slider
 
 some known bugs:
-	- touch slider bugs like: (unsure if fixed completely)
-		- sliders not being rendered after slider creation using the insert slider tool
-		- slider selection highlight applied incorrectly
-	- toggling between tap/hold makes it yellow
+ - touch slider bugs like: (unsure if fixed completely)
+    - sliders not being rendered after slider creation using the insert slider tool
+    - slider selection highlight applied incorrectly
+   
+ - toggling between tap/hold makes it yellow
 
 to-do:
-	- judge arc for notes
+ - judge arc for notes
 
 future plans:	
-	- utils like multi select, copy paste, bulk delete
-	- utils like flip/rotate selected notes
-	- optimization
-	- auto save
-	- android support
-	- ios support
-	- handle console spitting out zero length interval when things like 1-1 is declared
-	- finish each note type:
-		(hold slider implementation not done)
+ - utils like multi select, copy paste, bulk delete
+ - utils like flip/rotate selected notes
+ - optimization
+ - auto save
+ - android support
+ - ios support
+ - handle console spitting out zero length interval when things like 1-1 is declared
+ - finish each note type: (hold slider implementation not done)
 	
 
 limitations from godot:
-	- clip children bug (enjoy fireworks flashing outside the preview circle for now)
-	- no easy way of doing waveform yet
+ - clip children bug (enjoy fireworks flashing outside the preview circle for now)
+ - no easy way of doing waveform yet
